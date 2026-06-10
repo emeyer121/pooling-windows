@@ -1,0 +1,17 @@
+[project]
+name = "pooling-windows"
+version = "0.1.0"
+description = "PyTorch implementation of pooling windows like those used in Freeman and Simoncelli, 2011."
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "numpy>=1.1",
+    "torch>=1.4",
+    "matplotlib>=3.3",
+    "opt_einsum>=3.3",
+    "pyrtools>=1.0.9",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/LabForComputationalVision/pooling-windows"
