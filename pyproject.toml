@@ -62,3 +62,11 @@ select = [
     "I",
 ]
 ignore = []
+
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '.git*,*.svg,*.css,*.pgm'
+check-hidden = true
+# ignore regex like [Tt]rue
+ignore-regex = '\[[A-Z][a-z]\][a-z]+'
+# ignore-words-list = ''
