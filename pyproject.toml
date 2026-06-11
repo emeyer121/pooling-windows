@@ -10,7 +10,6 @@ dependencies = [
     "torch>=1.4",
     "matplotlib>=3.3",
     "opt_einsum>=3.3",
-    "pyrtools>=1.0.9",
 ]
 
 [build-system]

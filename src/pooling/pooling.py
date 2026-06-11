@@ -1048,7 +1048,6 @@ def create_pooling_windows(scaling, resolution, min_eccentricity=.5,
 
        import matplotlib.pyplot as plt
        import plenoptic as po
-       import pyrtools as pt
        angle_w, ecc_w = po.simul.pooling.create_pooling_windows(.87, (256, 256))
        fig = po.imshow(ecc_w.unsqueeze(0))
        fig = po.imshow(angle_w.unsqueeze(0))
@@ -1063,7 +1062,6 @@ def create_pooling_windows(scaling, resolution, min_eccentricity=.5,
        :include-source:
 
        import matplotlib.pyplot as plt
-       import pyrtools as pt
        import plenoptic as po
        angle_w, ecc_w = po.simul.pooling.create_pooling_windows(.87, (256, 256))
        # we ignore the last ring of eccentricity windows here because
