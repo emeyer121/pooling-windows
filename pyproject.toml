@@ -13,5 +13,12 @@ dependencies = [
     "pyrtools>=1.0.9",
 ]
 
+[build-system]
+requires = ["setuptools", "setuptools-scm[toml]"]
+build-backend = "setuptools.build_meta"
+
 [project.urls]
 "Homepage" = "https://github.com/LabForComputationalVision/pooling-windows"
+
+[tool.setuptools.packages.find]
+where = ["src"]
