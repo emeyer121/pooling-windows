@@ -46,7 +46,7 @@ that down:
 - First, load in an image. This can be either grayscale or color. In the
   following code snippet, we treat it as if it were 8-bit integers (which is
   generally the case) and divide it by 255 because we need all values to lie
-  between 0 and 1. 
+  between 0 and 1.
 
 ``` python
 import torch
@@ -63,7 +63,7 @@ img = torch.from_numpy(plt.imread('path/to/image.png').astype(np.float32)) / 255
   channels in convolution layers). `PoolingWindows` supports both single- and
   multi-batch and channel inputs, operating independently along batch and
   channel dimensions.
-  
+
 ``` python
 # if this is a grayscale image, it will be unsqueezed twice; if it's RGB, it will be unsqueezed once.
 while img.ndim < 4:
@@ -115,11 +115,11 @@ for k in ['residual_highpass', 'residual_lowpass']:
 # let's see their shape
 for k, v in pyr_coeffs.items():
     print(f'scale {k[0]}, orientation band {k[1]}: {v.shape}')
-# create the windows. Note that we're now setting the number of scales! 
+# create the windows. Note that we're now setting the number of scales!
 # This must be the same as the height of the pyramid
-pw = pooling.PoolingWindows(.5, img.shape[-2:], window_type='gaussian', 
+pw = pooling.PoolingWindows(.5, img.shape[-2:], window_type='gaussian',
                             std_dev=1, num_scales=4)
-# pooled_coeffs will have the same keys as pyr_coeffs, and its values will 
+# pooled_coeffs will have the same keys as pyr_coeffs, and its values will
 # be the pooled versions of the corresponding value in pyr_coeffs
 pooled_coeffs = pw(pyr_coeffs)
 for k, v in pooled_coeffs.items():
@@ -203,4 +203,3 @@ Nature Neuroscience, 14(9), 1195–1201. http://dx.doi.org/10.1038/nn.2889.
 [^2]: Wallis, T. S., Funke, C. M., Ecker, A. S., Gatys, L. A., Wichmann, F. A., &
 Bethge, M. (2019). Image content is more important than bouma's law for scene
 metamers. eLife, 8(), . http://dx.doi.org/10.7554/elife.42512
-

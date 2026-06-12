@@ -9,16 +9,23 @@ order to avoid aliasing. this file contains some functions to help you with
 that, see the Sampling_and_Aliasing notebook for some examples
 
 """
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from matplotlib import animation
-from .pooling import gaussian
+
 from . import utils
+from .pooling import gaussian
 
 
-def check_sampling(val_sampling=.5, pix_sampling=None, func=gaussian, x=torch.linspace(-5, 5, 101),
-                   **func_kwargs):
+def check_sampling(
+    val_sampling=0.5,
+    pix_sampling=None,
+    func=gaussian,
+    x=torch.linspace(-5, 5, 101),
+    **func_kwargs,
+):
     r"""check how sampling relates to interpolation quality
 
     Given a function, a domain, and how to sample that domain, this
@@ -85,12 +92,12 @@ def check_sampling(val_sampling=.5, pix_sampling=None, func=gaussian, x=torch.li
             raise Exception("One of val_sampling or pix_sampling must be None!")
         # this will get us the closest value, if there's no exactly
         # correct one.
-        pix_sampling = np.argmin(abs((x+val_sampling)[0] - x))
-        if pix_sampling == 0 or pix_sampling == (len(x)-1):
+        pix_sampling = np.argmin(abs((x + val_sampling)[0] - x))
+        if pix_sampling == 0 or pix_sampling == (len(x) - 1):
             # the above works if x is increasing. if it's decreasing,
             # then pix_sampling will be one of the extremal values, and
             # we need to try the following
-            pix_sampling = np.argmin(abs((x-val_sampling)[0] - x))
+            pix_sampling = np.argmin(abs((x - val_sampling)[0] - x))
     try:
         X = x.unsqueeze(1) + x[::pix_sampling]
         sampled = utils.to_numpy(func(X, **func_kwargs))
@@ -133,16 +140,19 @@ def plot_coeffs(coeffs, ncols=5, ax_size=(5, 5)):
     """
     nrows = int(np.ceil(coeffs.shape[0] / ncols))
     ylim = max(abs(coeffs.max()), abs(coeffs.min()))
-    ylim += ylim/10
-    fig, axes = plt.subplots(nrows, ncols, figsize=[i*j for i, j in zip(ax_size, [ncols, nrows])])
+    ylim += ylim / 10
+    fig, axes = plt.subplots(
+        nrows, ncols, figsize=[i * j for i, j in zip(ax_size, [ncols, nrows])]
+    )
     for i, ax in enumerate(axes.flatten()):
         ax.stem(coeffs[i])
         ax.set_ylim((-ylim, ylim))
     return fig
 
 
-def interpolation_plot(interpolated, residuals, pix=0, val=None, x=np.linspace(-5, 5, 101),
-                       full=None):
+def interpolation_plot(
+    interpolated, residuals, pix=0, val=None, x=np.linspace(-5, 5, 101), full=None
+):
     r"""create plot showing interpolation results at specified pixel or value
 
     We have two subplots: the interpolation (with optional actual
@@ -182,24 +192,26 @@ def interpolation_plot(interpolated, residuals, pix=0, val=None, x=np.linspace(-
             raise Exception("One of val_sampling or pix_sampling must be None!")
         # this will get us the closest value, if there's no exactly
         # correct one.
-        pix = np.argmin(abs(x-val))
+        pix = np.argmin(abs(x - val))
     x = utils.to_numpy(x)
     ylim = [interpolated.min(), interpolated.max()]
-    ylim = [ylim[0] - np.diff(ylim)/10, ylim[1] + np.diff(ylim)/10]
+    ylim = [ylim[0] - np.diff(ylim) / 10, ylim[1] + np.diff(ylim) / 10]
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     axes[0].set_ylim(ylim)
-    axes[0].plot(x, interpolated[:, pix], label='interpolation')
+    axes[0].plot(x, interpolated[:, pix], label="interpolation")
     if full is not None:
-        axes[0].plot(x, full[:, pix], '--', zorder=0, label='actual')
+        axes[0].plot(x, full[:, pix], "--", zorder=0, label="actual")
         axes[0].legend()
     axes[1].stem(x, residuals)
-    axes[1].scatter(x[pix], residuals[pix], c='r', zorder=10)
+    axes[1].scatter(x[pix], residuals[pix], c="r", zorder=10)
     axes[0].set_title("Interpolated function centered at highlighted pixel")
     axes[1].set_title("Error for interpolation centered at highlighted pixel")
     return fig
 
 
-def create_movie(interpolated, residuals, x=np.linspace(-5, 5, 101), full=None, framerate=10):
+def create_movie(
+    interpolated, residuals, x=np.linspace(-5, 5, 101), full=None, framerate=10
+):
     r"""create movie showing the interpolation results
 
     We create a simple movie to show this in action. we have two
@@ -253,5 +265,11 @@ def create_movie(interpolated, residuals, x=np.linspace(-5, 5, 101), full=None, 
         return artists
 
     plt.close(fig)
-    return animation.FuncAnimation(fig, movie_plot, frames=len(interpolated), blit=True,
-                                   interval=1000./framerate, repeat=False)
+    return animation.FuncAnimation(
+        fig,
+        movie_plot,
+        frames=len(interpolated),
+        blit=True,
+        interval=1000.0 / framerate,
+        repeat=False,
+    )
