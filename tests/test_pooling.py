@@ -12,7 +12,7 @@ sys.path.append(op.join(op.dirname(op.realpath(__file__)), ".."))
 import pooling
 
 
-class TestPooling(object):
+class TestPooling:
     def test_creation(self):
         ang_windows, ecc_windows = pooling.pooling.create_pooling_windows(
             0.87, (256, 256)
@@ -30,20 +30,18 @@ class TestPooling(object):
         )
 
     def test_ecc_windows(self):
-        windows = pooling.pooling.log_eccentricity_windows((256, 256), n_windows=4)
-        windows = pooling.pooling.log_eccentricity_windows((256, 256), n_windows=4.5)
-        windows = pooling.pooling.log_eccentricity_windows(
-            (256, 256), window_spacing=0.5
-        )
-        windows = pooling.pooling.log_eccentricity_windows((256, 256), window_spacing=1)
+        pooling.pooling.log_eccentricity_windows((256, 256), n_windows=4)
+        pooling.pooling.log_eccentricity_windows((256, 256), n_windows=4.5)
+        pooling.pooling.log_eccentricity_windows((256, 256), window_spacing=0.5)
+        pooling.pooling.log_eccentricity_windows((256, 256), window_spacing=1)
 
     def test_angle_windows(self):
-        windows = pooling.pooling.polar_angle_windows(4, (256, 256))
-        windows = pooling.pooling.polar_angle_windows(4, (1000, 1000))
+        pooling.pooling.polar_angle_windows(4, (256, 256))
+        pooling.pooling.polar_angle_windows(4, (1000, 1000))
         with pytest.raises(Exception):
-            windows = pooling.pooling.polar_angle_windows(1.5, (256, 256))
+            pooling.pooling.polar_angle_windows(1.5, (256, 256))
         with pytest.raises(Exception):
-            windows = pooling.pooling.polar_angle_windows(1, (256, 256))
+            pooling.pooling.polar_angle_windows(1, (256, 256))
 
     def test_calculations(self):
         # these really shouldn't change, but just in case...
@@ -147,12 +145,8 @@ class TestPooling(object):
     def test_PoolingWindows_caching(self, tmp_path):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
         # first time we save, second we load
-        pw = pooling.PoolingWindows(
-            0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path
-        )
-        pw = pooling.PoolingWindows(
-            0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path
-        )
+        pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
+        pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
 
     def test_PoolingWindows_cache_dne(self, tmp_path):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)

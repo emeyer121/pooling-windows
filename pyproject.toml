@@ -66,7 +66,5 @@ select = [
     # in particular, this looks for invalid escape sequences (has been an issue
     # for regex strings used in tests)
     "W"
-    # checks for missing type annotations
-    #"ANN"
 ]
 ignore = []
