@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from .pooling_windows import PoolingWindows
-from . import pooling
-from . import utils
-from . import sampling
+from . import pooling as pooling
+from . import sampling as sampling
+from . import utils as utils
+from .pooling_windows import PoolingWindows as PoolingWindows
