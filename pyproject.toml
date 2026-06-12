@@ -1,6 +1,6 @@
 [project]
 name = "pooling-windows"
-version = "0.1.0"
+dynamic = ["version"]
 description = "PyTorch implementation of pooling windows like those used in Freeman and Simoncelli, 2011."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -10,7 +10,6 @@ dependencies = [
     "torch>=1.4",
     "matplotlib>=3.3",
     "opt_einsum>=3.3",
-    "pyrtools>=1.0.9",
 ]
 
 [build-system]
@@ -18,7 +17,7 @@ requires = ["setuptools", "setuptools-scm[toml]"]
 build-backend = "setuptools.build_meta"
 
 [project.urls]
-"Homepage" = "https://github.com/LabForComputationalVision/pooling-windows"
+"Homepage" = "https://github.com/emeyer121/pooling-windows"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -70,3 +69,6 @@ check-hidden = true
 # ignore regex like [Tt]rue
 ignore-regex = '\[[A-Z][a-z]\][a-z]+'
 # ignore-words-list = ''
+[tool.setuptools_scm]
+version_scheme = 'semver-pep440'
+local_scheme = 'no-local-version'
