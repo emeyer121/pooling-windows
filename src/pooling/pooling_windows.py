@@ -17,8 +17,7 @@ import opt_einsum as oe
 import torch
 from torch import nn
 
-from . import pooling
-from . import utils
+from . import pooling, utils
 
 
 class PoolingWindows(nn.Module):
