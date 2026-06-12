@@ -101,7 +101,7 @@ class TestPooling(object):
         for i in range(2):
             pw.plot_window_areas('pixels', i)
             pw.plot_window_widths('pixels', i)
-        fig = po.imshow(im)
+        fig = po.plot.imshow(im)
         pw.plot_windows(fig.axes[0])
         plt.close('all')
 

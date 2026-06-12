@@ -1,0 +1,27 @@
+[project]
+name = "pooling-windows"
+dynamic = ["version"]
+description = "PyTorch implementation of pooling windows like those used in Freeman and Simoncelli, 2011."
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "numpy>=1.1",
+    "torch>=1.4",
+    "matplotlib>=3.3",
+    "opt_einsum>=3.3",
+]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm[toml]"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Homepage" = "https://github.com/emeyer121/pooling-windows"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+version_scheme = 'semver-pep440'
+local_scheme = 'no-local-version'
