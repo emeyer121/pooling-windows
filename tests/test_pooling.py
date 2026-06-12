@@ -1,32 +1,40 @@
 #!/usr/bin/env python3
-import pytest
-import sys
-import numpy as np
-import torch
 import os.path as op
+import sys
+
 import matplotlib.pyplot as plt
+import numpy as np
 import plenoptic as po
-sys.path.append(op.join(op.dirname(op.realpath(__file__)), '..'))
+import pytest
+import torch
+
+sys.path.append(op.join(op.dirname(op.realpath(__file__)), ".."))
 import pooling
 
 
 class TestPooling(object):
-
     def test_creation(self):
-        ang_windows, ecc_windows = pooling.pooling.create_pooling_windows(.87, (256, 256))
+        ang_windows, ecc_windows = pooling.pooling.create_pooling_windows(
+            0.87, (256, 256)
+        )
 
     def test_creation_args(self):
-        ang, ecc = pooling.pooling.create_pooling_windows(.87, (100, 100), .2, 30, 1.2,
-                                                           transition_region_width=.7)
-        ang, ecc = pooling.pooling.create_pooling_windows(.87, (100, 100), .2, 30, 1.2,
-                                                           transition_region_width=.5)
-        ang, ecc = pooling.pooling.create_pooling_windows(.87, (100, 100), .2, 30, 1.2,
-                                                           'gaussian', std_dev=1)
+        ang, ecc = pooling.pooling.create_pooling_windows(
+            0.87, (100, 100), 0.2, 30, 1.2, transition_region_width=0.7
+        )
+        ang, ecc = pooling.pooling.create_pooling_windows(
+            0.87, (100, 100), 0.2, 30, 1.2, transition_region_width=0.5
+        )
+        ang, ecc = pooling.pooling.create_pooling_windows(
+            0.87, (100, 100), 0.2, 30, 1.2, "gaussian", std_dev=1
+        )
 
     def test_ecc_windows(self):
         windows = pooling.pooling.log_eccentricity_windows((256, 256), n_windows=4)
         windows = pooling.pooling.log_eccentricity_windows((256, 256), n_windows=4.5)
-        windows = pooling.pooling.log_eccentricity_windows((256, 256), window_spacing=.5)
+        windows = pooling.pooling.log_eccentricity_windows(
+            (256, 256), window_spacing=0.5
+        )
         windows = pooling.pooling.log_eccentricity_windows((256, 256), window_spacing=1)
 
     def test_angle_windows(self):
@@ -43,45 +51,76 @@ class TestPooling(object):
         assert pooling.pooling.calc_angular_n_windows(2) == np.pi
         with pytest.raises(Exception):
             pooling.pooling.calc_eccentricity_window_spacing()
-        assert np.allclose(pooling.pooling.calc_eccentricity_window_spacing(n_windows=4), 0.8502993454155389)
-        assert np.allclose(pooling.pooling.calc_eccentricity_window_spacing(scaling=.87), 0.8446653390527211)
-        assert np.allclose(pooling.pooling.calc_eccentricity_window_spacing(5, 10, scaling=.87), 0.8446653390527211)
-        assert np.allclose(pooling.pooling.calc_eccentricity_window_spacing(5, 10, n_windows=4), 0.1732867951399864)
-        assert np.allclose(pooling.pooling.calc_eccentricity_n_windows(0.8502993454155389), 4)
-        assert np.allclose(pooling.pooling.calc_eccentricity_n_windows(0.1732867951399864, 5, 10), 4)
+        assert np.allclose(
+            pooling.pooling.calc_eccentricity_window_spacing(n_windows=4),
+            0.8502993454155389,
+        )
+        assert np.allclose(
+            pooling.pooling.calc_eccentricity_window_spacing(scaling=0.87),
+            0.8446653390527211,
+        )
+        assert np.allclose(
+            pooling.pooling.calc_eccentricity_window_spacing(5, 10, scaling=0.87),
+            0.8446653390527211,
+        )
+        assert np.allclose(
+            pooling.pooling.calc_eccentricity_window_spacing(5, 10, n_windows=4),
+            0.1732867951399864,
+        )
+        assert np.allclose(
+            pooling.pooling.calc_eccentricity_n_windows(0.8502993454155389), 4
+        )
+        assert np.allclose(
+            pooling.pooling.calc_eccentricity_n_windows(0.1732867951399864, 5, 10), 4
+        )
         assert np.allclose(pooling.pooling.calc_scaling(4), 0.8761474337786708)
         assert np.allclose(pooling.pooling.calc_scaling(4, 5, 10), 0.17350368946058647)
         assert np.isinf(pooling.pooling.calc_scaling(4, 0))
 
-    @pytest.mark.parametrize('num_scales', [1, 3])
-    @pytest.mark.parametrize('transition_region_width', [.5, 1])
+    @pytest.mark.parametrize("num_scales", [1, 3])
+    @pytest.mark.parametrize("transition_region_width", [0.5, 1])
     def test_PoolingWindows_cosine(self, num_scales, transition_region_width):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(.5, im.shape[2:], num_scales=num_scales,
-                                     transition_region_width=transition_region_width,
-                                     window_type='cosine',)
+        pw = pooling.PoolingWindows(
+            0.5,
+            im.shape[2:],
+            num_scales=num_scales,
+            transition_region_width=transition_region_width,
+            window_type="cosine",
+        )
         pw(im)
 
-    @pytest.mark.parametrize('num_scales', [1, 3])
+    @pytest.mark.parametrize("num_scales", [1, 3])
     def test_PoolingWindows(self, num_scales):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(.5, im.shape[2:], num_scales=num_scales,
-                                     window_type='gaussian', std_dev=1)
+        pw = pooling.PoolingWindows(
+            0.5, im.shape[2:], num_scales=num_scales, window_type="gaussian", std_dev=1
+        )
         pw(im)
         # we only support std_dev=1
         with pytest.raises(Exception):
-            pooling.PoolingWindows(.5, im.shape[2:], num_scales=num_scales,
-                                    window_type='gaussian', std_dev=2)
+            pooling.PoolingWindows(
+                0.5,
+                im.shape[2:],
+                num_scales=num_scales,
+                window_type="gaussian",
+                std_dev=2,
+            )
         with pytest.raises(Exception):
-            pooling.PoolingWindows(.5, im.shape[2:], num_scales=num_scales,
-                                    window_type='gaussian', std_dev=.5)
+            pooling.PoolingWindows(
+                0.5,
+                im.shape[2:],
+                num_scales=num_scales,
+                window_type="gaussian",
+                std_dev=0.5,
+            )
 
     def test_PoolingWindows_project(self):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(.5, im.shape[2:])
+        pw = pooling.PoolingWindows(0.5, im.shape[2:])
         pooled = pw(im)
         pw.project(pooled)
-        pw = pooling.PoolingWindows(.5, im.shape[2:], num_scales=3)
+        pw = pooling.PoolingWindows(0.5, im.shape[2:], num_scales=3)
         pooled = pw(im)
         pw.project(pooled)
 
@@ -89,48 +128,54 @@ class TestPooling(object):
         # test PoolingWindows with weirdly-shaped iamges
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
         for sh in [(256, 128), (256, 127), (256, 125), (125, 125), (127, 125)]:
-            tmp = im[..., :sh[0], :sh[1]]
-            pw = pooling.PoolingWindows(.9, tmp.shape[-2:])
+            tmp = im[..., : sh[0], : sh[1]]
+            pw = pooling.PoolingWindows(0.9, tmp.shape[-2:])
             pw(tmp)
 
     def test_PoolingWindows_plotting(self):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(.8, im.shape[-2:], num_scales=2)
+        pw = pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2)
         pw.plot_window_areas()
         pw.plot_window_widths()
         for i in range(2):
-            pw.plot_window_areas('pixels', i)
-            pw.plot_window_widths('pixels', i)
+            pw.plot_window_areas("pixels", i)
+            pw.plot_window_widths("pixels", i)
         fig = po.plot.imshow(im)
         pw.plot_windows(fig.axes[0])
-        plt.close('all')
+        plt.close("all")
 
     def test_PoolingWindows_caching(self, tmp_path):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
         # first time we save, second we load
-        pw = pooling.PoolingWindows(.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
-        pw = pooling.PoolingWindows(.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
+        pw = pooling.PoolingWindows(
+            0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path
+        )
+        pw = pooling.PoolingWindows(
+            0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path
+        )
 
     def test_PoolingWindows_cache_dne(self, tmp_path):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        tmp_path = op.join(tmp_path, 'new_dir')
+        tmp_path = op.join(tmp_path, "new_dir")
         with pytest.raises(FileNotFoundError):
-            pooling.PoolingWindows(.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
+            pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
 
     def test_PoolingWindows_sep(self):
         # test the window and pool function separate of the forward function
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(.5, im.shape[2:])
+        pw = pooling.PoolingWindows(0.5, im.shape[2:])
         pw.pool(pw.window(im))
 
-    @pytest.mark.parametrize('num_scales', [1, 3])
-    @pytest.mark.parametrize('input_fmt', ['dict', 'tensor'])
+    @pytest.mark.parametrize("num_scales", [1, 3])
+    @pytest.mark.parametrize("input_fmt", ["dict", "tensor"])
     def test_reweighting(self, num_scales, input_fmt):
-        pw = pooling.PoolingWindows(.5, (256, 256), num_scales=num_scales)
-        im = {(i,): torch.rand((1, 1, 256//2**i, 256//2**i), dtype=torch.float32)
-              for i in range(num_scales)}
-        if input_fmt == 'dict':
+        pw = pooling.PoolingWindows(0.5, (256, 256), num_scales=num_scales)
+        im = {
+            (i,): torch.rand((1, 1, 256 // 2**i, 256 // 2**i), dtype=torch.float32)
+            for i in range(num_scales)
+        }
+        if input_fmt == "dict":
             pw(im, weights=torch.ones(num_scales, 1, 1, 1, 1))
-        elif input_fmt == 'tensor':
+        elif input_fmt == "tensor":
             for i in range(num_scales):
                 pw(im[(i,)], idx=i, weights=torch.ones(num_scales, 1, 1, 1, 1))
