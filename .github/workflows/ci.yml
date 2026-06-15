@@ -35,7 +35,7 @@ jobs:
         pip install git+https://github.com/LabForComputationalVision/plenoptic.git@main
         pip install pytest
     - name: Run tests with pytest
-        run: 'pytest tests/test_pooling.py'
+      run: 'pytest tests/test_pooling.py'
     - name: Check imports
       run: |
         EAGER_IMPORT=1 python -c "import pooling"
