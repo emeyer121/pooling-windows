@@ -1,0 +1,41 @@
+name: build
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0" # weekly
+  pull_request:
+    branches:
+    - main
+
+concurrency:
+  # from https://stackoverflow.com/a/72408109/4659293
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+      fail-fast: false
+    name: Run tests with pytest
+    steps:
+    - name: Run checkout repository
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - name: Install Python 3
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 #v6.2.0
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: pip
+        cache-dependency-path: setup.py
+    - name: Install dependencies
+      run: |
+        pip install --upgrade --upgrade-strategy eager .[tests]
+    - name: Run tests with pytest
+      run: |
+        pytest --cov-report xml

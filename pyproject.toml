@@ -19,12 +19,24 @@ build-backend = "setuptools.build_meta"
 [project.urls]
 "Homepage" = "https://github.com/emeyer121/pooling-windows"
 
+[project.optional-dependencies]
+tests = [
+    "pytest>=5.1.2",
+    'pytest-cov',
+    "plenoptic>=2.0.0"
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools_scm]
 version_scheme = 'semver-pep440'
 local_scheme = 'no-local-version'
+
+[tool.pytest.ini_options]
+addopts = "--cov=pooling --cov-report term"
+testpaths = ["tests"]
+doctest_optionflags = "NORMALIZE_WHITESPACE NUMBER ELLIPSIS"
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
