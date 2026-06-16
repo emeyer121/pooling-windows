@@ -23,9 +23,7 @@ be found at the top of
 
 ## Requirements
 
-This code works with python 3.7, 3.8, 3.9, and 3.10. The packages required to
-use this code can be found in `requirements.txt`. In order to install them in
-your virtual environment of choice, run `pip install -r requirements.txt`; you
+This code works with python 3.10, 3.11, 3.12, 3.13, and 3.14 in order to match [PyTorch's compatibility](https://pytorch.org/get-started/locally/). To install all necessary dependencies, run `pip install .`; you
 will then be able to use the code here from within this directory (`pooling` is
 not itself installed, and thus will not be on your path). There is one function,
 `PoolingWindows.plot_windows()`, which requires
