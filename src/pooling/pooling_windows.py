@@ -963,7 +963,7 @@ class PoolingWindows(nn.Module):
             )
         if ax is None:
             dummy_data = torch.ones(1, 1, *self.img_res)
-            fig = po.imshow(dummy_data, cmap="gray_r", title=None)
+            fig = po.plot.imshow(dummy_data, cmap="gray_r", title=None)
             ax = fig.axes[0]
         if contour_levels is None:
             contour_levels = [self.window_intersecting_amplitude]
@@ -1035,7 +1035,7 @@ class PoolingWindows(nn.Module):
             )
         if ax is None:
             dummy_data = torch.ones(1, 1, *self.img_res)
-            fig = po.imshow(dummy_data, cmap="gray_r", title=None)
+            fig = po.plot.imshow(dummy_data, cmap="gray_r", title=None)
             ax = fig.axes[0]
         contour_level = self.window_intersecting_amplitude
         # attempt to not have all the windows in memory at once...

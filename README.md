@@ -29,7 +29,7 @@ your virtual environment of choice, run `pip install -r requirements.txt`; you
 will then be able to use the code here from within this directory (`pooling` is
 not itself installed, and thus will not be on your path). There is one function,
 `PoolingWindows.plot_windows()`, which requires
-[plenoptic](https://github.com/LabForComputationalVision/plenoptic/) -- if you
+[plenoptic](https://github.com/plenoptic-org/plenoptic) -- if you
 wish to use it, you must install that package as well (follow the instructions
 in its README).
 
@@ -106,7 +106,7 @@ img = torch.from_numpy(plt.imread('path/to/image.png').astype(np.float32)) / 255
 while img.ndim < 4:
     img = img.unsqueeze(0)
 # create the pyramid
-pyr = po.simul.Steerable_Pyramid_Freq(img.shape[-2:], height=4)
+pyr = po.process.SteerablePyramidFreq(img.shape[-2:], height=4)
 # get the pyramid coefficients
 pyr_coeffs = pyr(img)
 # remove the residuals, which PoolingWindows doesn't support natively
@@ -170,7 +170,7 @@ found on the `master` branch).
    the windows (in pixels or degrees) in each eccentricity ring. They should all
    have complete docstrings, so you are encouraged to explore.
 5. The code in this repo was originally part of
-   [plenoptic](https://github.com/LabForComputationalVision/plenoptic/) but
+   [plenoptic](https://github.com/plenoptic-org/plenoptic) but
    removed in March 2021. In moving over the code, I broke the git history; if,
    for some reason, you wish to see the history or git blame, [this plenoptic
    commit](https://github.com/LabForComputationalVision/plenoptic/tree/fb1c4d29c645c9a054baa021c7ffd07609b181d4)
