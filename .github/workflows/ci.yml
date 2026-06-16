@@ -15,9 +15,13 @@ concurrency:
 permissions: {}
 
 jobs:
-  check-imports:
+  tests:
     runs-on: ubuntu-latest
-    name: Eager import checks
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+      fail-fast: false
+    name: Run tests with pytest
     steps:
     - name: Run checkout repository
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -26,16 +30,12 @@ jobs:
     - name: Install Python 3
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 #v6.2.0
       with:
-        python-version: '3.12'
+        python-version: ${{ matrix.python-version }}
         cache: pip
         cache-dependency-path: setup.py
     - name: Install dependencies
       run: |
-        pip install --upgrade --upgrade-strategy eager .
-        pip install git+https://github.com/LabForComputationalVision/plenoptic.git@main
-        pip install pytest
+        pip install --upgrade --upgrade-strategy eager .[tests]
     - name: Run tests with pytest
-      run: 'pytest tests/test_pooling.py'
-    - name: Check imports
       run: |
-        EAGER_IMPORT=1 python -c "import pooling"
+        pytest --cov-report xml
