@@ -561,7 +561,7 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        other_PoolingWindows : plenoptic.simulate.PoolingWindows
+        other_PoolingWindows : pooling.PoolingWindows
             A second instantiated PoolingWindows object
         scale_offset : float, optional
             The amount to offset all the keys of the second
@@ -909,12 +909,12 @@ class PoolingWindows(nn.Module):
 
         This is just a simple little helper to plot the pooling windows
         on an axis. The intended use case is overlaying this on top of
-        the image we're pooling (as returned by ``plenoptic.imshow``).
+        the image we're pooling (as returned by ``plenoptic.plot.imshow``).
 
         Any additional kwargs get passed to ``ax.contour``
 
         WARNING: This method requires the additional package plenoptic, which
-        can be found at https://github.com/LabForComputationalVision/plenoptic/
+        can be found at https://github.com/plenoptic-org/plenoptic
 
         Parameters
         ----------
@@ -958,7 +958,7 @@ class PoolingWindows(nn.Module):
             raise Exception(
                 "plenoptic not found, cannot create this plot without access to its "
                 "imshow! "
-                "Go to https://github.com/LabForComputationalVision/plenoptic/ and "
+                "Go to https://github.com/plenoptic-org/plenoptic and "
                 "follow its install instructions."
             )
         if ax is None:
@@ -1000,7 +1000,7 @@ class PoolingWindows(nn.Module):
         Any additional kwargs are passed to ax.contourf
 
         WARNING: This method requires the additional package plenoptic, which
-        can be found at https://github.com/LabForComputationalVision/plenoptic/
+        can be found at https://github.com/plenoptic-org/plenoptic
 
         Parameters
         ----------
@@ -1030,7 +1030,7 @@ class PoolingWindows(nn.Module):
             raise Exception(
                 "plenoptic not found, cannot create this plot without access to "
                 "its imshow! "
-                "Go to https://github.com/LabForComputationalVision/plenoptic/ and "
+                "Go to https://github.com/plenoptic-org/plenoptic and "
                 "follow its install instructions."
             )
         if ax is None:

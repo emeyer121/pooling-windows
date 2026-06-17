@@ -3,8 +3,8 @@
 handful of functions here, related to sampling and checking whether
 you're sampling correctly, in order to avoid aliasing
 
-when doing something like strided convolution or using the pooling windows from
-plenoptic, you want to make sure you're sampling the image appropriately, in
+when doing something like strided convolution or using the pooling windows,
+you want to make sure you're sampling the image appropriately, in
 order to avoid aliasing. this file contains some functions to help you with
 that, see the Sampling_and_Aliasing notebook for some examples
 

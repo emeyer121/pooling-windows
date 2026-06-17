@@ -1200,8 +1200,7 @@ def create_pooling_windows(
        :include-source:
 
        import matplotlib.pyplot as plt
-       import plenoptic as po
-       angle_w, ecc_w = po.simul.pooling.create_pooling_windows(.87, (256, 256))
+       angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
        fig = po.imshow(ecc_w.unsqueeze(0))
        fig = po.imshow(angle_w.unsqueeze(0))
        plt.show()
@@ -1215,8 +1214,7 @@ def create_pooling_windows(
        :include-source:
 
        import matplotlib.pyplot as plt
-       import plenoptic as po
-       angle_w, ecc_w = po.simul.pooling.create_pooling_windows(.87, (256, 256))
+       angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
        # we ignore the last ring of eccentricity windows here because
        # they're all relatively small, which makes the following plot
        # look weird. for how to properly handle them, see the

@@ -24,8 +24,7 @@ be found at the top of
 ## Requirements
 
 This code works with python 3.10, 3.11, 3.12, 3.13, and 3.14 in order to match [PyTorch's compatibility](https://pytorch.org/get-started/locally/). To install all necessary dependencies, run `pip install .`; you
-will then be able to use the code here from within this directory (`pooling` is
-not itself installed, and thus will not be on your path). There is one function,
+will then be able to use the code here from within this directory. There is one function,
 `PoolingWindows.plot_windows()`, which requires
 [plenoptic](https://github.com/plenoptic-org/plenoptic) -- if you
 wish to use it, you must install that package as well (follow the instructions
@@ -89,7 +88,7 @@ pooled = pw(img)
 
 You can also run `PoolingWindows` on dictionaries of 4d tensors, like that
 created by the steerable pyramid implementation found in
-[plenoptic](https://github.com/LabForComputationalVision/plenoptic) (in this
+[plenoptic](https://github.com/plenoptic-org/plenoptic) (in this
 case, the keys of the input dictionary must be tuples where the first value is
 an int, giving the scale):
 
@@ -125,7 +124,7 @@ for k, v in pooled_coeffs.items():
 ```
 
 For an example of a more elaborate usage of these windows, see the
-[PooledVentralStream](https://github.com/LabForComputationalVision/plenoptic/blob/cdbc56886c3cf57822ae8fd8b71b78ef80670210/plenoptic/simulate/models/ventral_stream.py#L18)
+[PooledVentralStream](https://github.com/plenoptic-org/plenoptic/blob/cdbc56886c3cf57822ae8fd8b71b78ef80670210/plenoptic/simulate/models/ventral_stream.py#L18)
 models (note that these are no longer part of `plenoptic` and so will not be
 found on the `master` branch).
 
