@@ -3,8 +3,8 @@
 handful of functions here, related to sampling and checking whether
 you're sampling correctly, in order to avoid aliasing
 
-when doing something like strided convolution or using the pooling windows from
-plenoptic, you want to make sure you're sampling the image appropriately, in
+when doing something like strided convolution or using the pooling windows,
+you want to make sure you're sampling the image appropriately, in
 order to avoid aliasing. this file contains some functions to help you with
 that, see the Sampling_and_Aliasing notebook for some examples
 
@@ -35,7 +35,7 @@ def check_sampling(
     ``create_movie`` to see the quality of this interpolation
 
     The idea here is to take a function (for example,
-    ``po.simul.pooling.gaussian``) and say that we have this function
+    ``pooling.pooling.gaussian``) and say that we have this function
     defined at, e.g., every 10 pixels on the array ``linspace(-5, 5,
     101)``. We want to answer then, the question of how well we can
     interpolate to all the intermediate functions, that is, the
@@ -244,7 +244,7 @@ def create_movie(
     -------
     anim : matplotlib.animation.FuncAnimation
         The animation object. In order to view, must convert to HTML
-        (call ``po.convert_anim_to_html(anim)``) or save (call
+        (call ``pooling.utils.convert_anim_to_html(anim)``) or save (call
         ``anim.save(movie.mp4)``, must have ``ffmpeg`` installed).
 
     """

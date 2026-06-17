@@ -23,13 +23,10 @@ be found at the top of
 
 ## Requirements
 
-This code works with python 3.7, 3.8, 3.9, and 3.10. The packages required to
-use this code can be found in `requirements.txt`. In order to install them in
-your virtual environment of choice, run `pip install -r requirements.txt`; you
-will then be able to use the code here from within this directory (`pooling` is
-not itself installed, and thus will not be on your path). There is one function,
+This code works with python 3.10, 3.11, 3.12, 3.13, and 3.14 in order to match [PyTorch's compatibility](https://pytorch.org/get-started/locally/). To install all necessary dependencies, run `pip install .`; you
+will then be able to use the code here from within this directory. There is one function,
 `PoolingWindows.plot_windows()`, which requires
-[plenoptic](https://github.com/LabForComputationalVision/plenoptic/) -- if you
+[plenoptic](https://github.com/plenoptic-org/plenoptic) -- if you
 wish to use it, you must install that package as well (follow the instructions
 in its README).
 
@@ -91,7 +88,7 @@ pooled = pw(img)
 
 You can also run `PoolingWindows` on dictionaries of 4d tensors, like that
 created by the steerable pyramid implementation found in
-[plenoptic](https://github.com/LabForComputationalVision/plenoptic) (in this
+[plenoptic](https://github.com/plenoptic-org/plenoptic) (in this
 case, the keys of the input dictionary must be tuples where the first value is
 an int, giving the scale):
 
@@ -106,7 +103,7 @@ img = torch.from_numpy(plt.imread('path/to/image.png').astype(np.float32)) / 255
 while img.ndim < 4:
     img = img.unsqueeze(0)
 # create the pyramid
-pyr = po.simul.Steerable_Pyramid_Freq(img.shape[-2:], height=4)
+pyr = po.process.SteerablePyramidFreq(img.shape[-2:], height=4)
 # get the pyramid coefficients
 pyr_coeffs = pyr(img)
 # remove the residuals, which PoolingWindows doesn't support natively
@@ -127,7 +124,7 @@ for k, v in pooled_coeffs.items():
 ```
 
 For an example of a more elaborate usage of these windows, see the
-[PooledVentralStream](https://github.com/LabForComputationalVision/plenoptic/blob/cdbc56886c3cf57822ae8fd8b71b78ef80670210/plenoptic/simulate/models/ventral_stream.py#L18)
+[PooledVentralStream](https://github.com/plenoptic-org/plenoptic/blob/cdbc56886c3cf57822ae8fd8b71b78ef80670210/plenoptic/simulate/models/ventral_stream.py#L18)
 models (note that these are no longer part of `plenoptic` and so will not be
 found on the `master` branch).
 
@@ -170,7 +167,7 @@ found on the `master` branch).
    the windows (in pixels or degrees) in each eccentricity ring. They should all
    have complete docstrings, so you are encouraged to explore.
 5. The code in this repo was originally part of
-   [plenoptic](https://github.com/LabForComputationalVision/plenoptic/) but
+   [plenoptic](https://github.com/plenoptic-org/plenoptic) but
    removed in March 2021. In moving over the code, I broke the git history; if,
    for some reason, you wish to see the history or git blame, [this plenoptic
    commit](https://github.com/LabForComputationalVision/plenoptic/tree/fb1c4d29c645c9a054baa021c7ffd07609b181d4)
