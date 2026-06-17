@@ -1201,8 +1201,8 @@ def create_pooling_windows(
 
        import matplotlib.pyplot as plt
        angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
-       fig = po.imshow(ecc_w.unsqueeze(0))
-       fig = po.imshow(angle_w.unsqueeze(0))
+       fig = po.plot.imshow(ecc_w.unsqueeze(0))
+       fig = po.plot.imshow(angle_w.unsqueeze(0))
        plt.show()
 
     If you wish to get the windows as shown in Supplementary Figure 1C
