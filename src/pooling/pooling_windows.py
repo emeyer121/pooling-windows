@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import opt_einsum as oe
 import torch
+from matplotlib import cm
 from torch import nn
 
 from . import pooling, utils
@@ -896,6 +897,58 @@ class PoolingWindows(nn.Module):
                 backend="torch",
             )
 
+    def imshow(self, image, cmap=None, **kwargs):
+        """Show image(s).
+
+        Arguments
+        ---------
+        image : `np.array` or `list`
+            the image(s) to plot. Images can be either grayscale, in which case
+            they must be 2d arrays of shape `(h,w)`, or RGB(A), in which case they
+            must be 3d arrays of shape `(h,w,c)` where `c` is 3 (for RGB) or 4 (to
+            also plot the alpha channel). If multiple images, must be a list of
+            such arrays (note this means we do not support an array of shape
+            `(n,h,w)` for multiple grayscale images). all images will be
+            automatically rescaled so they're displayed at the same size. thus,
+            their sizes must be scalar multiples of each other.
+        cmap : matplotlib colormap, optional
+            colormap to use when showing these images
+        kwargs :
+            Passed to `ax.imshow`
+
+        Returns
+        -------
+        fig : `PyrFigure`
+            figure containing the plotted images
+
+        """
+
+        img_shape = np.shape(image)
+
+        # get the figure and axes created
+        # this is an arbitrary value
+        ppi = 96
+        fig = plt.figure(figsize=(img_shape[1] / ppi, img_shape[0] / ppi), dpi=ppi)
+
+        fig.add_axes([0, 0, 1, 1], frameon=False, xticks=[], yticks=[])
+        axes = fig.axes
+
+        flatimg = image.flatten()
+        vrange_list = [np.nanmin(flatimg), np.nanmax(flatimg)]
+        if cmap is None:
+            cmap = cm.RdBu_r if "0" in vrange_list else cm.gray
+
+        axes[0].imshow(
+            image,
+            cmap=cmap,
+            vmin=vrange_list[0],
+            vmax=vrange_list[1],
+            interpolation="none",
+            **kwargs,
+        )
+
+        return fig
+
     def plot_windows(
         self,
         ax=None,
@@ -909,12 +962,9 @@ class PoolingWindows(nn.Module):
 
         This is just a simple little helper to plot the pooling windows
         on an axis. The intended use case is overlaying this on top of
-        the image we're pooling (as returned by ``plenoptic.plot.imshow``).
+        the image we're pooling.
 
         Any additional kwargs get passed to ``ax.contour``
-
-        WARNING: This method requires the additional package plenoptic, which
-        can be found at https://github.com/plenoptic-org/plenoptic
 
         Parameters
         ----------
@@ -952,18 +1002,9 @@ class PoolingWindows(nn.Module):
             The axis with the windows
 
         """
-        try:
-            import plenoptic as po
-        except ModuleNotFoundError:
-            raise Exception(
-                "plenoptic not found, cannot create this plot without access to its "
-                "imshow! "
-                "Go to https://github.com/plenoptic-org/plenoptic and "
-                "follow its install instructions."
-            )
         if ax is None:
-            dummy_data = torch.ones(1, 1, *self.img_res)
-            fig = po.plot.imshow(dummy_data, cmap="gray_r", title=None)
+            dummy_data = np.ones([*self.img_res])
+            fig = self.imshow(dummy_data, cmap="gray_r")
             ax = fig.axes[0]
         if contour_levels is None:
             contour_levels = [self.window_intersecting_amplitude]
@@ -999,9 +1040,6 @@ class PoolingWindows(nn.Module):
 
         Any additional kwargs are passed to ax.contourf
 
-        WARNING: This method requires the additional package plenoptic, which
-        can be found at https://github.com/plenoptic-org/plenoptic
-
         Parameters
         ----------
         im : torch.Tensor or None, optional
@@ -1024,18 +1062,9 @@ class PoolingWindows(nn.Module):
             The axis with the windows
 
         """
-        try:
-            import plenoptic as po
-        except ModuleNotFoundError:
-            raise Exception(
-                "plenoptic not found, cannot create this plot without access to "
-                "its imshow! "
-                "Go to https://github.com/plenoptic-org/plenoptic and "
-                "follow its install instructions."
-            )
         if ax is None:
-            dummy_data = torch.ones(1, 1, *self.img_res)
-            fig = po.plot.imshow(dummy_data, cmap="gray_r", title=None)
+            dummy_data = np.ones([*self.img_res])
+            fig = self.imshow(dummy_data, cmap="gray_r")
             ax = fig.axes[0]
         contour_level = self.window_intersecting_amplitude
         # attempt to not have all the windows in memory at once...

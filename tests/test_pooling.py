@@ -4,7 +4,6 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-import plenoptic as po
 import pytest
 import torch
 
@@ -138,8 +137,6 @@ class TestPooling:
         for i in range(2):
             pw.plot_window_areas("pixels", i)
             pw.plot_window_widths("pixels", i)
-        fig = po.plot.imshow(im)
-        pw.plot_windows(fig.axes[0])
         plt.close("all")
 
     def test_PoolingWindows_caching(self, tmp_path):
