@@ -1203,10 +1203,8 @@ def create_pooling_windows(
 
        import matplotlib.pyplot as plt
        angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
-       plt.imshow(ecc_w[0], cmap='Grays_r')
-       plt.show()
-       plt.imshow(angle_w[0], cmap='Grays_r')
-       plt.show()
+       plt.imshow(ecc_w[0], cmap='Grays_r', interpolation='none')
+       plt.imshow(angle_w[0], cmap='Grays_r', interpolation='none')
 
     If you wish to get the windows as shown in Supplementary Figure 1C
     in the paper [1]_, use ``torch.einsum`` (if you wish to apply these

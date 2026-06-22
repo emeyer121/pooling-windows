@@ -2,23 +2,16 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import cm
 
 
-def setup_fig(image, cmap=None, **kwargs):
+def _setup_fig(image_size):
     """Setup figure for displaying pooling windows.
 
     Arguments
     ---------
-    image : `np.array`
-        the image to plot. Image can be either grayscale, in which case
-        they must be 2d arrays of shape `(h,w)`, or RGB(A), in which case they
-        must be 3d arrays of shape `(h,w,c)` where `c` is 3 (for RGB) or 4 (to
-        also plot the alpha channel).
-    cmap : matplotlib colormap, optional
-        colormap to use when showing these images
-    kwargs :
-        Passed to `ax.imshow`
+    image_size : `np.array`
+        the size of the image to plot. Image can be either grayscale or RGB(A),
+        but here only the first two dimensions (h,w) matter for setting up the figure.
 
     Returns
     -------
@@ -27,29 +20,17 @@ def setup_fig(image, cmap=None, **kwargs):
 
     """
 
-    # determine figure shape
-    img_shape = np.shape(image)
-
     # this is an arbitrary value
     ppi = 96
 
     # get the figure and axes created
-    fig = plt.figure(figsize=(img_shape[1] / ppi, img_shape[0] / ppi), dpi=ppi)
+    fig = plt.figure(figsize=(image_size[1] / ppi, image_size[0] / ppi), dpi=ppi)
 
     # define axis parameters
     fig.add_axes([0, 0, 1, 1], frameon=False, xticks=[], yticks=[])
     axes = fig.axes
 
-    # set cmap for figure
-    if cmap is None:
-        cmap = cm.gray
-
     # set axes parameters
-    axes[0].imshow(
-        image,
-        cmap=cmap,
-        interpolation="none",
-        **kwargs,
-    )
+    axes[0].imshow(np.ones(image_size), cmap="gray_r", interpolation="none")
 
     return fig
