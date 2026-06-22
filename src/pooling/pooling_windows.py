@@ -129,13 +129,7 @@ class PoolingWindows(nn.Module):
         stored to undo that normalization for plotting and projection.
     state_dict_reduced : dict
         A dictionary containing those attributes necessary to initialize
-        the model, plus a 'model_name' field which the ``load_reduced``
-        method uses to determine which model constructor to call. This
-        is used for saving/loading the models, since we don't want to
-        keep the (very large) representation and intermediate steps
-        around. To save, use ``self.save_reduced(filename)``, and then
-        load from that same file using the class method
-        ``po.simul.VentralModel.load_reduced(filename)``
+        the model.
     window_width_degrees : dict
         Dictionary containing the widths of the windows in
         degrees. There are six keys, corresponding to a 2x2 for the

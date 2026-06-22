@@ -1192,17 +1192,20 @@ def create_pooling_windows(
 
     Examples
     --------
-    To use, simply call with the desired scaling (for the version seen
-    in the paper, don't change any of the default arguments; compare
-    this image to the right side of Supplementary Figure 1C)
+    To use, simply call with the desired scaling and image size (for the
+    version seen in the paper, don't change any of the default arguments;
+    compare this image to the right side of Supplementary Figure 1C). You
+    can display the various angle and eccentricity windows by plotting a
+    specified index.
 
     .. plot::
        :include-source:
 
        import matplotlib.pyplot as plt
        angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
-       fig = po.plot.imshow(ecc_w.unsqueeze(0))
-       fig = po.plot.imshow(angle_w.unsqueeze(0))
+       plt.imshow(ecc_w[0], cmap='Grays_r')
+       plt.show()
+       plt.imshow(angle_w[0], cmap='Grays_r')
        plt.show()
 
     If you wish to get the windows as shown in Supplementary Figure 1C
@@ -1214,12 +1217,13 @@ def create_pooling_windows(
        :include-source:
 
        import matplotlib.pyplot as plt
+       import torch
        angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
        # we ignore the last ring of eccentricity windows here because
        # they're all relatively small, which makes the following plot
        # look weird. for how to properly handle them, see the
        # PoolingWindows class
-       windows = torch.einsum('ahw,ehw->eahw', [a, e[:-1]]).flatten(0, 1)
+       windows = torch.einsum('ahw,ehw->eahw', [angle_w, ecc_w[:-1]]).flatten(0, 1)
        fig, ax = plt.subplots(1, 1, figsize=(5, 5))
        for w in windows:
            ax.contour(w, [.5], colors='r')
