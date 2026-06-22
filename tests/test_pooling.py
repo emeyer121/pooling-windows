@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os.path as op
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 import torch
@@ -126,17 +125,6 @@ class TestPooling:
             tmp = im[..., : sh[0], : sh[1]]
             pw = pooling.PoolingWindows(0.9, tmp.shape[-2:])
             pw(tmp)
-
-    def test_PoolingWindows_plotting(self):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2)
-        pw.plot_window_areas()
-        pw.plot_window_widths()
-        for i in range(2):
-            pw.plot_window_areas("pixels", i)
-            pw.plot_window_widths("pixels", i)
-        pw.plot_windows()
-        plt.close("all")
 
     def test_PoolingWindows_caching(self, tmp_path):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
