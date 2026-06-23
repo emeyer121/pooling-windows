@@ -32,6 +32,7 @@ class TestPooling:
     def test_angle_windows(self):
         pooling.pooling.polar_angle_windows(4, (256, 256))
         pooling.pooling.polar_angle_windows(4, (1000, 1000))
+        pooling.pooling.polar_angle_windows(4, 100)
         with pytest.raises(Exception):
             pooling.pooling.polar_angle_windows(1.5, (256, 256))
         with pytest.raises(Exception):
@@ -111,6 +112,24 @@ class TestPooling:
                 std_dev=0.5,
             )
 
+    def test_PoolingWindows_to(self, pool_win, torch_img):
+        pool_win.to()
+        pool_win.to(torch.float32)
+        pool_win.to(torch_img)
+
+    def test_PoolingWindows_merge(self, torch_img, pool_win):
+        pool_win_orig = pooling.PoolingWindows(0.7, torch_img.shape[2:])
+        pool_win_orig.merge(pool_win, scale_offset=0.2)
+
+    def test_PoolingWindows_window(self, pool_win, torch_img):
+        pool_win.window(torch_img)
+        with pytest.raises(KeyError):
+            pool_win.window(torch_img, idx=5)
+
+    def test_PoolingWindows_pool(self, pool_win, torch_img):
+        windowed_x = pool_win.window(torch_img)
+        pool_win.pool(windowed_x)
+
     def test_PoolingWindows_project(self, torch_img):
         pw = pooling.PoolingWindows(0.5, torch_img.shape[2:])
         pooled = pw(torch_img)
@@ -159,3 +178,8 @@ class TestPooling:
         elif input_fmt == "tensor":
             for i in range(num_scales):
                 pw(im[(i,)], idx=i, weights=torch.ones(num_scales, 1, 1, 1, 1))
+
+    def test_PoolingWindows_summarize(self, torch_img, pool_win):
+        # test the window and pool function separate of the forward function
+        sizes = pool_win.summarize_window_sizes()
+        assert np.allclose(sizes["min_window_center_degrees"], 0.8201941016011038)

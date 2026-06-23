@@ -51,3 +51,10 @@ class TestPlotting:
         angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
         po.plot.imshow(ecc_w.unsqueeze(0))
         po.plot.imshow(angle_w.unsqueeze(0))
+
+    @pytest.mark.parametrize("angle_n", [0, 4])
+    @pytest.mark.parametrize("scale", [0, 1])
+    def test_plot_window_checks(self, pool_win, angle_n, scale):
+        pool_win.plot_window_checks()
+        pool_win.plot_window_checks(angle_n, scale)
+        pool_win.plot_window_checks([0, 4], scale)
