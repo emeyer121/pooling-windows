@@ -142,10 +142,9 @@ class TestPooling:
                 0.8, torch_img.shape[-2:], num_scales=2, cache_dir=tmp_path
             )
 
-    def test_PoolingWindows_sep(self, torch_img):
+    def test_PoolingWindows_sep(self, torch_img, pool_win):
         # test the window and pool function separate of the forward function
-        pw = pooling.PoolingWindows(0.5, torch_img.shape[2:])
-        pw.pool(pw.window(torch_img))
+        pool_win.pool(pool_win.window(torch_img))
 
     @pytest.mark.parametrize("num_scales", [1, 3])
     @pytest.mark.parametrize("input_fmt", ["dict", "tensor"])

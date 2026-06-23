@@ -19,28 +19,27 @@ def close_figures_on_teardown():
 
 
 class TestPlotting:
-    def test_plotting(self, torch_img):
-        pw = pooling.PoolingWindows(0.8, torch_img.shape[-2:], num_scales=2)
-        pw.plot_window_areas()
-        pw.plot_window_widths()
+    def test_plotting(self, pool_win):
+        pool_win.plot_window_areas()
+        pool_win.plot_window_widths()
         for i in range(2):
-            pw.plot_window_areas("pixels", i)
-            pw.plot_window_widths("pixels", i)
+            pool_win.plot_window_areas("pixels", i)
+            pool_win.plot_window_widths("pixels", i)
 
-    def test_plotting_windows(self, torch_img):
-        pw = pooling.PoolingWindows(0.8, torch_img.shape[-2:], num_scales=2)
-        pw.plot_windows()
+    def test_plotting_windows(self, pool_win):
+        pool_win.plot_windows()
         for i in range(2):
-            pw.plot_windows(contour_levels=0, colors="b", subset=False, windows_scale=i)
+            pool_win.plot_windows(
+                contour_levels=0, colors="b", subset=False, windows_scale=i
+            )
 
-    def test_plotting_window_values(self, torch_img):
-        pw = pooling.PoolingWindows(0.8, torch_img.shape[-2:], num_scales=2)
-        pw.plot_window_values()
+    def test_plotting_window_values(self, pool_win, torch_img):
+        pool_win.plot_window_values()
         fig, axes = plt.subplots(1, 1, figsize=(4, 4))
         plt.imshow(torch_img.squeeze(), cmap="Greys_r", interpolation="none")
-        pw.plot_window_values(im=torch_img, ax=axes, subset=False)
+        pool_win.plot_window_values(im=torch_img, ax=axes, subset=False)
         for i in range(2):
-            pw.plot_window_values(windows_scale=i)
+            pool_win.plot_window_values(windows_scale=i)
 
     def test_plot_angle_ecc(self):
         angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
