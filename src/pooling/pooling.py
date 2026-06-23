@@ -1194,9 +1194,10 @@ def create_pooling_windows(
     --------
     To use, simply call with the desired scaling and image size (for the
     version seen in the paper, don't change any of the default arguments;
-    compare this image to the right side of Supplementary Figure 1C). You
-    can display the various angle and eccentricity windows by plotting a
-    specified index.
+    compare this image to the right side of Supplementary Figure 1C).
+
+    You can display the various angle and eccentricity windows by plotting a
+    specified index:
 
     .. plot::
        :include-source:
