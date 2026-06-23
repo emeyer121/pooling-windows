@@ -20,7 +20,6 @@ class TestPlotting:
         for i in range(2):
             pw.plot_window_areas("pixels", i)
             pw.plot_window_widths("pixels", i)
-        pw.plot_windows()
         plt.close("all")
 
     def test_plotting_windows(self):
