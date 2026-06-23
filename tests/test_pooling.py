@@ -10,18 +10,16 @@ import pooling
 
 class TestPooling:
     def test_creation(self):
-        ang_windows, ecc_windows = pooling.pooling.create_pooling_windows(
-            0.87, (256, 256)
-        )
+        pooling.pooling.create_pooling_windows(0.87, (256, 256))
 
     def test_creation_args(self):
-        ang, ecc = pooling.pooling.create_pooling_windows(
+        pooling.pooling.create_pooling_windows(
             0.87, (100, 100), 0.2, 30, 1.2, transition_region_width=0.7
         )
-        ang, ecc = pooling.pooling.create_pooling_windows(
+        pooling.pooling.create_pooling_windows(
             0.87, (100, 100), 0.2, 30, 1.2, transition_region_width=0.5
         )
-        ang, ecc = pooling.pooling.create_pooling_windows(
+        pooling.pooling.create_pooling_windows(
             0.87, (100, 100), 0.2, 30, 1.2, "gaussian", std_dev=1
         )
 
@@ -73,29 +71,33 @@ class TestPooling:
 
     @pytest.mark.parametrize("num_scales", [1, 3])
     @pytest.mark.parametrize("transition_region_width", [0.5, 1])
-    def test_PoolingWindows_cosine(self, num_scales, transition_region_width):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
+    def test_PoolingWindows_cosine(
+        self, torch_img, num_scales, transition_region_width
+    ):
         pw = pooling.PoolingWindows(
             0.5,
-            im.shape[2:],
+            torch_img.shape[2:],
             num_scales=num_scales,
             transition_region_width=transition_region_width,
             window_type="cosine",
         )
-        pw(im)
+        pw(torch_img)
 
     @pytest.mark.parametrize("num_scales", [1, 3])
-    def test_PoolingWindows(self, num_scales):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
+    def test_PoolingWindows(self, torch_img, num_scales):
         pw = pooling.PoolingWindows(
-            0.5, im.shape[2:], num_scales=num_scales, window_type="gaussian", std_dev=1
+            0.5,
+            torch_img.shape[2:],
+            num_scales=num_scales,
+            window_type="gaussian",
+            std_dev=1,
         )
-        pw(im)
+        pw(torch_img)
         # we only support std_dev=1
         with pytest.raises(Exception):
             pooling.PoolingWindows(
                 0.5,
-                im.shape[2:],
+                torch_img.shape[2:],
                 num_scales=num_scales,
                 window_type="gaussian",
                 std_dev=2,
@@ -103,46 +105,47 @@ class TestPooling:
         with pytest.raises(Exception):
             pooling.PoolingWindows(
                 0.5,
-                im.shape[2:],
+                torch_img.shape[2:],
                 num_scales=num_scales,
                 window_type="gaussian",
                 std_dev=0.5,
             )
 
-    def test_PoolingWindows_project(self):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(0.5, im.shape[2:])
-        pooled = pw(im)
+    def test_PoolingWindows_project(self, torch_img):
+        pw = pooling.PoolingWindows(0.5, torch_img.shape[2:])
+        pooled = pw(torch_img)
         pw.project(pooled)
-        pw = pooling.PoolingWindows(0.5, im.shape[2:], num_scales=3)
-        pooled = pw(im)
+        pw = pooling.PoolingWindows(0.5, torch_img.shape[2:], num_scales=3)
+        pooled = pw(torch_img)
         pw.project(pooled)
 
-    def test_PoolingWindows_nonsquare(self):
+    def test_PoolingWindows_nonsquare(self, torch_img):
         # test PoolingWindows with weirdly-shaped iamges
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
         for sh in [(256, 128), (256, 127), (256, 125), (125, 125), (127, 125)]:
-            tmp = im[..., : sh[0], : sh[1]]
+            tmp = torch_img[..., : sh[0], : sh[1]]
             pw = pooling.PoolingWindows(0.9, tmp.shape[-2:])
             pw(tmp)
 
-    def test_PoolingWindows_caching(self, tmp_path):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
+    def test_PoolingWindows_caching(self, torch_img, tmp_path):
         # first time we save, second we load
-        pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
-        pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
+        pooling.PoolingWindows(
+            0.8, torch_img.shape[-2:], num_scales=2, cache_dir=tmp_path
+        )
+        pooling.PoolingWindows(
+            0.8, torch_img.shape[-2:], num_scales=2, cache_dir=tmp_path
+        )
 
-    def test_PoolingWindows_cache_dne(self, tmp_path):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
+    def test_PoolingWindows_cache_dne(self, torch_img, tmp_path):
         tmp_path = op.join(tmp_path, "new_dir")
         with pytest.raises(FileNotFoundError):
-            pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2, cache_dir=tmp_path)
+            pooling.PoolingWindows(
+                0.8, torch_img.shape[-2:], num_scales=2, cache_dir=tmp_path
+            )
 
-    def test_PoolingWindows_sep(self):
+    def test_PoolingWindows_sep(self, torch_img):
         # test the window and pool function separate of the forward function
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(0.5, im.shape[2:])
-        pw.pool(pw.window(im))
+        pw = pooling.PoolingWindows(0.5, torch_img.shape[2:])
+        pw.pool(pw.window(torch_img))
 
     @pytest.mark.parametrize("num_scales", [1, 3])
     @pytest.mark.parametrize("input_fmt", ["dict", "tensor"])
