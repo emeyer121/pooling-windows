@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import matplotlib as mpl
+import pytest
 import torch
 
 import pooling
@@ -34,3 +35,14 @@ class TestSampling:
             pooling.sampling.plot_coeffs(coeffs[:20], 10)
             pooling.sampling.interpolation_plot(interps, residuals, samp, None, x)
             pooling.sampling.create_movie(interps, residuals, x, full=full)
+
+    def test_check_sampling_error(self):
+        x = torch.linspace(-5, 5, 101)
+        samp = 2
+        with pytest.raises(Exception):
+            pooling.sampling.check_sampling(
+                val_sampling=samp,
+                pix_sampling=samp,
+                func=pooling.pooling.mother_window,
+                x=x,
+            )
