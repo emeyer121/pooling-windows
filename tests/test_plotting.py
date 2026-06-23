@@ -2,6 +2,7 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import plenoptic as po
+import pytest
 import torch
 
 import pooling
@@ -9,6 +10,13 @@ import pooling
 # necessary to avoid issues with animate:
 # https://github.com/matplotlib/matplotlib/issues/10287/
 mpl.use("agg")
+
+
+# following https://github.com/scverse/scanpy/issues/1662
+@pytest.fixture(autouse=True)
+def close_figures_on_teardown():
+    yield
+    plt.close("all")
 
 
 class TestPlotting:
@@ -20,7 +28,6 @@ class TestPlotting:
         for i in range(2):
             pw.plot_window_areas("pixels", i)
             pw.plot_window_widths("pixels", i)
-        plt.close("all")
 
     def test_plotting_windows(self):
         im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
