@@ -3,7 +3,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import plenoptic as po
 import pytest
-import torch
 
 import pooling
 
@@ -20,29 +19,26 @@ def close_figures_on_teardown():
 
 
 class TestPlotting:
-    def test_plotting(self):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2)
+    def test_plotting(self, torch_img):
+        pw = pooling.PoolingWindows(0.8, torch_img.shape[-2:], num_scales=2)
         pw.plot_window_areas()
         pw.plot_window_widths()
         for i in range(2):
             pw.plot_window_areas("pixels", i)
             pw.plot_window_widths("pixels", i)
 
-    def test_plotting_windows(self):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2)
+    def test_plotting_windows(self, torch_img):
+        pw = pooling.PoolingWindows(0.8, torch_img.shape[-2:], num_scales=2)
         pw.plot_windows()
         for i in range(2):
             pw.plot_windows(contour_levels=0, colors="b", subset=False, windows_scale=i)
 
-    def test_plotting_window_values(self):
-        im = torch.rand((1, 1, 256, 256), dtype=torch.float32)
-        pw = pooling.PoolingWindows(0.8, im.shape[-2:], num_scales=2)
+    def test_plotting_window_values(self, torch_img):
+        pw = pooling.PoolingWindows(0.8, torch_img.shape[-2:], num_scales=2)
         pw.plot_window_values()
         fig, axes = plt.subplots(1, 1, figsize=(4, 4))
-        plt.imshow(im.squeeze(), cmap="Greys_r", interpolation="none")
-        pw.plot_window_values(im=im, ax=axes, subset=False)
+        plt.imshow(torch_img.squeeze(), cmap="Greys_r", interpolation="none")
+        pw.plot_window_values(im=torch_img, ax=axes, subset=False)
         for i in range(2):
             pw.plot_window_values(windows_scale=i)
 
