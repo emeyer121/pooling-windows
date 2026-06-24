@@ -22,8 +22,7 @@ build-backend = "setuptools.build_meta"
 [project.optional-dependencies]
 tests = [
     "pytest>=5.1.2",
-    'pytest-cov',
-    "plenoptic>=2.0.0"
+    'pytest-cov'
 ]
 
 [tool.setuptools.packages.find]

@@ -17,7 +17,7 @@ import opt_einsum as oe
 import torch
 from torch import nn
 
-from . import pooling, utils
+from . import plot, pooling, utils
 
 
 class PoolingWindows(nn.Module):
@@ -129,13 +129,7 @@ class PoolingWindows(nn.Module):
         stored to undo that normalization for plotting and projection.
     state_dict_reduced : dict
         A dictionary containing those attributes necessary to initialize
-        the model, plus a 'model_name' field which the ``load_reduced``
-        method uses to determine which model constructor to call. This
-        is used for saving/loading the models, since we don't want to
-        keep the (very large) representation and intermediate steps
-        around. To save, use ``self.save_reduced(filename)``, and then
-        load from that same file using the class method
-        ``po.simul.VentralModel.load_reduced(filename)``
+        the model.
     window_width_degrees : dict
         Dictionary containing the widths of the windows in
         degrees. There are six keys, corresponding to a 2x2 for the
@@ -909,12 +903,9 @@ class PoolingWindows(nn.Module):
 
         This is just a simple little helper to plot the pooling windows
         on an axis. The intended use case is overlaying this on top of
-        the image we're pooling (as returned by ``plenoptic.plot.imshow``).
+        the image we're pooling.
 
         Any additional kwargs get passed to ``ax.contour``
-
-        WARNING: This method requires the additional package plenoptic, which
-        can be found at https://github.com/plenoptic-org/plenoptic
 
         Parameters
         ----------
@@ -952,18 +943,8 @@ class PoolingWindows(nn.Module):
             The axis with the windows
 
         """
-        try:
-            import plenoptic as po
-        except ModuleNotFoundError:
-            raise Exception(
-                "plenoptic not found, cannot create this plot without access to its "
-                "imshow! "
-                "Go to https://github.com/plenoptic-org/plenoptic and "
-                "follow its install instructions."
-            )
         if ax is None:
-            dummy_data = torch.ones(1, 1, *self.img_res)
-            fig = po.plot.imshow(dummy_data, cmap="gray_r", title=None)
+            fig = plot._setup_fig(self.img_res)
             ax = fig.axes[0]
         if contour_levels is None:
             contour_levels = [self.window_intersecting_amplitude]
@@ -999,9 +980,6 @@ class PoolingWindows(nn.Module):
 
         Any additional kwargs are passed to ax.contourf
 
-        WARNING: This method requires the additional package plenoptic, which
-        can be found at https://github.com/plenoptic-org/plenoptic
-
         Parameters
         ----------
         im : torch.Tensor or None, optional
@@ -1024,18 +1002,8 @@ class PoolingWindows(nn.Module):
             The axis with the windows
 
         """
-        try:
-            import plenoptic as po
-        except ModuleNotFoundError:
-            raise Exception(
-                "plenoptic not found, cannot create this plot without access to "
-                "its imshow! "
-                "Go to https://github.com/plenoptic-org/plenoptic and "
-                "follow its install instructions."
-            )
         if ax is None:
-            dummy_data = torch.ones(1, 1, *self.img_res)
-            fig = po.plot.imshow(dummy_data, cmap="gray_r", title=None)
+            fig = plot._setup_fig(self.img_res)
             ax = fig.axes[0]
         contour_level = self.window_intersecting_amplitude
         # attempt to not have all the windows in memory at once...

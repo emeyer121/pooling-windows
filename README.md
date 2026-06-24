@@ -24,15 +24,14 @@ be found at the top of
 ## Requirements
 
 This code works with python 3.10, 3.11, 3.12, 3.13, and 3.14 in order to match [PyTorch's compatibility](https://pytorch.org/get-started/locally/). To install all necessary dependencies, run `pip install .`; you
-will then be able to use the code here from within this directory. There is one function,
-`PoolingWindows.plot_windows()`, which requires
-[plenoptic](https://github.com/plenoptic-org/plenoptic) -- if you
-wish to use it, you must install that package as well (follow the instructions
-in its README).
+will then be able to use the code here from within this directory.
 
 If you wish to view the included notebook (which contains a simple demonstration
 of some sampling and aliasing issues), you will also need to install
-[jupyter](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html).
+[jupyter](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html). Additionally, some of the examples use
+[plenoptic](https://github.com/plenoptic-org/plenoptic) -- if you
+wish to use it, you must install that package as well (follow the instructions
+in its README).
 
 ## Usage
 
