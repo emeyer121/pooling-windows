@@ -5,9 +5,10 @@ import numpy as np
 
 
 def _setup_fig(image_size):
-    """Setup figure for displaying pooling windows. Plots an array of ones in the
-    specified size using ``gray_r`` colormap. This initializes a figure with a solid
-    black image, removing all x and y ticks.
+    """Setup figure for displaying pooling windows.
+
+    Plots an array of ones in the specified size using ``gray_r`` colormap.
+    This initializes a figure with a solid black image, removing all x and y ticks.
 
     Arguments
     ---------
