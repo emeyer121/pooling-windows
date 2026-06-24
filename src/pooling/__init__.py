@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from . import pooling as pooling
-from . import sampling as sampling
-from . import utils as utils
+__all__ = ["pooling_windows", "pooling", "sampling", "utils"]
+
+from . import pooling, sampling, utils
 from .pooling_windows import PoolingWindows as PoolingWindows

@@ -10,6 +10,12 @@ try:
 except ImportError:
     warnings.warn("Unable to import IPython.display.HTML")
 
+__all__ = ["to_numpy", "polar_radius", "polar_angle", "convert_anim_to_html"]
+
+
+def __dir__() -> list[str]:
+    return __all__
+
 
 def to_numpy(x):
     r"""Cast tensor to numpy in the most conservative way possible.

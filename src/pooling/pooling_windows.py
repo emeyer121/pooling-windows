@@ -19,6 +19,14 @@ from torch import nn
 
 from . import plot, pooling, utils
 
+__all__ = [
+    "PoolingWindows",
+]
+
+
+def __dir__() -> list[str]:
+    return __all__
+
 
 class PoolingWindows(nn.Module):
     r"""Generic class to set up scaling windows for use with other models

@@ -37,6 +37,29 @@ import torch
 
 from . import utils
 
+__all__ = [
+    "calc_angular_window_spacing",
+    "calc_angular_n_windows",
+    "calc_eccentricity_window_spacing",
+    "calc_eccentricity_n_windows",
+    "calc_scaling",
+    "calc_windows_eccentricity",
+    "calc_window_widths_actual",
+    "calc_deg_to_pix",
+    "calc_min_eccentricity",
+    "gaussian",
+    "mother_window",
+    "polar_angle_windows",
+    "log_eccentricity_windows",
+    "create_pooling_windows",
+    "normalize_windows",
+]
+
+
+def __dir__() -> list[str]:
+    return __all__
+
+
 # see docstring of gaussian function for explanation of this constant
 GAUSSIAN_SUM = 2 * 1.753314144021452772415339526931980189073725635759454989253 - 1
 

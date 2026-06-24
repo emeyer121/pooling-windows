@@ -3,6 +3,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+__all__ = []
+
+
+def __dir__() -> list[str]:
+    return __all__
+
 
 def _setup_fig(image_size):
     """Setup figure for displaying pooling windows.
