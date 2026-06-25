@@ -19,41 +19,55 @@ def close_figures_on_teardown():
 
 
 class TestPlotting:
-    @pytest.mark.parametrize("scale_num", [0, 1])
-    def test_plotting_window_areas(self, pool_win, scale_num, get_ax):
+    def test_plotting_window_areas(self, pool_win):
         pool_win.plot_window_areas()
+
+    @pytest.mark.parametrize("scale_num", [0, 1])
+    def test_plotting_window_areas_args(self, pool_win, scale_num):
         fig, axes = plt.subplots(1, 1, figsize=(4, 4))
         pool_win.plot_window_areas("pixels", scale_num, ax=axes)
 
-    @pytest.mark.parametrize("scale_num", [0, 1])
-    def test_plotting_window_widths(self, pool_win, scale_num, get_ax):
+    def test_plotting_window_widths(self, pool_win):
         pool_win.plot_window_widths()
+
+    @pytest.mark.parametrize("scale_num", [0, 1])
+    def test_plotting_window_widths_args(self, pool_win, scale_num):
         fig, axes = plt.subplots(1, 1, figsize=(4, 4))
         pool_win.plot_window_widths("pixels", scale_num, jitter=None, ax=axes)
 
-    @pytest.mark.parametrize("win_scale", [0, 1])
-    def test_plotting_windows(self, pool_win, win_scale):
+    def test_plotting_windows(self, pool_win):
         pool_win.plot_windows()
+
+    @pytest.mark.parametrize("win_scale", [0, 1])
+    def test_plotting_windows_args(self, pool_win, win_scale):
         pool_win.plot_windows(
             contour_levels=0, colors="b", subset=False, windows_scale=win_scale
         )
 
-    @pytest.mark.parametrize("win_scale", [0, 1])
-    def test_plotting_window_values(self, pool_win, torch_img, win_scale, get_ax):
+    def test_plotting_window_values(self, pool_win):
         pool_win.plot_window_values()
-        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
-        pool_win.plot_window_values(im=torch_img, ax=axes, subset=False)
-        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
-        pool_win.plot_window_values(ax=axes, subset=False, windows_scale=win_scale)
+
+    @pytest.mark.parametrize("win_scale", [0, 1])
+    def test_plotting_window_values_args(self, pool_win, rand_img, win_scale):
+        fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+        pool_win.plot_window_values(im=rand_img, ax=axes[0], subset=False)
+        pool_win.plot_window_values(
+            im=None, ax=axes[1], subset=False, windows_scale=win_scale
+        )
 
     def test_po_tensor_plot(self):
         angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
         po.plot.imshow(ecc_w.unsqueeze(0))
         po.plot.imshow(angle_w.unsqueeze(0))
 
+    def test_plot_window_checks(self, pool_win):
+        pool_win.plot_window_checks()
+
     @pytest.mark.parametrize("angle_n", [0, 4])
     @pytest.mark.parametrize("scale", [0, 1])
-    def test_plot_window_checks(self, pool_win, angle_n, scale):
-        pool_win.plot_window_checks()
+    def test_plot_window_checks_args(self, pool_win, angle_n, scale):
         pool_win.plot_window_checks(angle_n, scale)
+
+    @pytest.mark.parametrize("scale", [0, 1])
+    def test_plot_window_checks_arglist(self, pool_win, scale):
         pool_win.plot_window_checks([0, 4], scale)
