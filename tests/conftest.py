@@ -3,6 +3,8 @@ import torch
 
 import pooling
 
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 @pytest.fixture(scope="package")
 def rand_img():
