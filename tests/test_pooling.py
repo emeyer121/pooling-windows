@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os.path as op
+import pathlib
 import time
 
 import numpy as np
@@ -35,17 +36,18 @@ class TestPooling:
         pooling.pooling.polar_angle_windows(4, (256, 256))
         pooling.pooling.polar_angle_windows(4, (1000, 1000))
         pooling.pooling.polar_angle_windows(4, 100)
-        with pytest.raises(Exception) as excinfo:
+        with pytest.raises(Exception, match="n_windows must be an integer"):
             pooling.pooling.polar_angle_windows(1.5, (256, 256))
-        assert "n_windows must be an integer" in str(excinfo)
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="We cannot handle one window correctly!"):
             pooling.pooling.polar_angle_windows(1, (256, 256))
 
     def test_calculations(self):
         # these really shouldn't change, but just in case...
         assert pooling.pooling.calc_angular_window_spacing(2) == np.pi
         assert pooling.pooling.calc_angular_n_windows(2) == np.pi
-        with pytest.raises(Exception):
+        with pytest.raises(
+            Exception, match="Exactly one of n_windows or scaling must be set!"
+        ):
             pooling.pooling.calc_eccentricity_window_spacing()
         assert np.allclose(
             pooling.pooling.calc_eccentricity_window_spacing(n_windows=4),
@@ -96,7 +98,9 @@ class TestPooling:
         )
         pw(rand_img)
         # we only support std_dev=1
-        with pytest.raises(Exception):
+        with pytest.raises(
+            Exception, match="Only std_dev=1 allowed for Gaussian windows!"
+        ):
             pooling.PoolingWindows(
                 0.5,
                 rand_img.shape[2:],
@@ -104,7 +108,9 @@ class TestPooling:
                 window_type="gaussian",
                 std_dev=2,
             )
-        with pytest.raises(Exception):
+        with pytest.raises(
+            Exception, match="Only std_dev=1 allowed for Gaussian windows!"
+        ):
             pooling.PoolingWindows(
                 0.5,
                 rand_img.shape[2:],
@@ -113,7 +119,15 @@ class TestPooling:
                 std_dev=0.5,
             )
 
-    def test_PoolingWindows_to(self, pool_win, rand_img):
+    def test_PoolingWindows_totype(self, pool_win):
+        assert pool_win.angle_windows[0].dtype == torch.float32
+        pool_win.to(torch.float64)
+        assert pool_win.angle_windows[0].dtype == torch.float64
+        pool_win.to(torch.float32)
+        assert pool_win.angle_windows[0].dtype == torch.float32
+
+    def test_PoolingWindows_toimg(self, pool_win, rand_img):
+        assert pool_win.angle_windows[0].dtype == torch.float32
         pool_win.to(torch.float64)
         assert pool_win.angle_windows[0].dtype == torch.float64
         pool_win.to(rand_img)
@@ -139,13 +153,11 @@ class TestPooling:
             win = pool_win.window(rand_img, idx=idx)
             assert len(win.shape) == 5
         elif idx == 1:
-            with pytest.raises(ValueError) as excinfo:
+            with pytest.raises(ValueError, match="Size of label 'h'"):
                 pool_win.window(rand_img, idx=idx)
-            assert "Size of label 'h'" in str(excinfo)
         elif idx == 2:
-            with pytest.raises(KeyError) as excinfo:
+            with pytest.raises(KeyError, match=f"{idx}"):
                 pool_win.window(rand_img, idx=idx)
-            assert f"KeyError({idx})" in str(excinfo)
 
     def test_PoolingWindows_pool(self, pool_win, rand_img):
         windowed_x = pool_win.window(rand_img)
@@ -173,24 +185,28 @@ class TestPooling:
         new_path = tmp_path / "test_dir"
         new_path.mkdir()
         start_time = time.perf_counter()
-        pooling.PoolingWindows(
+        pw = pooling.PoolingWindows(
             0.8, rand_img.shape[-2:], num_scales=2, cache_dir=new_path
         )
         tot_time_new = time.perf_counter() - start_time
+        assert new_path.exists()
+        for i in pw.cache_paths:
+            assert pathlib.Path(i).exists()
         start_time = time.perf_counter()
-        pooling.PoolingWindows(
+        pw = pooling.PoolingWindows(
             0.8, rand_img.shape[-2:], num_scales=2, cache_dir=new_path
         )
         tot_time_cache = time.perf_counter() - start_time
+        for i in pw.cache_paths:
+            assert pathlib.Path(i).exists()
         assert tot_time_cache < tot_time_new
 
     def test_PoolingWindows_cache_dne(self, rand_img, tmp_path):
         tmp_path = op.join(tmp_path, "new_dir")
-        with pytest.raises(FileNotFoundError) as excinfo:
+        with pytest.raises(FileNotFoundError, match="directory does not exist!"):
             pooling.PoolingWindows(
                 0.8, rand_img.shape[-2:], num_scales=2, cache_dir=tmp_path
             )
-        assert "directory does not exist!" in str(excinfo)
 
     def test_PoolingWindows_sep(self, rand_img, pool_win):
         # test the window and pool function separate of the forward function
@@ -215,3 +231,20 @@ class TestPooling:
     def test_PoolingWindows_summarize(self, rand_img, pool_win):
         sizes = pool_win.summarize_window_sizes()
         assert np.allclose(sizes["min_window_center_degrees"], 0.8201941016011038)
+        assert np.allclose(sizes["min_window_fwhm_degrees"], 0.4100970508005519)
+        assert np.allclose(sizes["min_window_area_degrees"], 0.06604397097574137)
+        assert np.allclose(sizes["max_window_center_degrees"], 15.980724561828527)
+        assert np.allclose(sizes["max_window_fwhm_degrees"], 7.990362280914264)
+        assert np.allclose(sizes["max_window_area_degrees"], 25.072222129865402)
+        assert np.allclose(sizes["min_window_scale_0_center_pixels"], 6.998989666996086)
+        assert np.allclose(sizes["min_window_scale_0_fwhm_pixels"], 3.499494833498043)
+        assert np.allclose(sizes["min_window_scale_0_area_pixels"], 4.80917520207354)
+        assert np.allclose(sizes["max_window_scale_0_center_pixels"], 136.3688495942701)
+        assert np.allclose(sizes["max_window_scale_0_fwhm_pixels"], 68.18442479713505)
+        assert np.allclose(sizes["max_window_scale_0_area_pixels"], 1825.7034994476212)
+        assert np.allclose(sizes["min_window_scale_1_center_pixels"], 3.499494833498043)
+        assert np.allclose(sizes["min_window_scale_1_fwhm_pixels"], 1.7497474167490215)
+        assert np.allclose(sizes["min_window_scale_1_area_pixels"], 1.202293800518385)
+        assert np.allclose(sizes["max_window_scale_1_center_pixels"], 68.18442479713505)
+        assert np.allclose(sizes["max_window_scale_1_fwhm_pixels"], 34.092212398567526)
+        assert np.allclose(sizes["max_window_scale_1_area_pixels"], 456.4258748619053)

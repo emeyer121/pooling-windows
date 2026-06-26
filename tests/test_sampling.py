@@ -37,14 +37,15 @@ class TestSampling:
         )
 
     def test_check_sampling_error(self, x_eval):
-        with pytest.raises(Exception) as excinfo:
+        with pytest.raises(
+            Exception, match="One of val_sampling or pix_sampling must be None!"
+        ):
             pooling.sampling.check_sampling(
                 val_sampling=2,
                 pix_sampling=2,
                 func=pooling.pooling.mother_window,
                 x=x_eval,
             )
-        assert "One of val_sampling or pix_sampling must be None!" in str(excinfo)
 
     def test_check_small_residuals(self, x_eval):
         _, _, _, _, residuals = pooling.sampling.check_sampling(0.5, x=x_eval)

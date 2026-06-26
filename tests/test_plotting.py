@@ -19,40 +19,94 @@ def close_figures_on_teardown():
 
 
 class TestPlotting:
-    def test_plotting_window_areas(self, pool_win):
-        pool_win.plot_window_areas()
-
-    @pytest.mark.parametrize("scale_num", [0, 1])
-    def test_plotting_window_areas_args(self, pool_win, scale_num):
-        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
-        pool_win.plot_window_areas("pixels", scale_num, ax=axes)
-
-    def test_plotting_window_widths(self, pool_win):
-        pool_win.plot_window_widths()
-
-    @pytest.mark.parametrize("scale_num", [0, 1])
-    def test_plotting_window_widths_args(self, pool_win, scale_num):
-        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
-        pool_win.plot_window_widths("pixels", scale_num, jitter=None, ax=axes)
-
     def test_plotting_windows(self, pool_win):
         pool_win.plot_windows()
 
+    @pytest.mark.parametrize("contour", [None, 0, 1, [0, 2]])
+    @pytest.mark.parametrize("color", ["b", "r"])
+    @pytest.mark.parametrize("subset", [False, True])
     @pytest.mark.parametrize("win_scale", [0, 1])
-    def test_plotting_windows_args(self, pool_win, win_scale):
+    def test_plotting_windows_args(self, pool_win, contour, color, subset, win_scale):
         pool_win.plot_windows(
-            contour_levels=0, colors="b", subset=False, windows_scale=win_scale
+            contour_levels=contour, colors=color, subset=subset, windows_scale=win_scale
+        )
+
+    @pytest.mark.parametrize("contour", [None, 0, 1, [0, 2]])
+    @pytest.mark.parametrize("color", ["b", "r"])
+    @pytest.mark.parametrize("subset", [False, True])
+    @pytest.mark.parametrize("win_scale", [0, 1])
+    def test_plotting_windows_axargs(self, pool_win, contour, color, subset, win_scale):
+        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
+        pool_win.plot_windows(
+            ax=axes,
+            contour_levels=contour,
+            colors=color,
+            subset=subset,
+            windows_scale=win_scale,
         )
 
     def test_plotting_window_values(self, pool_win):
         pool_win.plot_window_values()
 
+    @pytest.mark.parametrize("subset", [False, True])
     @pytest.mark.parametrize("win_scale", [0, 1])
-    def test_plotting_window_values_args(self, pool_win, rand_img, win_scale):
-        fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-        pool_win.plot_window_values(im=rand_img, ax=axes[0], subset=False)
+    def test_plotting_window_values_args(self, pool_win, subset, win_scale):
+        pool_win.plot_window_values(im=None, subset=subset, windows_scale=win_scale)
+
+    @pytest.mark.parametrize("subset", [False, True])
+    @pytest.mark.parametrize("win_scale", [0, 1])
+    def test_plotting_window_values_imgargs(self, pool_win, rand_img, subset):
+        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
         pool_win.plot_window_values(
-            im=None, ax=axes[1], subset=False, windows_scale=win_scale
+            im=rand_img, ax=axes, subset=subset, windows_scale=0
+        )
+
+    def test_plotting_window_values_err(self, pool_win, rand_img):
+        with pytest.raises(ValueError, match="Size of label 'h'"):
+            pool_win.plot_window_values(im=rand_img, windows_scale=1)
+
+    def test_plotting_window_widths(self, pool_win):
+        pool_win.plot_window_widths()
+
+    @pytest.mark.parametrize("units", ["pixels", "degrees"])
+    @pytest.mark.parametrize("scale_num", [0, 1])
+    @pytest.mark.parametrize("figsize", [(4, 4), (5, 5)])
+    @pytest.mark.parametrize("jitter", [None, 0, 0.25])
+    def test_plotting_window_widths_args(
+        self, pool_win, units, scale_num, figsize, jitter
+    ):
+        pool_win.plot_window_widths(
+            units=units, scale_num=scale_num, figsize=figsize, jitter=jitter
+        )
+
+    @pytest.mark.parametrize("units", ["pixels", "degrees"])
+    @pytest.mark.parametrize("scale_num", [0, 1])
+    @pytest.mark.parametrize("figsize", [(4, 4), (5, 5)])
+    @pytest.mark.parametrize("jitter", [None, 0, 0.25])
+    def test_plotting_window_widths_axargs(
+        self, pool_win, units, scale_num, figsize, jitter
+    ):
+        fig, axes = plt.subplots(1, 1)
+        pool_win.plot_window_widths(
+            units=units, scale_num=scale_num, jitter=jitter, figsize=figsize, ax=axes
+        )
+
+    def test_plotting_window_areas(self, pool_win):
+        pool_win.plot_window_areas()
+
+    @pytest.mark.parametrize("units", ["pixels", "degrees"])
+    @pytest.mark.parametrize("scale_num", [0, 1])
+    @pytest.mark.parametrize("figsize", [(4, 4), (5, 5)])
+    def test_plotting_window_areas_args(self, pool_win, units, scale_num, figsize):
+        pool_win.plot_window_areas(units=units, scale_num=scale_num, figsize=figsize)
+
+    @pytest.mark.parametrize("units", ["pixels", "degrees"])
+    @pytest.mark.parametrize("scale_num", [0, 1])
+    @pytest.mark.parametrize("figsize", [(4, 4), (5, 5)])
+    def test_plotting_window_areas_axargs(self, pool_win, units, scale_num, figsize):
+        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
+        pool_win.plot_window_areas(
+            units=units, scale_num=scale_num, figsize=figsize, ax=axes
         )
 
     def test_po_tensor_plot(self):
