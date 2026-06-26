@@ -54,7 +54,6 @@ class TestPlotting:
         pool_win.plot_window_values(im=None, subset=subset, windows_scale=win_scale)
 
     @pytest.mark.parametrize("subset", [False, True])
-    @pytest.mark.parametrize("win_scale", [0, 1])
     def test_plotting_window_values_imgargs(self, pool_win, rand_img, subset):
         fig, axes = plt.subplots(1, 1, figsize=(4, 4))
         pool_win.plot_window_values(
