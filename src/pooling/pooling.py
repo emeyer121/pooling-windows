@@ -37,6 +37,29 @@ import torch
 
 from . import utils
 
+__all__ = [
+    "calc_angular_window_spacing",
+    "calc_angular_n_windows",
+    "calc_eccentricity_window_spacing",
+    "calc_eccentricity_n_windows",
+    "calc_scaling",
+    "calc_windows_eccentricity",
+    "calc_window_widths_actual",
+    "calc_deg_to_pix",
+    "calc_min_eccentricity",
+    "gaussian",
+    "mother_window",
+    "polar_angle_windows",
+    "log_eccentricity_windows",
+    "create_pooling_windows",
+    "normalize_windows",
+]
+
+
+def __dir__() -> list[str]:
+    return __all__
+
+
 # see docstring of gaussian function for explanation of this constant
 GAUSSIAN_SUM = 2 * 1.753314144021452772415339526931980189073725635759454989253 - 1
 
@@ -1194,9 +1217,10 @@ def create_pooling_windows(
     --------
     To use, simply call with the desired scaling and image size (for the
     version seen in the paper, don't change any of the default arguments;
-    compare this image to the right side of Supplementary Figure 1C). You
-    can display the various angle and eccentricity windows by plotting a
-    specified index.
+    compare this image to the right side of Supplementary Figure 1C).
+
+    You can display the various angle and eccentricity windows by plotting a
+    specified index:
 
     .. plot::
        :include-source:

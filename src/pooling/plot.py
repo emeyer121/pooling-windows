@@ -3,15 +3,24 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+__all__ = []
+
+
+def __dir__() -> list[str]:
+    return __all__
+
 
 def _setup_fig(image_size):
     """Setup figure for displaying pooling windows.
 
+    Plots an array of ones in the specified size using ``gray_r`` colormap.
+    This initializes a figure with a solid black image, removing all x and y ticks.
+
     Arguments
     ---------
-    image_size : `np.array`
-        the size of the image to plot. Image can be either grayscale or RGB(A),
-        but here only the first two dimensions (h,w) matter for setting up the figure.
+    image_size
+        the size of the image to plot. Input should be 2-tuple of ints giving the
+        size of the figure in pixels.
 
     Returns
     -------

@@ -18,6 +18,12 @@ from matplotlib import animation
 from . import utils
 from .pooling import gaussian
 
+__all__ = ["check_sampling", "plot_coeffs", "interpolation_plot", "create_movie"]
+
+
+def __dir__() -> list[str]:
+    return __all__
+
 
 def check_sampling(
     val_sampling=0.5,
