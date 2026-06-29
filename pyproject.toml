@@ -68,6 +68,8 @@ skip-magic-trailing-comma = false
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
 
+docstring-code-format = true
+
 [tool.ruff.lint]
 select = [
     # pycodestyle
@@ -83,6 +85,30 @@ select = [
     "I",
     # in particular, this looks for invalid escape sequences (has been an issue
     # for regex strings used in tests)
-    "W"
+    "W",
+    # docstrings, note that DOC rules (pydoclint) are all in preview, so have to be explicitly added
+    "D", "DOC201", "DOC202", "DOC402", "DOC403", "DOC501",
+    # flake8 function annotations
+    "ANN"
 ]
 ignore = []
+
+# allow preview rules, but require them to be explicitly added
+preview = true
+explicit-preview-rules = true
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-none-returning = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.numpydoc_validation]
+checks = [
+    "all",
+    "SA01",
+    # will remove this eventually
+    "EX01",
+    "PR04",
+]
