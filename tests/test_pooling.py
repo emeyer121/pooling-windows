@@ -15,29 +15,36 @@ class TestPooling:
     def test_creation(self):
         pooling.pooling.create_pooling_windows(0.87, (256, 256))
 
-    def test_creation_args(self):
+    @pytest.mark.parametrize("region_width", [0.5, 0.7])
+    def test_creation_args(self, region_width):
         pooling.pooling.create_pooling_windows(
-            0.87, (100, 100), 0.2, 30, 1.2, transition_region_width=0.7
+            0.87, (100, 100), 0.2, 30, 1.2, transition_region_width=region_width
         )
-        pooling.pooling.create_pooling_windows(
-            0.87, (100, 100), 0.2, 30, 1.2, transition_region_width=0.5
-        )
+
+    def test_creation_gaussian(self):
         pooling.pooling.create_pooling_windows(
             0.87, (100, 100), 0.2, 30, 1.2, "gaussian", std_dev=1
         )
 
-    def test_ecc_windows(self):
-        pooling.pooling.log_eccentricity_windows((256, 256), n_windows=4)
-        pooling.pooling.log_eccentricity_windows((256, 256), n_windows=4.5)
-        pooling.pooling.log_eccentricity_windows((256, 256), window_spacing=0.5)
-        pooling.pooling.log_eccentricity_windows((256, 256), window_spacing=1)
+    @pytest.mark.parametrize("n_windows", [4, 4.5])
+    def test_ecc_nwindows(self, n_windows):
+        pooling.pooling.log_eccentricity_windows((256, 256), n_windows=n_windows)
 
-    def test_angle_windows(self):
-        pooling.pooling.polar_angle_windows(4, (256, 256))
-        pooling.pooling.polar_angle_windows(4, (1000, 1000))
-        pooling.pooling.polar_angle_windows(4, 100)
+    @pytest.mark.parametrize("window_spacing", [0.5, 1])
+    def test_ecc_window_spacing(self, window_spacing):
+        pooling.pooling.log_eccentricity_windows(
+            (256, 256), window_spacing=window_spacing
+        )
+
+    @pytest.mark.parametrize("res", [(256, 256), (1000, 1000), 100])
+    def test_angle_windows(self, res):
+        pooling.pooling.polar_angle_windows(4, res)
+
+    def test_angle_windows_notint(self):
         with pytest.raises(Exception, match="n_windows must be an integer"):
             pooling.pooling.polar_angle_windows(1.5, (256, 256))
+
+    def test_angle_windows_onewin(self):
         with pytest.raises(Exception, match="We cannot handle one window correctly!"):
             pooling.pooling.polar_angle_windows(1, (256, 256))
 
