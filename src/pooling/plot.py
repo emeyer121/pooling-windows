@@ -1,4 +1,4 @@
-"""Helpful utility functions for plotting or displaying information"""
+"""Helpful utility functions for plotting or displaying information."""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +11,7 @@ def __dir__() -> list[str]:
 
 
 def _setup_fig(image_size):
-    """Setup figure for displaying pooling windows.
+    """Set up figure for displaying pooling windows.
 
     Plots an array of ones in the specified size using ``gray_r`` colormap.
     This initializes a figure with a solid black image, removing all x and y ticks.
@@ -28,7 +28,6 @@ def _setup_fig(image_size):
         matplotlib figure containing the plotted images
 
     """
-
     # this is an arbitrary value
     ppi = 96
 

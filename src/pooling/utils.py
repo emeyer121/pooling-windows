@@ -1,4 +1,10 @@
-#!/usr/bin/env python3
+"""External utility functions to assist with spatial pooling.
+
+pooling_windows.py contains the PoolingWindows class, which uses most of these
+functions
+
+"""
+
 import warnings
 from contextlib import suppress
 
@@ -149,7 +155,7 @@ def polar_angle(size, phase=0, origin=None, device=None):
 
 
 def convert_anim_to_html(anim):
-    r"""convert a matplotlib animation object to HTML (for display)
+    r"""Convert a matplotlib animation object to HTML (for display).
 
     This is a simple little wrapper function that allows the animation
     to be displayed in a Jupyter notebook
@@ -158,8 +164,8 @@ def convert_anim_to_html(anim):
     ----------
     anim : `matplotlib.animation.FuncAnimation`
         The animation object to convert to HTML
-    """
 
+    """
     # to_html5_video will call savefig with a dpi kwarg, so our
     # custom figure class will raise a warning. we don't want to
     # worry people, so we go ahead and suppress it

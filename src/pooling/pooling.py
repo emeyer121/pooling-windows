@@ -1,4 +1,4 @@
-"""functions to perform spatial pooling, as seen in Freeman and Simoncelli, 2011
+"""Functions to perform spatial pooling, as seen in Freeman and Simoncelli, 2011.
 
 In addition the raised-cosine windows used in that paper, we also
 provide support for an alternative window construction:
@@ -65,7 +65,7 @@ GAUSSIAN_SUM = 2 * 1.753314144021452772415339526931980189073725635759454989253 -
 
 
 def calc_angular_window_spacing(n_windows):
-    r"""calculate and return the window spacing for the angular windows
+    r"""Calculate and return the window spacing for the angular windows.
 
     this is the :math:`w_{\theta }` term in equation 10 of the paper's
     online methods, referred to as the angular window width.
@@ -94,7 +94,7 @@ def calc_angular_window_spacing(n_windows):
 
 
 def calc_angular_n_windows(window_spacing):
-    r"""calculate and return the number of angular windows
+    r"""Calculate and return the number of angular windows.
 
     this is the :math:`N_{\theta }` term in equation 10 of the paper's
     online method, which we've rearranged in order to get this.
@@ -116,7 +116,7 @@ def calc_angular_n_windows(window_spacing):
 def calc_eccentricity_window_spacing(
     min_ecc=0.5, max_ecc=15, n_windows=None, scaling=None, std_dev=None
 ):
-    r"""calculate and return the window spacing for the eccentricity windows
+    r"""Calculate and return the window spacing for the eccentricity windows.
 
     this is the :math:`w_e` term in equation 11 of the paper's online
     methods (referred to as the window width), which we also refer to as
@@ -207,7 +207,7 @@ def calc_eccentricity_window_spacing(
 
 
 def calc_eccentricity_n_windows(window_spacing, min_ecc=0.5, max_ecc=15, std_dev=None):
-    r"""calculate and return the number of eccentricity windows
+    r"""Calculate and return the number of eccentricity windows.
 
     this is the :math:`N_e` term in equation 11 of the paper's online
     method, which we've rearranged in order to get this.
@@ -248,7 +248,7 @@ def calc_eccentricity_n_windows(window_spacing, min_ecc=0.5, max_ecc=15, std_dev
 
 
 def calc_scaling(n_windows, min_ecc=0.5, max_ecc=15, std_dev=None):
-    r"""calculate and return the scaling value, as reported in the paper
+    r"""Calculate and return the scaling value, as reported in the paper.
 
     Scaling is the ratio of the eccentricity window's radial full-width
     at half-maximum to eccentricity. For eccentricity, we use the
@@ -342,7 +342,7 @@ def calc_windows_eccentricity(
     transition_region_width=0.5,
     std_dev=None,
 ):
-    r"""calculate a relevant eccentricity for each radial window
+    r"""Calculate a relevant eccentricity for each radial window.
 
     These are the values :math:`e_c`, as referred to in ``calc_scaling``
     (for each of the n windows)
@@ -493,8 +493,7 @@ def calc_window_widths_actual(
     transition_region_width=0.5,
     std_dev=None,
 ):
-    r"""calculate and return the actual widths of the windows, in angular
-    and radial directions
+    r"""Calculate and return the actual widths of the windows.
 
     whereas ``calc_angular_window_spacing`` returns a term used in the
     equations to generate the windows, this returns the actual angular
@@ -665,7 +664,7 @@ def calc_window_widths_actual(
 
 
 def calc_deg_to_pix(img_res, max_eccentricity=15):
-    r"""Calculate the degree-to-pixel conversion factor
+    r"""Calculate the degree-to-pixel conversion factor.
 
     We assume ``img_res`` is the full resolution of the image and
     ``max_eccentricity`` is the radius of the image in degrees. Thus, we
@@ -701,7 +700,7 @@ def calc_min_eccentricity(
     pixel_area_thresh=1,
     radial_to_circumferential_ratio=2,
 ):
-    r"""Calculate the eccentricity where window area exceeds a threshold
+    r"""Calculate the eccentricity where window area exceeds a threshold.
 
     The pooling windows are used primarily for metamer synthesis, and
     conceptually, if the pooling windows only include a single pixel, or
@@ -793,7 +792,7 @@ def calc_min_eccentricity(
 
 
 def gaussian(x, std_dev=1):
-    r"""Simple gaussian with mean 0, and adjustable std dev
+    r"""Compute simple gaussian with mean 0, and adjustable std dev.
 
     Possible alternative mother window, giving the weighting in each
     direction for the spatial pooling performed during the construction
@@ -849,7 +848,7 @@ def gaussian(x, std_dev=1):
 
 
 def mother_window(x, transition_region_width=0.5):
-    r"""Raised cosine 'mother' window function
+    r"""Compute raised cosine 'mother' window function.
 
     Used to give the weighting in each direction for the spatial pooling
     performed during the construction of visual metamers
@@ -929,7 +928,7 @@ def polar_angle_windows(
     std_dev=None,
     device=None,
 ):
-    r"""Create polar angle windows
+    r"""Create polar angle windows.
 
     We require an integer number of windows placed between 0 and 2 pi.
 
@@ -1018,7 +1017,7 @@ def log_eccentricity_windows(
     device=None,
     linear=False,
 ):
-    r"""Create log eccentricity windows in 2d
+    r"""Create log eccentricity windows in 2d.
 
     Note that exactly one of ``n_windows`` or ``window_width`` must be
     set.
@@ -1035,9 +1034,6 @@ def log_eccentricity_windows(
     returns one more window there; we determine if this is necessary by
     calling ``calc_eccentricity_n_windows`` with
     ``np.sqrt(2)*max_ecc``.
-
-    Notes
-    -----
 
     Parameters
     ----------
@@ -1146,8 +1142,7 @@ def create_pooling_windows(
     std_dev=None,
     device=None,
 ):
-    r"""Create two sets of 2d pooling windows (log-eccentricity and polar angle)
-    that span the visual field
+    r"""Create two sets of 2d pooling windows that span the visual field.
 
     This creates the pooling windows that we use to average image
     statistics for metamer generation as done in [1]_. This is returned
@@ -1285,7 +1280,7 @@ def create_pooling_windows(
 
 
 def normalize_windows(angle_windows, ecc_windows, window_eccentricity, scale=0):
-    r"""normalize windows to have L1-norm of 1
+    r"""Normalize windows to have L1-norm of 1.
 
     we calculate the L1-norm of single windows (that is, product of
     eccentricity and angular windows) for all angles, one middling

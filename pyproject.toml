@@ -87,9 +87,9 @@ select = [
     # for regex strings used in tests)
     "W",
     # docstrings, note that DOC rules (pydoclint) are all in preview, so have to be explicitly added
-    "D", "DOC201", "DOC202", "DOC402", "DOC403", "DOC501",
+    "D", #"DOC201", "DOC202", "DOC402", "DOC403", "DOC501",
     # flake8 function annotations
-    "ANN"
+    #"ANN"
 ]
 ignore = []
 
@@ -101,6 +101,11 @@ explicit-preview-rules = true
 allow-star-arg-any = true
 suppress-none-returning = true
 
+[tool.ruff.lint.per-file-ignores]
+# Ignore docstring rules everywhere except for the `src/` directory, from
+# https://docs.astral.sh/ruff/settings/#lint_per-file-ignores.
+"!src/**.py" = ["D", "DOC", "ANN"]
+
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
@@ -111,4 +116,9 @@ checks = [
     # will remove this eventually
     "EX01",
     "PR04",
+]
+
+# don't report on objects that match any of these regex
+exclude = [
+    "__init__"
 ]

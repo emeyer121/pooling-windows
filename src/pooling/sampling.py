@@ -1,4 +1,4 @@
-"""functions related to sampling
+"""Functions related to sampling.
 
 handful of functions here, related to sampling and checking whether
 you're sampling correctly, in order to avoid aliasing
@@ -32,7 +32,7 @@ def check_sampling(
     x=torch.linspace(-5, 5, 101),
     **func_kwargs,
 ):
-    r"""check how sampling relates to interpolation quality
+    r"""Check how sampling relates to interpolation quality.
 
     Given a function, a domain, and how to sample that domain, this
     function will use linear algebra (``np.linalg.lstsq``) to determine
@@ -116,13 +116,13 @@ def check_sampling(
         sampled = func(X, **func_kwargs)
         full_X = x.unsqueeze(1) + x
         full = func(full_X, func_kwargs)
-    coeffs, residuals, rank, s = np.linalg.lstsq(sampled, full, rcond=None)
+    coeffs, residuals, _, _ = np.linalg.lstsq(sampled, full, rcond=None)
     interpolated = np.matmul(sampled, coeffs)
     return sampled, full, interpolated, coeffs.T, residuals
 
 
 def plot_coeffs(coeffs, ncols=5, ax_size=(5, 5)):
-    r"""plot interpolation coefficients
+    r"""Plot interpolation coefficients.
 
     Simple function to plot a bunch of interpolation coefficients on the
     same figure as stem plots
@@ -159,7 +159,7 @@ def plot_coeffs(coeffs, ncols=5, ax_size=(5, 5)):
 def interpolation_plot(
     interpolated, residuals, pix=0, val=None, x=np.linspace(-5, 5, 101), full=None
 ):
-    r"""create plot showing interpolation results at specified pixel or value
+    r"""Create plot showing interpolation results at specified pixel or value.
 
     We have two subplots: the interpolation (with optional actual
     values) and the residuals
@@ -218,7 +218,7 @@ def interpolation_plot(
 def create_movie(
     interpolated, residuals, x=np.linspace(-5, 5, 101), full=None, framerate=10
 ):
-    r"""create movie showing the interpolation results
+    r"""Create movie showing the interpolation results.
 
     We create a simple movie to show this in action. we have two
     subplots: the interpolation (with optional actual values) and the
