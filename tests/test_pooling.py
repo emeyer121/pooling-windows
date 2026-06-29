@@ -131,13 +131,14 @@ class TestPooling:
         pool_win.to(torch.float64)
         assert pool_win.angle_windows[0].dtype == torch.float64
         pool_win.to(rand_img)
-        assert pool_win.angle_windows[0].dtype == torch.float32
+        assert pool_win.angle_windows[0].dtype == rand_img.dtype
 
     @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
     def test_PoolingWindows_todevice(self, pool_win):
         pool_win.to("cpu")
         assert pool_win.angle_windows[0].device == "cpu"
         pool_win.to("cuda")
+        assert pool_win.angle_windows[0].device == "cuda"
 
     @pytest.mark.parametrize("offset", [0.2, 0.5])
     def test_PoolingWindows_merge(self, rand_img, pool_win, offset):
@@ -192,6 +193,7 @@ class TestPooling:
         assert new_path.exists()
         for i in pw.cache_paths:
             assert pathlib.Path(i).exists()
+            assert pathlib.Path(i).is_relative_to(new_path)
         start_time = time.perf_counter()
         pw = pooling.PoolingWindows(
             0.8, rand_img.shape[-2:], num_scales=2, cache_dir=new_path
@@ -199,6 +201,7 @@ class TestPooling:
         tot_time_cache = time.perf_counter() - start_time
         for i in pw.cache_paths:
             assert pathlib.Path(i).exists()
+            assert pathlib.Path(i).is_relative_to(new_path)
         assert tot_time_cache < tot_time_new
 
     def test_PoolingWindows_cache_dne(self, rand_img, tmp_path):
