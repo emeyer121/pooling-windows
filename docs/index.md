@@ -1,9 +1,7 @@
 (index-doc)=
 # pooling-windows
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Pooling Windows is a python library for generating foveated pooling windows.
 
 
 ```{toctree}
