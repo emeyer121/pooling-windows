@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.figure import Figure
 
 __all__ = []
 
@@ -10,7 +11,7 @@ def __dir__() -> list[str]:
     return __all__
 
 
-def _setup_fig(image_size):
+def _setup_fig(image_size: tuple[int, int]) -> Figure:
     """Set up figure for displaying pooling windows.
 
     Plots an array of ones in the specified size using ``gray_r`` colormap.
@@ -24,7 +25,7 @@ def _setup_fig(image_size):
 
     Returns
     -------
-    fig : `Figure`
+    fig
         matplotlib figure containing the plotted images
 
     """
