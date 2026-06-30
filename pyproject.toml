@@ -89,7 +89,7 @@ select = [
     # docstrings, note that DOC rules (pydoclint) are all in preview, so have to be explicitly added
     "D", "DOC201", "DOC202", "DOC402", "DOC403", "DOC501",
     # flake8 function annotations
-    #"ANN"
+    "ANN"
 ]
 ignore = []
 
