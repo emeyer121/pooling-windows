@@ -725,6 +725,11 @@ class PoolingWindows(nn.Module):
         windowed_x : dict or torch.Tensor
             Same type as ``x``, see above for how it's created.
 
+        Raises
+        ------
+        Exception
+            If input tensor does not have 4 dimensions
+
         See Also
         --------
         pool : pool the windowed input (get the weighted average)
@@ -845,6 +850,11 @@ class PoolingWindows(nn.Module):
         -------
         x : dict or torch.Tensor
             4d tensor or dictionary of 4d tensors
+
+        Raises
+        ------
+        Exception
+            If tensor input is not 3 dimensions
 
         See Also
         --------
@@ -1011,6 +1021,11 @@ class PoolingWindows(nn.Module):
         ax : matplotlib.pyplot.axis
             The axis with the windows
 
+        Raises
+        ------
+        Exception
+            If ``im`` has more than one batch or channel
+
         """
         if ax is None:
             fig = plot._setup_fig(self.img_res)
@@ -1102,6 +1117,11 @@ class PoolingWindows(nn.Module):
         fig : matplotlib.figure.Figure
             The figure containing the plot
 
+        Raises
+        ------
+        Exception
+            If ``units`` are not "pixels" or "degrees"
+
         """
         if units == "degrees":
             data = self.window_width_degrees
@@ -1179,6 +1199,11 @@ class PoolingWindows(nn.Module):
         -------
         fig : matplotlib.figure.Figure
             The figure containing the plot
+
+        Raises
+        ------
+        Exception
+            If ``units`` are not "pixels" or "degrees"
 
         """
         if units == "degrees":

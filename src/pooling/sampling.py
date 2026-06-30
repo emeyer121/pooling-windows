@@ -92,6 +92,11 @@ def check_sampling(
     residuals : np.array
         the errors for each interpolation, will have shape ``len(x)``
 
+    Raises
+    ------
+    Exception
+        If neither ``val_sampling`` nor ``pix_sampling`` are set to ``None``
+
     """
     if val_sampling is not None:
         if pix_sampling is not None:
@@ -191,6 +196,11 @@ def interpolation_plot(
     -------
     fig  : plt.Figure
         figure containing the plot
+
+    Raises
+    ------
+    Exception
+        If neither ``val_sampling`` nor ``pix_sampling`` are set to ``None``
 
     """
     if val is not None:

@@ -162,6 +162,11 @@ def calc_eccentricity_window_spacing(
     window_spacing : `float`
         The spacing  of the log-eccentricity windows.
 
+    Raises
+    ------
+    Exception
+        If ``n_windows`` or ``scaling`` is not set
+
     Notes
     -----
     No equation was given in the paper to calculate the window spacing,
@@ -380,6 +385,11 @@ def calc_windows_eccentricity(
     eccentricity : np.ndarray
         A list of length ``n_windows``, containing the minimum, central,
         or maximum eccentricities of each window.
+
+    Raises
+    ------
+    Exception
+        If ``ecc_type`` takes an illegal value.
 
     Notes
     -----
@@ -872,6 +882,11 @@ def mother_window(x, transition_region_width=0.5):
     array
         The value of the window at each value of ``x``.
 
+    Raises
+    ------
+    Exception
+        If ``transition_region_width`` is not between 0 and 1
+
     References
     ----------
     .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the ventral stream.
@@ -964,6 +979,13 @@ def polar_angle_windows(
         will be indexed along the first dimension. If resolution was an
         int, then this will be a 2d arra containing the 1d polar angle
         windows
+
+    Raises
+    ------
+    Exception
+        If ``n_windows`` is not an integer
+    Exception
+        If ``n_windows`` is not greater than 8*``std_dev``
 
     References
     ----------
@@ -1084,6 +1106,11 @@ def log_eccentricity_windows(
         windows. Windows will be indexed along the first dimension. If
         resolution was an int, then this will be a 2d array containing
         the 1d polar angle windows
+
+    Raises
+    ------
+    Exception
+        If ``std_dev`` is not 1
 
     Notes
     -----

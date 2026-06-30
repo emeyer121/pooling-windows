@@ -165,6 +165,11 @@ def convert_anim_to_html(anim):
     anim : `matplotlib.animation.FuncAnimation`
         The animation object to convert to HTML
 
+    Returns
+    -------
+    html_file :
+
+
     """
     # to_html5_video will call savefig with a dpi kwarg, so our
     # custom figure class will raise a warning. we don't want to

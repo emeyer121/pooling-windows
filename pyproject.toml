@@ -87,7 +87,7 @@ select = [
     # for regex strings used in tests)
     "W",
     # docstrings, note that DOC rules (pydoclint) are all in preview, so have to be explicitly added
-    "D", #"DOC201", "DOC202", "DOC402", "DOC403", "DOC501",
+    "D", "DOC201", "DOC202", "DOC402", "DOC403", "DOC501",
     # flake8 function annotations
     #"ANN"
 ]
@@ -119,6 +119,4 @@ checks = [
 ]
 
 # don't report on objects that match any of these regex
-exclude = [
-    "__init__"
-]
+exclude = ["__init__.py"]
