@@ -5,7 +5,7 @@ from typing import Literal
 
 import numpy as np
 
-__all__ = []
+__all__ = ["scaling", "deg_to_pix"]
 
 
 def __dir__() -> list[str]:
