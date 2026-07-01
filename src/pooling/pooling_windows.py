@@ -581,47 +581,6 @@ class PoolingWindows(nn.Module):
         for k, v in other_PoolingWindows.norm_factor.items():
             self.norm_factor[k + scale_offset] = v
 
-    @staticmethod
-    def _get_slice_vals(scaled_window_res: float, scaled_img_res: float) -> list[int]:
-        r"""Find the values to use when slicing windows down to size.
-
-        If we have a non-square image, we must create the windows as a
-        square array and then slice it down to the size of the image,
-        retaining the center of the windows array.
-
-        The one wrinkle on this is that we also sometimes need to do
-        this for different scales, so we need to make sure that
-        'down-sampled' windows we create have the same shape as those
-        created by our pyramid methods. It looks like that's always the
-        ceiling of shape/2**scale. NOTE: This means it will probably not
-        work if you're using something else that has multiple scales
-        that doesn't use our pyramid methods and thus ends up with
-        slightly differently sized down-sampled components. On images
-        that are a power of 2, this shouldn't be an issue regardless
-
-        This will only be for one dimension; because of how we've
-        constructed the windows, we know they only need to be cut down
-        in a single dimension
-
-        Parameters
-        ----------
-        scaled_window_res
-            The size of the square 'down-sampled'/scaled window we
-            created (in one dimension; this should not be a tuple).
-        scaled_img_res
-            The size of the 'down-sampled'/scaled image we want to match
-            (in one dimension; this should not be a tuple).
-
-        Returns
-        -------
-        slice_vals
-            A list of ints, use this to slice the window down correctly, e.g.,
-            ``window[..., slice_vals[0]:slice_vals[1]]``
-
-        """
-        slice_vals = (scaled_window_res - scaled_img_res) / 2
-        return [int(np.floor(slice_vals)), -int(np.ceil(slice_vals))]
-
     def forward(
         self, x: dict | torch.Tensor, idx: int = 0, weights: torch.Tensor | None = None
     ) -> dict[torch.Tensor] | torch.Tensor:
