@@ -928,7 +928,7 @@ class PoolingWindows(nn.Module):
         subset: bool = True,
         windows_scale: int = 0,
         **kwargs: Any,
-    ) -> plt.axis:
+    ) -> plt.Axes:
         r"""Plot the pooling windows on an image.
 
         This is just a simple little helper to plot the pooling windows
@@ -1000,11 +1000,11 @@ class PoolingWindows(nn.Module):
     def plot_window_values(
         self,
         im: torch.Tensor | None = None,
-        ax: plt.axis | None = None,
+        ax: plt.Axes | None = None,
         subset: bool = True,
         windows_scale: int = 0,
         **kwargs: Any,
-    ) -> plt.axis:
+    ) -> plt.Axes:
         r"""Plot the windowed average values.
 
         This plots the average values of an image, as computed by these
@@ -1094,7 +1094,7 @@ class PoolingWindows(nn.Module):
         scale_num: int = 0,
         figsize: tuple[int, int] = (5, 5),
         jitter: float | None = 0.25,
-        ax: plt.axis | None = None,
+        ax: plt.Axes | None = None,
     ) -> Figure:
         r"""Plot the widths of the windows, in degrees or pixels.
 
@@ -1182,7 +1182,7 @@ class PoolingWindows(nn.Module):
         units: Literal["degrees", "pixels"] = "degrees",
         scale_num: int = 0,
         figsize: tuple[int, int] = (5, 5),
-        ax: plt.axis | None = None,
+        ax: plt.Axes | None = None,
     ) -> Figure:
         r"""Plot the approximate areas of the windows, in degrees or pixels.
 
