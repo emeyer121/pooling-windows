@@ -293,7 +293,6 @@ def create_movie(
             artists.append(full_line)
         return artists
 
-    plt.close(fig)
     return animation.FuncAnimation(
         fig,
         _movie_plot,

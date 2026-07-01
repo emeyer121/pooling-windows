@@ -5,19 +5,12 @@ functions
 
 """
 
-import warnings
 from contextlib import suppress
 
 import numpy as np
 import torch
-from matplotlib import animation
 
-try:
-    from IPython.display import HTML
-except ImportError:
-    warnings.warn("Unable to import IPython.display.HTML")
-
-__all__ = ["to_numpy", "polar_radius", "polar_angle", "convert_anim_to_html"]
+__all__ = ["to_numpy", "polar_radius", "polar_angle"]
 
 
 def __dir__() -> list[str]:
@@ -163,28 +156,3 @@ def polar_angle(
     res = ((res + (np.pi - phase)) % (2 * np.pi)) - np.pi
 
     return res
-
-
-def convert_anim_to_html(anim: animation.FuncAnimation) -> HTML:
-    r"""Convert a matplotlib animation object to HTML (for display).
-
-    This is a simple little wrapper function that allows the animation
-    to be displayed in a Jupyter notebook
-
-    Parameters
-    ----------
-    anim : `matplotlib.animation.FuncAnimation`
-        The animation object to convert to HTML
-
-    Returns
-    -------
-    html_file :
-
-
-    """
-    # to_html5_video will call savefig with a dpi kwarg, so our
-    # custom figure class will raise a warning. we don't want to
-    # worry people, so we go ahead and suppress it
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=UserWarning)
-        return HTML(anim.to_html5_video())
