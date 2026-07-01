@@ -922,7 +922,7 @@ class PoolingWindows(nn.Module):
 
     def plot_windows(
         self,
-        ax: plt.axes | None = None,
+        ax: plt.Axes | None = None,
         contour_levels: np.ndarray | int | None = None,
         colors: list[str] | str = "r",
         subset: bool = True,
