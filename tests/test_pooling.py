@@ -28,25 +28,25 @@ class TestPooling:
 
     @pytest.mark.parametrize("n_windows", [4, 4.5])
     def test_ecc_nwindows(self, n_windows):
-        pooling.pooling.log_eccentricity_windows((256, 256), n_windows=n_windows)
+        pooling.pooling._log_eccentricity_windows((256, 256), n_windows=n_windows)
 
     @pytest.mark.parametrize("window_spacing", [0.5, 1])
     def test_ecc_window_spacing(self, window_spacing):
-        pooling.pooling.log_eccentricity_windows(
+        pooling.pooling._log_eccentricity_windows(
             (256, 256), window_spacing=window_spacing
         )
 
     @pytest.mark.parametrize("res", [(256, 256), (1000, 1000), 100])
     def test_angle_windows(self, res):
-        pooling.pooling.polar_angle_windows(4, res)
+        pooling.pooling._polar_angle_windows(4, res)
 
     def test_angle_windows_notint(self):
         with pytest.raises(Exception, match="n_windows must be an integer"):
-            pooling.pooling.polar_angle_windows(1.5, (256, 256))
+            pooling.pooling._polar_angle_windows(1.5, (256, 256))
 
     def test_angle_windows_onewin(self):
         with pytest.raises(Exception, match="We cannot handle one window correctly!"):
-            pooling.pooling.polar_angle_windows(1, (256, 256))
+            pooling.pooling._polar_angle_windows(1, (256, 256))
 
     def test_calculations(self):
         # these really shouldn't change, but just in case...
