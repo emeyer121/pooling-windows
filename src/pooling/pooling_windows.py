@@ -96,18 +96,11 @@ class PoolingWindows(nn.Module):
     window_type
         Whether to use the raised cosine function from [1]_ or a Gaussian that
         has approximately the same structure. If cosine,
-        ``transition_region_width`` must be set; if gaussian, then ``std_dev``
-        must be set.
+        ``transition_region_width`` must be set.
     transition_region_width
         The width of the transition region, parameter :math:`t` in
         equation 9 from the online methods. 0.5 (the default) is the
         value used in the paper [1]_.
-    std_dev
-        The standard deviation of the Gaussian window. WARNING -- For
-        now, we only support ``std_dev=1`` (in order to ensure that the
-        windows tile correctly, intersect at the proper point, follow
-        scaling, and have proper aspect ratio; not sure we can make that
-        happen for other values).
 
     Attributes
     ----------
@@ -122,8 +115,11 @@ class PoolingWindows(nn.Module):
     transition_region_width : float or None
         The width of the cosine windows' transition region, parameter
         :math:`t` in equation 9 from the online methods.
-    std_dev : float or None
-        The standard deviation of the Gaussian windows.
+    std_dev : float
+        The standard deviation of the Gaussian windows. For now, we only
+        support ``std_dev=1`` (in order to ensure that the windows tile
+        correctly, intersect at the proper point, follow scaling, and have
+        proper aspect ratio; not sure we can make that happen for other values).
     angle_windows : dict
         A dict of 3d tensors containing the angular pooling windows in
         which the model parameters are averaged. Each key corresponds to
@@ -217,15 +213,13 @@ class PoolingWindows(nn.Module):
         Gaussian that has approximately the same structure.
     window_max_amplitude : float
         The max amplitude of an individual window. This will always be 1
-        for raised-cosine windows, but will depend on ``std_dev`` for
-        gaussian ones (for ``std_dev=1``, the only value we support for
-        now, it's approximately .16).
+        for raised-cosine windows, for gaussian ones with ``std_dev=1``,
+        the only value we support for now, it's approximately 0.16.
     window_intersecting_amplitude : float
         The amplitude at which two neighboring windows intersect. This
-        will always be .5 for raised-cosine windows, but will depend on
-        ``std_dev`` for gaussian ones (for ``std_dev=1``, the only value
-        we support for now, it's half a standard deviation away from the
-        center, approximately .14)
+        will always be .5 for raised-cosine windows, but for gaussian ones
+        with ``std_dev=1``, the only value we support for now, it's half a
+        standard deviation away from the center, approximately 0.14.
 
     """
 
@@ -239,7 +233,6 @@ class PoolingWindows(nn.Module):
         cache_dir: str | None = None,
         window_type: Literal["cosine", "gaussian"] = "cosine",
         transition_region_width: float | None = 0.5,
-        std_dev: float | None = None,
     ):
         super().__init__()
         if len(img_res) != 2:
@@ -264,16 +257,13 @@ class PoolingWindows(nn.Module):
             self.window_max_amplitude = 1
             self.window_intersecting_amplitude = 0.5
         elif window_type == "gaussian":
-            assert std_dev is not None, "gaussian windows need standard deviations!"
-            self.std_dev = float(std_dev)
+            self.std_dev = 1
             self.transition_region_width = None
-            if std_dev != 1:
-                raise Exception("Only std_dev=1 allowed for Gaussian windows!")
             window_width_for_saving = self.std_dev
             # 1 / (std_dev * GAUSSIAN_SUM) is the max in a single
             # direction (radial or angular), so the max for a single
             # window is its square
-            self.window_max_amplitude = (1 / (std_dev * pooling.GAUSSIAN_SUM)) ** 2
+            self.window_max_amplitude = (1 / (self.std_dev * pooling.GAUSSIAN_SUM)) ** 2
             self.window_intersecting_amplitude = self.window_max_amplitude * np.exp(
                 -0.25 / 2
             )
