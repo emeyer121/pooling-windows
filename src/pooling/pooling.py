@@ -1,4 +1,4 @@
-"""functions to perform spatial pooling, as seen in Freeman and Simoncelli, 2011
+"""Functions to perform spatial pooling, as seen in Freeman and Simoncelli, 2011.
 
 In addition the raised-cosine windows used in that paper, we also
 provide support for an alternative window construction:
@@ -31,6 +31,7 @@ functions
 
 import math
 import re
+from typing import Literal
 
 import numpy as np
 import torch
@@ -64,8 +65,8 @@ def __dir__() -> list[str]:
 GAUSSIAN_SUM = 2 * 1.753314144021452772415339526931980189073725635759454989253 - 1
 
 
-def calc_angular_window_spacing(n_windows):
-    r"""calculate and return the window spacing for the angular windows
+def calc_angular_window_spacing(n_windows: float) -> float:
+    r"""Calculate and return the window spacing for the angular windows.
 
     this is the :math:`w_{\theta }` term in equation 10 of the paper's
     online methods, referred to as the angular window width.
@@ -79,34 +80,34 @@ def calc_angular_window_spacing(n_windows):
 
     Parameters
     ----------
-    n_windows : `float`
+    n_windows
         The number of windows to pack into 2 pi. Note that we don't
         require it to be an integer here, but the code that makes use of
         this does.
 
     Returns
     -------
-    window_spacing : `float`
+    window_spacing
         The spacing of the polar angle windows.
 
     """
     return (2 * np.pi) / n_windows
 
 
-def calc_angular_n_windows(window_spacing):
-    r"""calculate and return the number of angular windows
+def calc_angular_n_windows(window_spacing: float) -> float:
+    r"""Calculate and return the number of angular windows.
 
     this is the :math:`N_{\theta }` term in equation 10 of the paper's
     online method, which we've rearranged in order to get this.
 
     Parameters
     ----------
-    window_spacing : `float`
+    window_spacing
         The spacing of the polar angle windows.
 
     Returns
     -------
-    n_windows : `float`
+    n_windows
         The number of windows that fit into 2 pi.
 
     """
@@ -114,9 +115,13 @@ def calc_angular_n_windows(window_spacing):
 
 
 def calc_eccentricity_window_spacing(
-    min_ecc=0.5, max_ecc=15, n_windows=None, scaling=None, std_dev=None
-):
-    r"""calculate and return the window spacing for the eccentricity windows
+    min_ecc: float = 0.5,
+    max_ecc: float = 15,
+    n_windows: float | None = None,
+    scaling: float | None = None,
+    std_dev: float | None = None,
+) -> float:
+    r"""Calculate and return the window spacing for the eccentricity windows.
 
     this is the :math:`w_e` term in equation 11 of the paper's online
     methods (referred to as the window width), which we also refer to as
@@ -137,30 +142,35 @@ def calc_eccentricity_window_spacing(
 
     Parameters
     ----------
-    min_ecc : float, optional
+    min_ecc
         The minimum eccentricity, the eccentricity below which we do not
         compute pooling windows (in degrees). Parameter :math:`e_0` in
         equation 11 of the online methods.
-    max_ecc : `float`, optional
+    max_ecc
         The maximum eccentricity, the outer radius of the image (in
         degrees). Parameter :math:`e_r` in equation 11 of the online
         methods.
-    n_windows : `float` or `None`
+    n_windows
         The number of log-eccentricity windows we create. ``n_windows``
         xor ``scaling`` must be set.
-    scaling : `float` or `None`.
+    scaling
         The ratio of the eccentricity window's radial full-width at
         half-maximum to eccentricity (see the ``calc_scaling``
         function). ``n_windows`` xor ``scaling`` must be set.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation of the Gaussian window. If this is set,
         we compute the scaling value for the Gaussian windows instead of
         for the cosine ones.
 
     Returns
     -------
-    window_spacing : `float`
+    window_spacing
         The spacing  of the log-eccentricity windows.
+
+    Raises
+    ------
+    Exception
+        If ``n_windows`` or ``scaling`` is not set
 
     Notes
     -----
@@ -206,32 +216,37 @@ def calc_eccentricity_window_spacing(
     return spacing
 
 
-def calc_eccentricity_n_windows(window_spacing, min_ecc=0.5, max_ecc=15, std_dev=None):
-    r"""calculate and return the number of eccentricity windows
+def calc_eccentricity_n_windows(
+    window_spacing: float,
+    min_ecc: float = 0.5,
+    max_ecc: float = 15,
+    std_dev: float | None = None,
+) -> float:
+    r"""Calculate and return the number of eccentricity windows.
 
     this is the :math:`N_e` term in equation 11 of the paper's online
     method, which we've rearranged in order to get this.
 
     Parameters
     ----------
-    window_spacing : `float`
+    window_spacing
         The spacing of the log-eccentricity windows.
-    min_ecc : float, optional
+    min_ecc
         The minimum eccentricity, the eccentricity below which we do not
         compute pooling windows (in degrees). Parameter :math:`e_0` in
         equation 11 of the online methods.
-    max_ecc : `float`, optional
+    max_ecc
         The maximum eccentricity, the outer radius of the image (in
         degrees). Parameter :math:`e_r` in equation 11 of the online
         methods.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation of the Gaussian window. Adds extra
         windows to account for the fact that Gaussian windows are
         larger. If using cosine windows, this should be None
 
     Returns
     -------
-    n_windows : `float`
+    n_windows
         The number of log-eccentricity windows we create.
 
     """
@@ -247,8 +262,13 @@ def calc_eccentricity_n_windows(window_spacing, min_ecc=0.5, max_ecc=15, std_dev
     return n_windows
 
 
-def calc_scaling(n_windows, min_ecc=0.5, max_ecc=15, std_dev=None):
-    r"""calculate and return the scaling value, as reported in the paper
+def calc_scaling(
+    n_windows: float,
+    min_ecc: float = 0.5,
+    max_ecc: float = 15,
+    std_dev: float | None = None,
+) -> float:
+    r"""Calculate and return the scaling value, as reported in the paper.
 
     Scaling is the ratio of the eccentricity window's radial full-width
     at half-maximum to eccentricity. For eccentricity, we use the
@@ -257,24 +277,24 @@ def calc_scaling(n_windows, min_ecc=0.5, max_ecc=15, std_dev=None):
 
     Parameters
     ----------
-    n_windows : `float`
+    n_windows
         The number of log-eccentricity windows we create.
-    min_ecc : `float`, optional
+    min_ecc
         The minimum eccentricity, the eccentricity below which we do not
         compute pooling windows (in degrees). Parameter :math:`e_0` in
         equation 11 of the online methods.
-    max_ecc : `float`, optional
+    max_ecc
         The maximum eccentricity, the outer radius of the image (in
         degrees). Parameter :math:`e_r` in equation 11 of the online
         methods.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation fo the Gaussian window. If this is set,
         we compute the scaling value for the Gaussian windows instead of
         for the cosine ones.
 
     Returns
     -------
-    scaling : `float`.
+    scaling
         The ratio of the eccentricity window's radial full-width at
         half-maximum to eccentricity
 
@@ -335,51 +355,56 @@ def calc_scaling(n_windows, min_ecc=0.5, max_ecc=15, std_dev=None):
 
 
 def calc_windows_eccentricity(
-    ecc_type,
-    n_windows,
-    window_spacing,
-    min_ecc=0.5,
-    transition_region_width=0.5,
-    std_dev=None,
-):
-    r"""calculate a relevant eccentricity for each radial window
+    ecc_type: Literal["min", "central", "max", "{n}std"],
+    n_windows: float,
+    window_spacing: float,
+    min_ecc: float = 0.5,
+    transition_region_width: float = 0.5,
+    std_dev: float | None = None,
+) -> np.ndarray:
+    r"""Calculate a relevant eccentricity for each radial window.
 
     These are the values :math:`e_c`, as referred to in ``calc_scaling``
     (for each of the n windows)
 
     Parameters
     ----------
-    ecc_type : {'min', 'central', 'max', '{n}std'}
+    ecc_type
         Which eccentricity you want to calculate: the minimum one where
         x=-(1+t)/2, the central one where x=0, or the maximum one where
         x=(1+t)/2. if std_dev is set, minimum and maximum are +/- 3
         std_dev. if '{n}std' (where n is a positive or negative
         integer), then we return the eccentricity at that many std_dev
         away from center (only std_dev is set).
-    n_windows : `float`
+    n_windows
         The number of log-eccentricity windows we create. n_windows can
         be a non-integer, in which case we round it up (thus one of our
         central eccentricities might be above the maximum eccentricity
         for the windows actually created)
-    window_spacing : `float`
+    window_spacing
         The spacing of the log-eccentricity windows.
-    min_ecc : `float`, optional
+    min_ecc
         The minimum eccentricity, the eccentricity below which we do not
         compute pooling windows (in degrees). Parameter :math:`e_0` in
         equation 11 of the online methods.
-    transition_region_width : `float`, optional
+    transition_region_width
         The width of the transition region, parameter :math:`t` in
         equation 9 from the online methods. Must lie between 0 and 1.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation fo the Gaussian window. If this is set,
         we compute the eccentricities for the Gaussian windows instead of
         for the cosine ones.
 
     Returns
     -------
-    eccentricity : np.ndarray
+    eccentricity
         A list of length ``n_windows``, containing the minimum, central,
         or maximum eccentricities of each window.
+
+    Raises
+    ------
+    Exception
+        If ``ecc_type`` takes an illegal value.
 
     Notes
     -----
@@ -485,16 +510,15 @@ def calc_windows_eccentricity(
 
 
 def calc_window_widths_actual(
-    angular_window_spacing,
-    radial_window_spacing,
-    min_ecc=0.5,
-    max_ecc=15,
-    window_type="cosine",
-    transition_region_width=0.5,
-    std_dev=None,
-):
-    r"""calculate and return the actual widths of the windows, in angular
-    and radial directions
+    angular_window_spacing: float,
+    radial_window_spacing: float,
+    min_ecc: float = 0.5,
+    max_ecc: float = 15,
+    window_type: Literal["cosine", "gaussian"] = "cosine",
+    transition_region_width: float | None = 0.5,
+    std_dev: float | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    r"""Calculate and return the actual widths of the windows.
 
     whereas ``calc_angular_window_spacing`` returns a term used in the
     equations to generate the windows, this returns the actual angular
@@ -507,46 +531,46 @@ def calc_window_widths_actual(
 
     Parameters
     ----------
-    angular_window_spacing : float
+    angular_window_spacing
         The width of the windows in the angular direction, as returned
         by ``calc_angular_window_spacing``
-    radial_window_spacing : float
+    radial_window_spacing
         The width of the windows in the radial direction, as returned by
         ``calc_eccentricity_window_spacing``
-    min_ecc : `float`, optional
+    min_ecc
         The minimum eccentricity, the eccentricity below which we do not
         compute pooling windows (in degrees). Parameter :math:`e_0` in
         equation 11 of the online methods.
-    max_ecc : `float`, optional
+    max_ecc
         The maximum eccentricity, the outer radius of the image (in
         degrees). Parameter :math:`e_r` in equation 11 of the online
         methods.
-    window_type : {'cosine', 'gaussian'}
-        Whether to use the raised cosine function from [1]_ or a
+    window_type
+        Whether to use the raised cosine function from [7]_ or a
         Gaussian that has approximately the same structure. If cosine,
         ``transition_region_width`` must be set; if gaussian, then
         ``std_dev`` must be set
-    transition_region_width : `float` or None, optional
+    transition_region_width
         The width of the cosine windows' transition region, parameter
         :math:`t` in equation 9 from the online methods.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation of the Gaussian window.
 
     Returns
     -------
-    radial_top_width : np.ndarray
+    radial_top_width
         The width of the flat-top region of the windows in the radial
         direction (each value corresponds to a different ring of
         windows, from the fovea to the periphery).
-    radial_full_width : np.ndarray
+    radial_full_width
         The full width of the windows in the radial direction (each
         value corresponds to a different ring of windows, from the fovea
         to the periphery).
-    angular_top_width : np.ndarray
+    angular_top_width
         The width of the flat-top region of the windows in the angular
         direction (each value corresponds to a different ring of
         windows, from the fovea to the periphery).
-    angular_full_width : np.ndarray
+    angular_full_width
         The full width of the windows in the angular direction (each
         value corresponds to a different ring of windows, from the fovea
         to the periphery).
@@ -599,6 +623,12 @@ def calc_window_widths_actual(
     we want to find the difference between math:`\exp(\pm 3\sigma w_e +
     \log e_0 + w_e(n+1))` and rearranging to the forms used in this
     function.
+
+    References
+    ----------
+    .. [7] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+       ventral stream. Nature Neuroscience, 14(9),
+       1195–1201. http://dx.doi.org/10.1038/nn.2889
 
     """
     n_radial_windows = np.ceil(
@@ -664,8 +694,8 @@ def calc_window_widths_actual(
     )
 
 
-def calc_deg_to_pix(img_res, max_eccentricity=15):
-    r"""Calculate the degree-to-pixel conversion factor
+def calc_deg_to_pix(img_res: tuple[int, int], max_eccentricity: float = 15) -> float:
+    r"""Calculate the degree-to-pixel conversion factor.
 
     We assume ``img_res`` is the full resolution of the image and
     ``max_eccentricity`` is the radius of the image in degrees. Thus, we
@@ -677,15 +707,15 @@ def calc_deg_to_pix(img_res, max_eccentricity=15):
 
     Parameters
     ----------
-    img_res : tuple
+    img_res
         The resolution of our image (should therefore contains
         integers).
-    max_eccentricity : float, optional
+    max_eccentricity
         The eccentricity (in degrees) of the edge of the image
 
     Returns
     -------
-    deg_to_pix : float
+    deg_to_pix
         The factor to convert degrees to pixels (in
         pixels/degree). E.g., multiply the eccentricity (in degrees) by
         deg_to_pix to get it in pixels
@@ -695,13 +725,13 @@ def calc_deg_to_pix(img_res, max_eccentricity=15):
 
 
 def calc_min_eccentricity(
-    scaling,
-    img_res,
-    max_eccentricity=15,
-    pixel_area_thresh=1,
-    radial_to_circumferential_ratio=2,
-):
-    r"""Calculate the eccentricity where window area exceeds a threshold
+    scaling: float,
+    img_res: tuple[int, int],
+    max_eccentricity: float = 15,
+    pixel_area_thresh: float = 1,
+    radial_to_circumferential_ratio: float = 2,
+) -> tuple[float, float]:
+    r"""Calculate the eccentricity where window area exceeds a threshold.
 
     The pooling windows are used primarily for metamer synthesis, and
     conceptually, if the pooling windows only include a single pixel, or
@@ -738,22 +768,22 @@ def calc_min_eccentricity(
 
     Parameters
     ----------
-    scaling : float
+    scaling
         Scaling parameter that governs the size of the pooling
         windows. Other pooling windows parameters
         (``radial_to_circumferential_ratio``,
         ``transition_region_width``) cannot be set here. If that ends up
         being of interest, will change that.
-    img_res : tuple
+    img_res
         The resolution of our image (should therefore contains
         integers).
-    max_eccentricity : float, optional
+    max_eccentricity
         The eccentricity (in degrees) of the edge of the image
-    pixel_area_thresh : float, optional
+    pixel_area_thresh
         What area (in square pixels) to check against our approximate
         pooling window area. This is slightly arbitrary, but should be
         consistent
-    radial_to_circumferential_ratio : `float`, optional
+    radial_to_circumferential_ratio
         ``scaling`` determines the number of log-eccentricity windows we
         can create; this ratio gives us the number of polar angle
         ones. Based on `scaling`, we calculate the width of the windows
@@ -762,20 +792,20 @@ def calc_min_eccentricity(
         of polar angle windows, we round the resulting number of polar
         angle windows to the nearest integer, so the ratio in the
         generated windows approximate this. 2 (the default) is the value
-        used in the paper [1]_.
+        used in the paper [2]_.
 
     Returns
     -------
-    min_ecc_deg : float
+    min_ecc_deg
         The eccentricity (in degrees) where window area will definitely
         exceed ``pixel_area_thresh``
-    min_ecc_pix : float
+    min_ecc_pix
         The eccentricity (in pixels) where window area will definitely
         exceed ``pixel_area_thresh``
 
     References
     ----------
-    .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+    .. [2] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
        ventral stream. Nature Neuroscience, 14(9),
        1195–1201. http://dx.doi.org/10.1038/nn.2889
 
@@ -792,8 +822,8 @@ def calc_min_eccentricity(
     return min_ecc_deg, min_ecc_deg * deg_to_pix
 
 
-def gaussian(x, std_dev=1):
-    r"""Simple gaussian with mean 0, and adjustable std dev
+def gaussian(x: float | np.ndarray, std_dev: float | None = 1) -> np.ndarray:
+    r"""Compute simple gaussian with mean 0, and adjustable std dev.
 
     Possible alternative mother window, giving the weighting in each
     direction for the spatial pooling performed during the construction
@@ -801,9 +831,9 @@ def gaussian(x, std_dev=1):
 
     Parameters
     ----------
-    x : float or array_like
+    x
         The distance in a direction
-    std_dev : float or None, optional
+    std_dev
         The standard deviation of the Gaussian window.
 
     Returns
@@ -848,8 +878,10 @@ def gaussian(x, std_dev=1):
     return torch.exp(-(x**2 / (2 * std_dev**2))) / (std_dev * GAUSSIAN_SUM)
 
 
-def mother_window(x, transition_region_width=0.5):
-    r"""Raised cosine 'mother' window function
+def mother_window(
+    x: float | np.ndarray, transition_region_width: float = 0.5
+) -> np.ndarray:
+    r"""Compute raised cosine 'mother' window function.
 
     Used to give the weighting in each direction for the spatial pooling
     performed during the construction of visual metamers
@@ -858,13 +890,13 @@ def mother_window(x, transition_region_width=0.5):
     -----
     For ``x`` values outside the function's domain, we return 0
 
-    Equation 9 from the online methods of [1]_.
+    Equation 9 from the online methods of [3]_.
 
     Parameters
     ----------
-    x : `float` or `array_like`
+    x
         The distance in a direction
-    transition_region_width : `float`, optional
+    transition_region_width
         The width of the transition region, parameter :math:`t` in
         equation 9 from the online methods. Must lie between 0 and 1.
 
@@ -873,9 +905,14 @@ def mother_window(x, transition_region_width=0.5):
     array
         The value of the window at each value of ``x``.
 
+    Raises
+    ------
+    Exception
+        If ``transition_region_width`` is not between 0 and 1
+
     References
     ----------
-    .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the ventral stream.
+    .. [3] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the ventral stream.
         Nature Neuroscience, 14(9), 1195–1201. http://dx.doi.org/10.1038/nn.2889
 
     """
@@ -922,53 +959,60 @@ def mother_window(x, transition_region_width=0.5):
 
 
 def polar_angle_windows(
-    n_windows,
-    resolution,
-    window_type="cosine",
-    transition_region_width=0.5,
-    std_dev=None,
-    device=None,
-):
-    r"""Create polar angle windows
+    n_windows: int,
+    resolution: int | tuple[int, int],
+    window_type: Literal["cosine", "gaussian"] = "cosine",
+    transition_region_width: float | None = 0.5,
+    std_dev: float | None = None,
+    device: str | torch.device | None = None,
+) -> torch.Tensor:
+    r"""Create polar angle windows.
 
     We require an integer number of windows placed between 0 and 2 pi.
 
     Notes
     -----
-    Equation 10 from the online methods of [1]_.
+    Equation 10 from the online methods of [4]_.
 
     Parameters
     ----------
-    n_windows : `int`
+    n_windows
         The number of polar angle windows we create.
-    resolution : int or tuple
+    resolution
         2-tuple of ints specifying the resolution of the 2d images to
         make. If an int, will only make the windows in 1d (this is
         mainly for testing purposes)
-    window_type : {'cosine', 'gaussian'}
-        Whether to use the raised cosine function from [1]_ or a
+    window_type
+        Whether to use the raised cosine function from [4]_ or a
         Gaussian that has approximately the same structure. If cosine,
         ``transition_region_width`` must be set; if gaussian, then
         ``std_dev`` must be set
-    transition_region_width : `float` or None, optional
+    transition_region_width
         The width of the cosine windows' transition region, parameter
         :math:`t` in equation 9 from the online methods.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation of the Gaussian window.
-    device : str or torch.device
+    device
         the device to create this tensor on
 
     Returns
     -------
-    windows : torch.Tensor
+    windows
         A 3d tensor containing the (2d) polar angle windows. Windows
         will be indexed along the first dimension. If resolution was an
         int, then this will be a 2d arra containing the 1d polar angle
         windows
 
+    Raises
+    ------
+    Exception
+        If ``n_windows`` is not an integer
+    Exception
+        If ``n_windows`` is not greater than 8*``std_dev``
+
     References
     ----------
-    .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+    .. [4] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
        ventral stream. Nature Neuroscience, 14(9),
        1195–1201. http://dx.doi.org/10.1038/nn.2889
 
@@ -1007,18 +1051,18 @@ def polar_angle_windows(
 
 
 def log_eccentricity_windows(
-    resolution,
-    n_windows=None,
-    window_spacing=None,
-    min_ecc=0.5,
-    max_ecc=15,
-    window_type="cosine",
-    transition_region_width=0.5,
-    std_dev=None,
-    device=None,
-    linear=False,
-):
-    r"""Create log eccentricity windows in 2d
+    resolution: int | tuple[int, int],
+    n_windows: float | None = None,
+    window_spacing: float | None = None,
+    min_ecc: float = 0.5,
+    max_ecc: float = 15,
+    window_type: Literal["cosine", "gaussian"] = "cosine",
+    transition_region_width: float | None = 0.5,
+    std_dev: float | None = None,
+    device: str | torch.device | None = None,
+    linear: bool = False,
+) -> torch.Tensor:
+    r"""Create log eccentricity windows in 2d.
 
     Note that exactly one of ``n_windows`` or ``window_width`` must be
     set.
@@ -1036,46 +1080,43 @@ def log_eccentricity_windows(
     calling ``calc_eccentricity_n_windows`` with
     ``np.sqrt(2)*max_ecc``.
 
-    Notes
-    -----
-
     Parameters
     ----------
-    resolution : int or tuple
+    resolution
         2-tuple of ints specifying the resolution of the 2d images to
         make. If an int, will only make the windows in 1d (this is
         mainly for testing purposes)
-    n_windows : `float` or `None`
+    n_windows
         The number of log-eccentricity windows from ``min_ecc`` to
         ``max_ecc``. ``n_windows`` xor ``window_width`` must be set.
-    window_spacing : `float` or `None`
+    window_spacing
         The spacing of the log-eccentricity windows. ``n_windows`` xor
         ``window_spacing`` must be set.
-    min_ecc : `float`, optional
+    min_ecc
         The minimum eccentricity, the eccentricity below which we do not
         compute pooling windows (in degrees). Parameter :math:`e_0` in
         equation 11 of the online methods.
-    max_ecc : `float`, optional
+    max_ecc
         The maximum eccentricity, the outer radius of the image (in
         degrees). Parameter :math:`e_r` in equation 11 of the online
         methods.
-    window_type : {'cosine', 'gaussian'}
-        Whether to use the raised cosine function from [1]_ or a
+    window_type
+        Whether to use the raised cosine function from [5]_ or a
         Gaussian that has approximately the same structure. If cosine,
         ``transition_region_width`` must be set; if gaussian, then
         ``std_dev`` must be set
-    transition_region_width : `float` or None, optional
+    transition_region_width
         The width of the transition region, parameter :math:`t` in
         equation 9 from the online methods.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation of the Gaussian window. WARNING -- For
         now, we only support ``std_dev=1`` (in order to ensure that the
         windows tile correctly, intersect at the proper point, follow
         scaling, and have proper aspect ratio; not sure we can make that
         happen for other values).
-    device : str or torch.device
+    device
         the device to create this tensor on
-    linear : bool, optional
+    linear
         if True, create linear windows instead of log-spaced. NOTE This is only
         for playing around with, it really is not supported or a good idea
         because the angular windows still grow in size as a function of
@@ -1083,19 +1124,24 @@ def log_eccentricity_windows(
 
     Returns
     -------
-    windows : torch.Tensor
+    windows
         A 3d tensor containing the (2d) log-eccentricity
         windows. Windows will be indexed along the first dimension. If
         resolution was an int, then this will be a 2d array containing
         the 1d polar angle windows
 
+    Raises
+    ------
+    Exception
+        If ``std_dev`` is not 1
+
     Notes
     -----
-    Equation 11 from the online methods of [1]_.
+    Equation 11 from the online methods of [5]_.
 
     References
     ----------
-    .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+    .. [5] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
        ventral stream. Nature Neuroscience, 14(9),
        1195–1201. http://dx.doi.org/10.1038/nn.2889
 
@@ -1136,46 +1182,45 @@ def log_eccentricity_windows(
 
 
 def create_pooling_windows(
-    scaling,
-    resolution,
-    min_eccentricity=0.5,
-    max_eccentricity=15,
-    radial_to_circumferential_ratio=2,
-    window_type="cosine",
-    transition_region_width=0.5,
-    std_dev=None,
-    device=None,
-):
-    r"""Create two sets of 2d pooling windows (log-eccentricity and polar angle)
-    that span the visual field
+    scaling: float | None,
+    resolution: tuple[int, int],
+    min_eccentricity: float = 0.5,
+    max_eccentricity: float = 15,
+    radial_to_circumferential_ratio: float = 2,
+    window_type: Literal["cosine", "gaussian"] = "cosine",
+    transition_region_width: float | None = 0.5,
+    std_dev: float | None = None,
+    device: str | torch.device | None = None,
+) -> tuple[torch.Tensor | dict, torch.Tensor | dict]:
+    r"""Create two sets of 2d pooling windows that span the visual field.
 
     This creates the pooling windows that we use to average image
-    statistics for metamer generation as done in [1]_. This is returned
+    statistics for metamer generation as done in [6]_. This is returned
     as two 3d torch tensors for further use with a model.
 
     Note that these are returned separately as log-eccentricity and
     polar angle tensors and if you want the windows used in the paper
-    [1]_, you'll need to call ``torch.einsum`` (see Examples section)
+    [6]_, you'll need to call ``torch.einsum`` (see Examples section)
     or, better yet, use the ``PoolingWindows`` class, which is provided
     for this purpose.
 
     Parameters
     ----------
-    scaling : `float` or `None`.
+    scaling
         The ratio of the eccentricity window's radial full-width at
         half-maximum to eccentricity (see the `calc_scaling` function).
-    resolution : tuple
+    resolution
         2-tuple of ints specifying the resolution of the 2d images to
         make.
-    min_eccentricity : `float`, optional
+    min_eccentricity
         The minimum eccentricity, the eccentricity below which we do not
         compute pooling windows (in degrees). Parameter :math:`e_0` in
         equation 11 of the online methods.
-    max_eccentricity : `float`, optional
+    max_eccentricity
         The maximum eccentricity, the outer radius of the image (in
         degrees). Parameter :math:`e_r` in equation 11 of the online
         methods.
-    radial_to_circumferential_ratio : `float`, optional
+    radial_to_circumferential_ratio
         ``scaling`` determines the number of log-eccentricity windows we
         can create; this ratio gives us the number of polar angle
         ones. Based on `scaling`, we calculate the width of the windows
@@ -1184,30 +1229,30 @@ def create_pooling_windows(
         of polar angle windows, we round the resulting number of polar
         angle windows to the nearest integer, so the ratio in the
         generated windows approximate this. 2 (the default) is the value
-        used in the paper [1]_.
-    window_type : {'cosine', 'gaussian'}
-        Whether to use the raised cosine function from [1]_ or a Gaussian that
+        used in the paper [6]_.
+    window_type
+        Whether to use the raised cosine function from [6]_ or a Gaussian that
         has approximately the same structure. If cosine,
         ``transition_region_width`` must be set; if gaussian, then ``std_dev``
         must be set.
-    transition_region_width : `float` or None, optional
+    transition_region_width
         The width of the transition region, parameter :math:`t` in
         equation 9 from the online methods.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation of the Gaussian window. WARNING -- if
         this is too small (say < 3/4), then the windows won't tile
         correctly. So we only support std_dev=1 for now.
-    device : str or torch.device
+    device
         the device to create these tensors on
 
     Returns
     -------
-    angle_windows : torch.Tensor or dict
+    angle_windows
         The 3d tensor of 2d polar angle windows. Its shape will be
         ``(n_angle_windows, *resolution)``, where the number of windows
         is inferred in this function based on the values of ``scaling``
         and ``radial_to_circumferential_width``.
-    ecc_windows : torch.Tensor or dict
+    ecc_windows
         The 3d tensor of 2d log-eccentricity windows. Its shape will be
         ``(n_eccen_windows, *resolution)``, where the number of windows
         is inferred in this function based on the values of ``scaling``,
@@ -1225,31 +1270,41 @@ def create_pooling_windows(
     .. plot::
        :include-source:
 
-       import matplotlib.pyplot as plt
-       angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
-       plt.imshow(ecc_w[0], cmap='Grays_r', interpolation='none')
-       plt.imshow(angle_w[0], cmap='Grays_r', interpolation='none')
+       >>> import matplotlib.pyplot as plt
+       >>> import pooling
+       >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
+       >>> fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+       >>> ax[0].imshow(ecc_w[0], cmap="Grays_r", interpolation="none")
+       >>> ax[6].imshow(angle_w[0], cmap="Grays_r", interpolation="none")
+       >>> plt.show()
 
     If you wish to get the windows as shown in Supplementary Figure 1C
-    in the paper [1]_, use ``torch.einsum`` (if you wish to apply these
+    in the paper [6]_, use ``torch.einsum`` (if you wish to apply these
     to images, use the ``PoolingWindows`` class instead, which has many
     more features):
 
     .. plot::
        :include-source:
 
-       import matplotlib.pyplot as plt
-       import torch
-       angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
-       # we ignore the last ring of eccentricity windows here because
-       # they're all relatively small, which makes the following plot
-       # look weird. for how to properly handle them, see the
-       # PoolingWindows class
-       windows = torch.einsum('ahw,ehw->eahw', [angle_w, ecc_w[:-1]]).flatten(0, 1)
-       fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-       for w in windows:
-           ax.contour(w, [.5], colors='r')
-       plt.show()
+       >>> import matplotlib.pyplot as plt
+       >>> import pooling
+       >>> import torch
+       >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
+       >>> # we ignore the last ring of eccentricity windows here because
+       >>> # they're all relatively small, which makes the following plot
+       >>> # look weird. for how to properly handle them, see the
+       >>> # PoolingWindows class
+       >>> windows = torch.einsum("ahw,ehw->eahw", [angle_w, ecc_w[:-1]]).flatten(0, 1)
+       >>> fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+       >>> for w in windows:
+       >>>     ax.contour(w, [.5], colors='r')
+       >>> plt.show()
+
+    References
+    ----------
+    .. [6] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+       ventral stream. Nature Neuroscience, 14(9),
+       1195–1201. http://dx.doi.org/10.1038/nn.2889
 
     """
     ecc_window_spacing = calc_eccentricity_window_spacing(
@@ -1284,8 +1339,13 @@ def create_pooling_windows(
     return angle_tensor, ecc_tensor
 
 
-def normalize_windows(angle_windows, ecc_windows, window_eccentricity, scale=0):
-    r"""normalize windows to have L1-norm of 1
+def normalize_windows(
+    angle_windows: dict,
+    ecc_windows: dict,
+    window_eccentricity: np.ndarray,
+    scale: int = 0,
+) -> tuple[dict, torch.Tensor]:
+    r"""Normalize windows to have L1-norm of 1.
 
     we calculate the L1-norm of single windows (that is, product of
     eccentricity and angular windows) for all angles, one middling
@@ -1303,24 +1363,24 @@ def normalize_windows(angle_windows, ecc_windows, window_eccentricity, scale=0):
 
     Parameters
     ----------
-    angle_windows : dict
+    angle_windows
         dictionary containing the angular windows
-    ecc_windows : dict
+    ecc_windows
         dictionary containing the eccentricity windows
-    window_eccentricity : array_like
+    window_eccentricity
         array containing the eccentricity for each window that defines
         their location relative to each other (and so can be in either
         pixels or degrees). this is used to determine how to scale the
         L1-norm. It should probably be the central eccentricity, but it
         should not contain any zeros.
-    scale : int, optional
+    scale
         which scale to calculate norm for and modify
 
     Returns
     -------
-    ecc_windows : dict
+    ecc_windows
         the normalized ecc_windows. only ``scale`` is modified
-    scale_factor : torch.Tensor
+    scale_factor
         the scale_factor used to normalize eccentricity windows at this
         scale (as a 3d tensor, number of eccentricity windows by 1 by
         1). stored by ``PoolingWindows`` object so we can undo it for

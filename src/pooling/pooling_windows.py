@@ -10,11 +10,13 @@ pooling.py contains a lot of necessary functions
 import itertools
 import os.path as op
 import warnings
+from typing import Any, Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
 import opt_einsum as oe
 import torch
+from matplotlib.figure import Figure
 from torch import nn
 
 from . import plot, pooling, utils
@@ -29,7 +31,7 @@ def __dir__() -> list[str]:
 
 
 class PoolingWindows(nn.Module):
-    r"""Generic class to set up scaling windows for use with other models
+    r"""Generic class to set up scaling windows for use with other models.
 
     Note that we will calculate the minimum eccentricity at which the
     area of the windows at half-max exceeds one pixel (based on
@@ -68,39 +70,39 @@ class PoolingWindows(nn.Module):
 
     Parameters
     ----------
-    scaling : float
+    scaling
         Scaling parameter that governs the size of the pooling
         windows. Other pooling windows parameters
         (``radial_to_circumferential_ratio``,
         ``transition_region_width``) cannot be set here. If that ends up
         being of interest, will change that.
-    img_res : tuple
+    img_res
         The resolution of our image (should therefore contains
         integers). Will use this to generate appropriately sized pooling
         windows.
-    min_eccentricity : float, optional
+    min_eccentricity
         The eccentricity at which the pooling windows start.
-    max_eccentricity : float, optional
+    max_eccentricity
         The eccentricity at which the pooling windows end.
-    num_scales : int, optional
+    num_scales
         The number of scales to generate masks for. For the RGC model,
         this should be 1, otherwise should match the number of scales in
         the steerable pyramid.
-    cache_dir : str or None, optional
+    cache_dir
         The directory to cache the windows tensor in. If set, we'll look
         there for cached versions of the windows we create, load them if
         they exist and create and cache them if they don't. If None, we
         don't check for or cache the windows.
-    window_type : {'cosine', 'gaussian'}
+    window_type
         Whether to use the raised cosine function from [1]_ or a Gaussian that
         has approximately the same structure. If cosine,
         ``transition_region_width`` must be set; if gaussian, then ``std_dev``
         must be set.
-    transition_region_width : float or None, optional
+    transition_region_width
         The width of the transition region, parameter :math:`t` in
         equation 9 from the online methods. 0.5 (the default) is the
         value used in the paper [1]_.
-    std_dev : float or None, optional
+    std_dev
         The standard deviation of the Gaussian window. WARNING -- For
         now, we only support ``std_dev=1`` (in order to ensure that the
         windows tile correctly, intersect at the proper point, follow
@@ -111,12 +113,12 @@ class PoolingWindows(nn.Module):
     ----------
     scaling : float
         Scaling parameter that governs the size of the pooling windows.
+    img_res : tuple
+        The resolution of our image in pixels.
     min_eccentricity : float
         The eccentricity at which the pooling windows start.
     max_eccentricity : float
         The eccentricity at which the pooling windows end.
-    img_res : tuple
-        The resolution of our image in pixels.
     transition_region_width : float or None
         The width of the cosine windows' transition region, parameter
         :math:`t` in equation 9 from the online methods.
@@ -229,15 +231,15 @@ class PoolingWindows(nn.Module):
 
     def __init__(
         self,
-        scaling,
-        img_res,
-        min_eccentricity=0.5,
-        max_eccentricity=15,
-        num_scales=1,
-        cache_dir=None,
-        window_type="cosine",
-        transition_region_width=0.5,
-        std_dev=None,
+        scaling: float,
+        img_res: tuple[int, int],
+        min_eccentricity: float = 0.5,
+        max_eccentricity: float = 15,
+        num_scales: int = 1,
+        cache_dir: str | None = None,
+        window_type: Literal["cosine", "gaussian"] = "cosine",
+        transition_region_width: float | None = 0.5,
+        std_dev: float | None = None,
     ):
         super().__init__()
         if len(img_res) != 2:
@@ -388,7 +390,7 @@ class PoolingWindows(nn.Module):
             self.norm_factor[i] = norm_factor
 
     def _window_sizes(self):
-        r"""Calculate the various window size metrics
+        r"""Calculate the various window size metrics.
 
         helper function that gets called during construction, should not
         be used by user. Sets the following attribute: n_polar_windows,
@@ -486,8 +488,8 @@ class PoolingWindows(nn.Module):
                 self.deg_to_pix[-1] * self.central_eccentricity_degrees
             )
 
-    def to(self, *args, **kwargs):
-        r"""Moves and/or casts the parameters and buffers.
+    def to(self, *args: Any, **kwargs: Any) -> nn.Module:
+        r"""Move and/or cast the parameters and buffer.
 
         This can be called as
 
@@ -511,7 +513,8 @@ class PoolingWindows(nn.Module):
         .. note::
             This method modifies the module in-place.
 
-        Args:
+        Args
+        -----
             device (:class:`torch.device`): the desired device of the parameters
                 and buffers in this module
             dtype (:class:`torch.dtype`): the desired floating point type of
@@ -519,8 +522,9 @@ class PoolingWindows(nn.Module):
             tensor (torch.Tensor): Tensor whose dtype and device are the desired
                 dtype and device for all parameters and buffers in this module
 
-        Returns:
-            Module: self
+        Returns
+        -------
+            Module
         """
         for k, v in self.angle_windows.items():
             self.angle_windows[k] = v.to(*args, **kwargs)
@@ -530,8 +534,8 @@ class PoolingWindows(nn.Module):
             self.norm_factor[k] = v.to(*args, **kwargs)
         return self
 
-    def merge(self, other_PoolingWindows, scale_offset=0.5):
-        """Merge with a second PoolingWindows object
+    def merge(self, other_PoolingWindows: nn.Module, scale_offset: float = 0.5):
+        """Merge with a second PoolingWindows object.
 
         This combines the angle_windows, ecc_windows, and window_size
         dictionaries of two PoolingWindows objects. Since they will both
@@ -541,8 +545,8 @@ class PoolingWindows(nn.Module):
         so:
 
         ```
-        for k, v  in other_PoolingWindows.angle_windows.items():
-            self.angle_windows[k+scale_offset] = v
+        for k, v in other_PoolingWindows.angle_windows.items():
+            self.angle_windows[k + scale_offset] = v
         ```
 
         and similarly for ecc_windows and window_size
@@ -578,8 +582,8 @@ class PoolingWindows(nn.Module):
             self.norm_factor[k + scale_offset] = v
 
     @staticmethod
-    def _get_slice_vals(scaled_window_res, scaled_img_res):
-        r"""Helper function to find the values to use when slicing windows down to size
+    def _get_slice_vals(scaled_window_res: float, scaled_img_res: float) -> list[int]:
+        r"""Find the values to use when slicing windows down to size.
 
         If we have a non-square image, we must create the windows as a
         square array and then slice it down to the size of the image,
@@ -601,16 +605,16 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        scaled_window_res : float
+        scaled_window_res
             The size of the square 'down-sampled'/scaled window we
             created (in one dimension; this should not be a tuple).
-        scaled_img_res : float
+        scaled_img_res
             The size of the 'down-sampled'/scaled image we want to match
             (in one dimension; this should not be a tuple).
 
         Returns
         -------
-        slice_vals : list
+        slice_vals
             A list of ints, use this to slice the window down correctly, e.g.,
             ``window[..., slice_vals[0]:slice_vals[1]]``
 
@@ -618,8 +622,10 @@ class PoolingWindows(nn.Module):
         slice_vals = (scaled_window_res - scaled_img_res) / 2
         return [int(np.floor(slice_vals)), -int(np.ceil(slice_vals))]
 
-    def forward(self, x, idx=0, weights=None):
-        r"""Window and pool the input
+    def forward(
+        self, x: dict | torch.Tensor, idx: int = 0, weights: torch.Tensor | None = None
+    ) -> dict[torch.Tensor] | torch.Tensor:
+        r"""Window and pool the input.
 
         We take an input, either a 4d tensor or a dictionary of 4d
         tensors, and return a windowed version of it. If it's a 4d
@@ -641,22 +647,22 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        x : dict or torch.Tensor
+        x
             Either a 4d tensor or a dictionary of 4d tensors.
-        idx : int, optional
+        idx
             Which entry in the ``windows`` list to use. Only used if
             ``x`` is a tensor
-        weights : torch.Tensor or None, optional
+        weights
             If not None, should be a tensor of shape (scales, batch, channel,
             eccentricity, angle), this allows us to reweight the pooled input
             across scales, eccentricity, and angle. If None, don't reweight.
 
         Returns
         -------
-        pooled_x : dict or torch.Tensor
+        pooled_x
             Same type as ``x``, see above for how it's created.
 
-        See also
+        See Also
         --------
         window : window the input
         pool : pool the windowed input (get the weighted average)
@@ -693,8 +699,10 @@ class PoolingWindows(nn.Module):
             pooled_x = (weights[idx] * pooled_x).flatten(2, 3)
         return pooled_x
 
-    def window(self, x, idx=0):
-        r"""Window the input
+    def window(
+        self, x: dict[torch.Tensor] | torch.Tensor, idx: int = 0
+    ) -> dict[torch.Tensor] | torch.Tensor:
+        r"""Window the input.
 
         We take an input, either a 4d tensor or a dictionary of 4d
         tensors, and return a windowed version of it. If it's a 4d
@@ -712,18 +720,23 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        x : dict or torch.Tensor
+        x
             Either a 4d tensor or a dictionary of 4d tensors.
-        idx : int, optional
+        idx
             Which entry in the ``windows`` list to use. Only used if
             ``x`` is a tensor
 
         Returns
         -------
-        windowed_x : dict or torch.Tensor
+        windowed_x
             Same type as ``x``, see above for how it's created.
 
-        See also
+        Raises
+        ------
+        Exception
+            If input tensor does not have 4 dimensions
+
+        See Also
         --------
         pool : pool the windowed input (get the weighted average)
         forward : perform the windowing and pooling simultaneously
@@ -765,8 +778,10 @@ class PoolingWindows(nn.Module):
                 backend="torch",
             ).flatten(2, 3)
 
-    def pool(self, windowed_x, idx=0):
-        r"""Pool the windowed input
+    def pool(
+        self, windowed_x: dict[torch.Tensor] | torch.Tensor, idx: int = 0
+    ) -> dict[torch.Tensor] | torch.Tensor:
+        r"""Pool the windowed input.
 
         We take the windowed input (as returned by ``self.window()``)
         and perform a weighted average, dividing each windowed statistic
@@ -786,18 +801,18 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        windowed_x : dict or torch.Tensor
+        windowed_x
             Either a 5d tensor or a dictionary of 5d tensors
-        idx : int, optional
+        idx
             Which entry in the ``windows`` list to use. Only used if
             ``windowed_x`` is a tensor
 
         Returns
         -------
-        pooled_x : dict or torch.Tensor
+        pooled_x
             Same type as ``windowed_x``, see above for how it's created.
 
-        See also
+        See Also
         --------
         window : window the input
         forward : perform the windowing and pooling simultaneously
@@ -811,8 +826,10 @@ class PoolingWindows(nn.Module):
         else:
             return windowed_x.sum((-1, -2))
 
-    def project(self, pooled_x, idx=0):
-        r"""Project pooled values back onto an image
+    def project(
+        self, pooled_x: dict[torch.Tensor] | torch.Tensor, idx: int = 0
+    ) -> dict[torch.Tensor] | torch.Tensor:
+        r"""Project pooled values back onto an image.
 
         For visualization purposes, you may want to project the pooled
         values (or values that have been pooled and then transformed in
@@ -833,18 +850,23 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        pooled_x : dict or torch.Tensor
+        pooled_x
             3d Tensor or a dictionary of 3d tensors
-        idx : int, optional
+        idx
             Which entry in the ``windows`` list to use. Only used if
             ``pooled_x`` is a tensor
 
         Returns
         -------
-        x : dict or torch.Tensor
+        x
             4d tensor or dictionary of 4d tensors
 
-        See also
+        Raises
+        ------
+        Exception
+            If tensor input is not 3 dimensions
+
+        See Also
         --------
         forward : the opposite of this, going from image to pooled
             values
@@ -900,14 +922,14 @@ class PoolingWindows(nn.Module):
 
     def plot_windows(
         self,
-        ax=None,
-        contour_levels=None,
-        colors="r",
-        subset=True,
-        windows_scale=0,
-        **kwargs,
-    ):
-        r"""plot the pooling windows on an image.
+        ax: plt.Axes | None = None,
+        contour_levels: np.ndarray | int | None = None,
+        colors: list[str] | str = "r",
+        subset: bool = True,
+        windows_scale: int = 0,
+        **kwargs: Any,
+    ) -> plt.Axes:
+        r"""Plot the pooling windows on an image.
 
         This is just a simple little helper to plot the pooling windows
         on an axis. The intended use case is overlaying this on top of
@@ -917,10 +939,10 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        ax : matplotlib.pyplot.axis or None, optional
+        ax
             The axis to plot the windows on. If None, will create a new
             figure with 1 axis
-        contour_levels : None, array-like, or int, optional
+        contour_levels
             The ``levels`` argument to pass to ``ax.contour``. From that
             documentation: "Determines the number and positions of the
             contour lines / regions. If an int ``n``, use ``n`` data
@@ -932,22 +954,22 @@ class PoolingWindows(nn.Module):
             self.window_max_amplitude * np.exp(-.25/2) (half a standard
             deviation away from max) for gaussian windows), as this is
             the easiest to see.
-        colors : color string or sequence of colors, optional
+        colors
             The ``colors`` argument to pass to ``ax.contour``. If a
             single character, all will have the same color; if a
             sequence, will cycle through the colors in ascending order
             (repeating if necessary)
-        subset : bool, optional
+        subset
             If True, will only plot four of the angle window
             slices. This is to save time and memory. If False, will plot
             all of them
-        windows_scale : int, optional
+        windows_scale
             Which scale of the windows to use. windows is a list with
             different scales, so this specifies which one to use
 
         Returns
         -------
-        ax : matplotlib.pyplot.axis
+        ax
             The axis with the windows
 
         """
@@ -976,8 +998,13 @@ class PoolingWindows(nn.Module):
         return ax
 
     def plot_window_values(
-        self, im=None, ax=None, subset=True, windows_scale=0, **kwargs
-    ):
+        self,
+        im: torch.Tensor | None = None,
+        ax: plt.Axes | None = None,
+        subset: bool = True,
+        windows_scale: int = 0,
+        **kwargs: Any,
+    ) -> plt.Axes:
         r"""Plot the windowed average values.
 
         This plots the average values of an image, as computed by these
@@ -990,24 +1017,29 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        im : torch.Tensor or None, optional
+        im
             The image whose average values we plot within the windows. If None,
             we plot random gray values instead.
-        ax : matplotlib.pyplot.axis or None, optional
+        ax
             The axis to plot the windows on. If None, will create a new
             figure with 1 axis
-        subset : bool, optional
+        subset
             If True, will only plot four of the angle window
             slices. This is to save time and memory. If False, will plot
             all of them
-        windows_scale : int, optional
+        windows_scale
             Which scale of the windows to use. windows is a list with
             different scales, so this specifies which one to use
 
         Returns
         -------
-        ax : matplotlib.pyplot.axis
+        ax
             The axis with the windows
+
+        Raises
+        ------
+        Exception
+            If ``im`` has more than one batch or channel
 
         """
         if ax is None:
@@ -1057,9 +1089,14 @@ class PoolingWindows(nn.Module):
         return ax
 
     def plot_window_widths(
-        self, units="degrees", scale_num=0, figsize=(5, 5), jitter=0.25, ax=None
-    ):
-        r"""plot the widths of the windows, in degrees or pixels
+        self,
+        units: Literal["degrees", "pixels"] = "degrees",
+        scale_num: int = 0,
+        figsize: tuple[int, int] = (5, 5),
+        jitter: float | None = 0.25,
+        ax: plt.Axes | None = None,
+    ) -> Figure:
+        r"""Plot the widths of the windows, in degrees or pixels.
 
         We plot the width of the window in both angular and radial
         direction, as well as showing the 'top', 'half', and 'full'
@@ -1077,28 +1114,33 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        units : {'degrees', 'pixels'}, optional
+        units
             Whether to show the information in degrees or pixels (both
             the width and the window location will be presented in the
             same unit).
-        scale_num : int, optional
+        scale_num
             Which scale window we should plot
-        figsize : tuple, optional
+        figsize
             The size of the figure to create
-        jitter : float or None, optional
+        jitter
             Whether to add a little bit of jitter to the x-axis to
             separate the radial and angular widths. There are only two
             values we separate, so we don't add actual jitter, just move
             one up by the value specified by jitter, the other down by
             that much (we use the same value at each eccentricity)
-        ax : matplotlib.pyplot.axis or None, optional
+        ax
             The axis to plot the windows on. If None, will create a new
             figure with 1 axis
 
         Returns
         -------
-        fig : matplotlib.figure.Figure
+        fig
             The figure containing the plot
+
+        Raises
+        ------
+        Exception
+            If ``units`` are not "pixels" or "degrees"
 
         """
         if units == "degrees":
@@ -1122,7 +1164,7 @@ class PoolingWindows(nn.Module):
         for direc, height in itertools.product(
             ["radial", "angular"], ["top", "half", "full"]
         ):
-            m, s, b = ax.stem(
+            m, _, _ = ax.stem(
                 central_ecc + jitter_vals[direc],
                 data[direc + "_" + height],
                 linefmt=colors[direc],
@@ -1135,8 +1177,14 @@ class PoolingWindows(nn.Module):
         ax.legend(loc="upper left")
         return fig
 
-    def plot_window_areas(self, units="degrees", scale_num=0, figsize=(5, 5), ax=None):
-        r"""plot the approximate areas of the windows, in degrees or pixels
+    def plot_window_areas(
+        self,
+        units: Literal["degrees", "pixels"] = "degrees",
+        scale_num: int = 0,
+        figsize: tuple[int, int] = (5, 5),
+        ax: plt.Axes | None = None,
+    ) -> Figure:
+        r"""Plot the approximate areas of the windows, in degrees or pixels.
 
         We plot the approximate area of the window, calculated using
         'top', 'half', and 'full' widths (top is the width of the
@@ -1161,22 +1209,27 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        units : {'degrees', 'pixels'}, optional
+        units
             Whether to show the information in degrees or pixels (both
             the area and the window location will be presented in the
             same unit).
-        scale_num : int, optional
+        scale_num
             Which scale window we should plot
-        figsize : tuple, optional
+        figsize
             The size of the figure to create
-        ax : matplotlib.pyplot.axis or None, optional
+        ax
             The axis to plot the windows on. If None, will create a new
             figure with 1 axis
 
         Returns
         -------
-        fig : matplotlib.figure.Figure
+        fig
             The figure containing the plot
+
+        Raises
+        ------
+        Exception
+            If ``units`` are not "pixels" or "degrees"
 
         """
         if units == "degrees":
@@ -1193,7 +1246,7 @@ class PoolingWindows(nn.Module):
             fig = ax.figure
         sizes = {"full": 5, "half": 10, "top": 15}
         for height in ["top", "half", "full"]:
-            m, s, b = ax.stem(
+            m, _, _ = ax.stem(
                 central_ecc, data[height], linefmt="C0", markerfmt="C0.", label=height
             )
             m.set(markersize=sizes[height])
@@ -1202,8 +1255,8 @@ class PoolingWindows(nn.Module):
         ax.legend(loc="upper left")
         return fig
 
-    def summarize_window_sizes(self):
-        r"""Summarize window sizes
+    def summarize_window_sizes(self) -> dict:
+        r"""Summarize window sizes.
 
         This function returns a dictionary summarizing the window sizes
         at the minimum and maximum eccentricity. Let ``min_window`` be
@@ -1215,7 +1268,7 @@ class PoolingWindows(nn.Module):
 
         Returns
         -------
-        sizes : dict
+        sizes
             dictionary with the keys described above, summarizing window
             sizes. all values are scalar floats
 
@@ -1246,8 +1299,10 @@ class PoolingWindows(nn.Module):
                 sizes[f"{extrem}_window_scale_{i}_area_pixels"] = areas[i]["half"][idx]
         return sizes
 
-    def plot_window_checks(self, angle_n=0, scale=0):
-        r"""Make some plots to check whether windows have been normalized properly
+    def plot_window_checks(
+        self, angle_n: int | list[int] = 0, scale: int = 0
+    ) -> Figure:
+        r"""Make some plots to check whether windows have been normalized properly.
 
         This creates a figure with two sets of plots: the first row shows the
         L1-norm of the windows, the second shows the sum. Each row will have
@@ -1259,7 +1314,7 @@ class PoolingWindows(nn.Module):
         less the same
 
         Parameters
-        ------
+        ----------
         angle_n : int or list, optional
             Which angle slice(s) to show. Can be a single int or a list
             of ints, in which case we plot each as a separate color

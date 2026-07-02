@@ -36,7 +36,7 @@ class TestPlotting:
     @pytest.mark.parametrize("subset", [False, True])
     @pytest.mark.parametrize("win_scale", [0, 1])
     def test_plotting_windows_axargs(self, pool_win, contour, color, subset, win_scale):
-        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
+        _, axes = plt.subplots(1, 1, figsize=(4, 4))
         pool_win.plot_windows(
             ax=axes,
             contour_levels=contour,
@@ -55,7 +55,7 @@ class TestPlotting:
 
     @pytest.mark.parametrize("subset", [False, True])
     def test_plotting_window_values_imgargs(self, pool_win, rand_img, subset):
-        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
+        _, axes = plt.subplots(1, 1, figsize=(4, 4))
         pool_win.plot_window_values(
             im=rand_img, ax=axes, subset=subset, windows_scale=0
         )
@@ -85,7 +85,7 @@ class TestPlotting:
     def test_plotting_window_widths_axargs(
         self, pool_win, units, scale_num, figsize, jitter
     ):
-        fig, axes = plt.subplots(1, 1)
+        _, axes = plt.subplots(1, 1)
         pool_win.plot_window_widths(
             units=units, scale_num=scale_num, jitter=jitter, figsize=figsize, ax=axes
         )
@@ -103,7 +103,7 @@ class TestPlotting:
     @pytest.mark.parametrize("scale_num", [0, 1])
     @pytest.mark.parametrize("figsize", [(4, 4), (5, 5)])
     def test_plotting_window_areas_axargs(self, pool_win, units, scale_num, figsize):
-        fig, axes = plt.subplots(1, 1, figsize=(4, 4))
+        _, axes = plt.subplots(1, 1, figsize=(4, 4))
         pool_win.plot_window_areas(
             units=units, scale_num=scale_num, figsize=figsize, ax=axes
         )
