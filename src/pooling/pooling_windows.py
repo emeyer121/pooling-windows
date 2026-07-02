@@ -163,13 +163,13 @@ class PoolingWindows(nn.Module):
         The number of eccentricity bands in our model
     calculated_min_eccentricity_degrees : list
         List of floats (one for each scale) that contain
-        ``calc_min_eccentricity()[0]``, that is, the minimum
+        ``calculate._min_eccentricity()[0]``, that is, the minimum
         eccentricity (in degrees) where the area of the window at
         half-max exceeds one pixel (based on the scaling, size of the
         image in pixels and in degrees).
     calculated_min_eccentricity_pixels : list
         List of floats (one for each scale) that contain
-        ``calc_min_eccentricity()[1]``, that is, the minimum
+        ``calculate._min_eccentricity()[1]``, that is, the minimum
         eccentricity (in pixels) where the area of the window at
         half-max exceeds one pixel (based on the scaling, size of the
         image in pixels and in degrees).
@@ -398,8 +398,8 @@ class PoolingWindows(nn.Module):
         window_approx_area_degrees, window_width_pixels, central_eccentricity_pixels,
         window_approx_area_pixels, deg_to_pix
 
-        all of these are based on calling various helper functions (all
-        of which start with ``calc_``) and doing simple calculations
+        all of these are based on calling various helper functions (from
+        ``pooling.calculate``) and doing simple calculations
         based on the attributes already set (largely min_eccentricity,
         max_eccentricity, scaling, and transition_region_width)
 
@@ -1159,7 +1159,7 @@ class PoolingWindows(nn.Module):
         / 4.
 
         The half area shown here is what we use to compare against a
-        threshold value in the ``calc_min_eccentricity()`` in order to
+        threshold value in the ``calculate._min_eccentricity()`` in order to
         determine what the minimum eccentricity where the windows
         contain more than 1 pixel.
 
