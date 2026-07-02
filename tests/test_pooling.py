@@ -23,7 +23,7 @@ class TestPooling:
 
     def test_creation_gaussian(self):
         pooling.pooling.create_pooling_windows(
-            0.87, (100, 100), 0.2, 30, 1.2, "gaussian"
+            0.87, (100, 100), 0.2, 30, 1.2, "gaussian", std_dev=1
         )
 
     @pytest.mark.parametrize("n_windows", [4, 4.5])
