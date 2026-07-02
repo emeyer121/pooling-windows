@@ -221,6 +221,11 @@ class PoolingWindows(nn.Module):
         with ``std_dev=1``, the only value we support for now, it's half a
         standard deviation away from the center, approximately 0.14.
 
+    References
+    ----------
+    .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the ventral stream.
+        Nature Neuroscience, 14(9), 1195–1201. http://dx.doi.org/10.1038/nn.2889
+
     """
 
     def __init__(
