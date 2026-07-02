@@ -308,7 +308,7 @@ class PoolingWindows(nn.Module):
         }
         for i in range(self.num_scales):
             scaled_img_res = [np.ceil(j / 2**i) for j in img_res]
-            min_ecc, min_ecc_pix = pooling.calc_min_eccentricity(
+            min_ecc, min_ecc_pix = pooling.calculate._min_eccentricity(
                 scaling, scaled_img_res, max_eccentricity
             )
             self.calculated_min_eccentricity_degrees.append(min_ecc)
@@ -404,17 +404,19 @@ class PoolingWindows(nn.Module):
         max_eccentricity, scaling, and transition_region_width)
 
         """
-        ecc_window_width = pooling.calc_eccentricity_window_spacing(
+        ecc_window_width = pooling.calculate._eccentricity_window_spacing(
             scaling=self.scaling, std_dev=self.std_dev
         )
         n_polar_windows = int(
-            round(pooling.calc_angular_n_windows(ecc_window_width / 2))
+            round(pooling.calculate._angular_n_windows(ecc_window_width / 2))
         )
         self.n_polar_windows = n_polar_windows
-        angular_window_width = pooling.calc_angular_window_spacing(self.n_polar_windows)
+        angular_window_width = pooling.calculate._angular_window_spacing(
+            self.n_polar_windows
+        )
         # we multiply max_eccentricity by sqrt(2) here because we want
         # to go out to the corner of the image
-        window_widths = pooling.calc_window_widths_actual(
+        window_widths = pooling.calculate._window_widths_actual(
             angular_window_width,
             ecc_window_width,
             self.min_eccentricity,
@@ -432,19 +434,21 @@ class PoolingWindows(nn.Module):
         self.n_eccentricity_bands = len(self.window_width_degrees["radial_top"])
         # transition width and std dev don't matter for central
         # eccentricity, just min and max
-        self.central_eccentricity_degrees = pooling.calc_windows_eccentricity(
+        self.central_eccentricity_degrees = pooling.calculate._windows_eccentricity(
             "central",
             self.n_eccentricity_bands,
             ecc_window_width,
             self.min_eccentricity,
         )
         if self.window_type == "gaussian":
-            self.one_std_dev_eccentricity_degrees = pooling.calc_windows_eccentricity(
-                "1std",
-                self.n_eccentricity_bands,
-                ecc_window_width,
-                self.min_eccentricity,
-                std_dev=self.std_dev,
+            self.one_std_dev_eccentricity_degrees = (
+                pooling.calculate._windows_eccentricity(
+                    "1std",
+                    self.n_eccentricity_bands,
+                    ecc_window_width,
+                    self.min_eccentricity,
+                    std_dev=self.std_dev,
+                )
             )
         self.window_width_degrees["radial_half"] = (
             self.scaling * self.central_eccentricity_degrees
@@ -467,7 +471,7 @@ class PoolingWindows(nn.Module):
         self.central_eccentricity_pixels = []
         self.deg_to_pix = []
         for i in range(self.num_scales):
-            deg_to_pix = pooling.calc_deg_to_pix(
+            deg_to_pix = pooling.calculate.deg_to_pix(
                 [j / 2**i for j in self.img_res], self.max_eccentricity
             )
             self.deg_to_pix.append(deg_to_pix)
