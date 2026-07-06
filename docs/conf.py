@@ -14,11 +14,16 @@ author = "Flatiron NeuroRSE"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "myst_parser",
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "matplotlib.sphinxext.plot_directive",
+    "myst_nb",
+    "jupytext",
 ]
+
+nb_custom_formats = {
+    ".md": ["jupytext.reads", {"fmt": "mystnb"}],
+}
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
