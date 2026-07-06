@@ -39,7 +39,7 @@ from . import calculate, utils
 
 __all__ = [
     "gaussian",
-    "mother_window",
+    "raised_cosine",
     "create_pooling_windows",
     "normalize_windows",
 ]
@@ -56,7 +56,7 @@ GAUSSIAN_SUM = 2 * 1.753314144021452772415339526931980189073725635759454989253 -
 def gaussian(x: float | np.ndarray, std_dev: float | None = 1) -> np.ndarray:
     r"""Compute simple gaussian with mean 0, and adjustable std dev.
 
-    Possible alternative mother window, giving the weighting in each
+    Possible alternative window function, giving the weighting in each
     direction for the spatial pooling performed during the construction
     of visual metamers
 
@@ -109,10 +109,10 @@ def gaussian(x: float | np.ndarray, std_dev: float | None = 1) -> np.ndarray:
     return torch.exp(-(x**2 / (2 * std_dev**2))) / (std_dev * GAUSSIAN_SUM)
 
 
-def mother_window(
+def raised_cosine(
     x: float | np.ndarray, transition_region_width: float = 0.5
 ) -> np.ndarray:
-    r"""Compute raised cosine 'mother' window function.
+    r"""Compute raised cosine window function.
 
     Used to give the weighting in each direction for the spatial pooling
     performed during the construction of visual metamers
@@ -134,7 +134,7 @@ def mother_window(
     Returns
     -------
     array
-        The value of the window at each value of ``x``.
+        The value of the raised cosine window at each value of ``x``.
 
     Raises
     ------
@@ -277,7 +277,7 @@ def _polar_angle_windows(
     if window_type == "gaussian":
         windows = gaussian(theta, std_dev)
     elif window_type == "cosine":
-        windows = mother_window(theta, transition_region_width)
+        windows = raised_cosine(theta, transition_region_width)
     return torch.stack([w for w in windows if (w != 0).any()])
 
 
@@ -408,7 +408,7 @@ def _log_eccentricity_windows(
     if window_type == "gaussian":
         windows = gaussian(ecc, std_dev)
     elif window_type == "cosine":
-        windows = mother_window(ecc, transition_region_width)
+        windows = raised_cosine(ecc, transition_region_width)
     return torch.stack([w for w in windows if (w != 0).any()])
 
 

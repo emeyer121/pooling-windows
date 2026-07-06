@@ -220,7 +220,7 @@ def scaling(
     Scaling is the ratio of the eccentricity window's radial full-width
     at half-maximum to eccentricity. For eccentricity, we use the
     window's "central eccentricity", the one where the input to the
-    mother window (:math:`x` in equation 9 in the online methods) is 0.
+    window function (:math:`x` in equation 9 in the online methods) is 0.
 
     Parameters
     ----------
@@ -248,8 +248,8 @@ def scaling(
     Notes
     -----
     No equation for the scaling, :math:`s`, was included in the paper,
-    so we derived this ourselves. To start, we note that the mother
-    window equation (equation 9) reaches its half-max (.5) at
+    so we derived this ourselves. To start, we note that the window
+    function equation (equation 9) reaches its half-max (.5) at
     :math:`x=\pm .5`, and that, as above, we treat :math:`x=0` as the
     central eccentricity of the window. Then we must solve for these,
     using the values given within the parentheses in equation 11 as the
@@ -555,7 +555,7 @@ def _window_widths_actual(
     means that a given window's full extent goes from :math:`x=-3\sigma`
     to :math:`x=3\sigma`, where :math:`\sigma` is ``std_dev``, the
     window's standard deviation, and :math:`x` is the input to the
-    ``gaussian`` function (analogous to the ``mother_window`` function).
+    ``gaussian`` function (analogous to the ``raised_cosine`` function).
 
     In the angular direction, for window :math:`n`,
     :math:`x=\frac{\theta-w_\theta n}{w_\theta}` (see equation 10, and
