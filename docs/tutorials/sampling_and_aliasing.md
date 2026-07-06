@@ -56,8 +56,8 @@ sampled, full, interps, coeffs, residuals = pooling.sampling.check_sampling(0.5,
 This could also be tested using pixels rather than values assuming an image of shape `(100,100)` with increments of `0.5` pixels, sampled every `2` pixels. We will use the `val_sampling` method moving forward.
 
 ```{code-cell} ipython3
-x = torch.linspace(-50, 50, 201)
-sampled, full, interps, coeffs, residuals = pooling.sampling.check_sampling(val_sampling=None, pix_sampling=2, x=x)
+x_pix = torch.linspace(-50, 50, 201)
+pooling.sampling.check_sampling(val_sampling=None, pix_sampling=2, x=x_pix);
 ```
 
 Let's look at the residuals, the error in each reconstruction. We can see there's problems at the boundaries, but that all the error is on the order of `1e-12`, which is pretty good!
