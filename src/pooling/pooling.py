@@ -308,7 +308,7 @@ def _log_eccentricity_windows(
     the full set of windows, we want to consider those that would show
     up in the corners as well, so it's probable that this function
     returns one more window there; we determine if this is necessary by
-    calling ``calc_eccentricity_n_windows`` with
+    calling ``calculate._eccentricity_n_windows`` with
     ``np.sqrt(2)*max_ecc``.
 
     Parameters
@@ -439,7 +439,7 @@ def create_pooling_windows(
     ----------
     scaling
         The ratio of the eccentricity window's radial full-width at
-        half-maximum to eccentricity (see the `calc_scaling` function).
+        half-maximum to eccentricity (see the `calculate.scaling` function).
     resolution
         2-tuple of ints specifying the resolution of the 2d images to
         make.

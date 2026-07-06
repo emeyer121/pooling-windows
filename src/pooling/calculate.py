@@ -102,7 +102,7 @@ def _eccentricity_window_spacing(
         xor ``scaling`` must be set.
     scaling
         The ratio of the eccentricity window's radial full-width at
-        half-maximum to eccentricity (see the ``calc_scaling``
+        half-maximum to eccentricity (see the ``scaling``
         function). ``n_windows`` xor ``scaling`` must be set.
     std_dev
         The standard deviation of the Gaussian window. If this is set,
@@ -124,7 +124,7 @@ def _eccentricity_window_spacing(
     No equation was given in the paper to calculate the window spacing,
     :math:`w_e` from the scaling, :math:`s`, so we derived it
     ourselves. We start with the final equation for the scaling, given
-    in the Notes for the ``calc_scaling`` function.
+    in the Notes for the ``scaling`` function.
 
     .. math::
 
@@ -292,7 +292,7 @@ def scaling(
         s &= \exp(x_h\cdot w_e) - \exp(-x_h\cdot w_e)
 
     Note that we don't actually use the value returned by
-    ``calc_windows_eccentricity`` for :math:`e_c`; we simplify
+    ``_windows_eccentricity`` for :math:`e_c`; we simplify
     it away in the calculation above.
 
     """
@@ -311,7 +311,7 @@ def _windows_eccentricity(
 ) -> np.ndarray:
     r"""Calculate a relevant eccentricity for each radial window.
 
-    These are the values :math:`e_c`, as referred to in ``calc_scaling``
+    These are the values :math:`e_c`, as referred to in ``scaling``
     (for each of the n windows)
 
     Parameters
@@ -467,7 +467,7 @@ def _window_widths_actual(
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     r"""Calculate and return the actual widths of the windows.
 
-    whereas ``calc_angular_window_spacing`` returns a term used in the
+    whereas ``_angular_window_spacing`` returns a term used in the
     equations to generate the windows, this returns the actual angular
     and radial widths of each set of windows (in degrees).
 
@@ -480,10 +480,10 @@ def _window_widths_actual(
     ----------
     angular_window_spacing
         The width of the windows in the angular direction, as returned
-        by ``calc_angular_window_spacing``
+        by ``_angular_window_spacing``
     radial_window_spacing
         The width of the windows in the radial direction, as returned by
-        ``calc_eccentricity_window_spacing``
+        ``_eccentricity_window_spacing``
     min_ecc
         The minimum eccentricity, the eccentricity below which we do not
         compute pooling windows (in degrees). Parameter :math:`e_0` in
@@ -532,8 +532,8 @@ def _window_widths_actual(
     :math:`w_{\theta}(1+t)`, where :math:`t` is the
     ``transition_region_width``. This gives us the width in radians, so
     we convert it to degrees by finding the windows' central
-    eccentricity (:math:`e_c`, as referred to in ``calc_scaling`` and
-    returned by ``calc_windows_central_eccentricity``), and find the
+    eccentricity (:math:`e_c`, as referred to in ``scaling`` and
+    returned by ``_windows_eccentricity``), and find the
     circumference (in degrees) of the circle that goes through that
     eccentricity. We then multiply our width in radians by
     :math:`\frac{2\pi e_c}{2\pi}=e_c`.
