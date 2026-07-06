@@ -21,7 +21,7 @@ Download the executed notebook: **{nb-download}`Sampling_and_Aliasing.ipynb`**!
 (sampling-aliasing-nb)=
 # Sampling and Aliasing
 
-This notebook shows some examples of the effect of sampling on aliasing. If you want to perform strided convolution, how far apart can your strides be while still avoiding aliasing? We examine this by seeing whether, given that your sampling every, e.g., 20 pixels, can you interpolate to the function values at the remaining pixels?
+A key feature of using pooling windows or other image sampling methods (e.g. strided convolutions) is ensuring that the sampling is appropriate. A sampling rate that is too low or that does not effectively match your data can result in aliasing, in which there are incorrect measurements in your reconstructed signal. This notebook shows some examples of the effect of sampling on aliasing. If you want to perform strided convolution, how far apart can your strides be while still avoiding aliasing? We examine this by seeing whether you can accurately interpolate to the function values at the unsampled pixels given different sampling rates.
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
@@ -44,13 +44,20 @@ plt.rcParams["animation.ffmpeg_args"] = ["-threads", "1"]
 
 Here, we'll show an example of good sampling -- it's fine enough that we can successfully use linear interpolation to reconstruct the function centered at each pixel.
 
-We'll use a simple Gaussian with a standard deviation of 1. We'll examine this function on a domain of `[-5, 5]`, and sample it every `.5`. Because this is a `torch` function, our `x` value should be `torch.linspace` (if it was a `numpy` function, `x` should be `np.linspace` instead).
+We'll use a simple Gaussian with a standard deviation of 1. We'll examine this function on a domain of `[-5, 5]` with values given at increments of `0.1`, and sample it at increments of `0.5`. Because this is a `torch` function, our `x` value should be `torch.linspace` (if it was a `numpy` function, `x` should be `np.linspace` instead).
 
 Under the hood, this function uses `np.linalg.lstsq` to use regression and solve the interpolation.
 
 ```{code-cell} ipython3
 x = torch.linspace(-5, 5, 101)
 sampled, full, interps, coeffs, residuals = pooling.sampling.check_sampling(0.5, x=x)
+```
+
+This could also be tested using pixels rather than values assuming an image of shape `(100,100)` with increments of `0.5` pixels, sampled every `2` pixels. We will use the `val_sampling` method moving forward.
+
+```{code-cell} ipython3
+x = torch.linspace(-50, 50, 201)
+sampled, full, interps, coeffs, residuals = pooling.sampling.check_sampling(val_sampling=None, pix_sampling=2, x=x)
 ```
 
 Let's look at the residuals, the error in each reconstruction. We can see there's problems at the boundaries, but that all the error is on the order of `1e-12`, which is pretty good!
