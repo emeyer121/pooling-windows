@@ -85,6 +85,8 @@ for w in windows:
 plt.show()
 ```
 
+## Displaying Window Values
+
 Now let's generate a figure with a noisy gradient across the image. We can then use `plot_window_values` to display the average values within each window.
 
 ```{code-cell} ipython3
@@ -96,3 +98,11 @@ plt.imshow(torch.squeeze(img), cmap='gray')
 pw_gauss.plot_window_values(img, subset=False)
 pw_cosine.plot_window_values(img, subset=False)
 ```
+
+If you would like a summary of the size and values associated with the pooling windows, you can call `summarize_window_sizes`.
+
+```{code-cell} ipython3
+pw_gauss.summarize_window_sizes()
+```
+
+## Choosing Scaling Values
