@@ -106,8 +106,30 @@ class TestPooling:
             rand_img.shape[2:],
             num_scales=num_scales,
             window_type="gaussian",
+            std_dev=1,
         )
         pw(rand_img)
+        # we only support std_dev=1
+        with pytest.raises(
+            Exception, match="Only std_dev=1 allowed for Gaussian windows!"
+        ):
+            pooling.PoolingWindows(
+                0.5,
+                rand_img.shape[2:],
+                num_scales=num_scales,
+                window_type="gaussian",
+                std_dev=2,
+            )
+        with pytest.raises(
+            Exception, match="Only std_dev=1 allowed for Gaussian windows!"
+        ):
+            pooling.PoolingWindows(
+                0.5,
+                rand_img.shape[2:],
+                num_scales=num_scales,
+                window_type="gaussian",
+                std_dev=0.5,
+            )
 
     def test_PoolingWindows_totype(self, pool_win):
         assert pool_win.angle_windows[0].dtype == torch.float32
