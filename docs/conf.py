@@ -13,7 +13,13 @@ author = "Flatiron NeuroRSE"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["myst_parser", "sphinx.ext.napoleon", "sphinx.ext.autodoc"]
+extensions = [
+    "myst_parser",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.autodoc",
+    "matplotlib.sphinxext.plot_directive",
+]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
@@ -30,3 +36,10 @@ master_doc = "index"
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+
+# Path for static files (custom stylesheets or JavaScript)
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
+
+# Enable automatic stub page generation
+autosummary_generate = True

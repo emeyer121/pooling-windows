@@ -121,7 +121,7 @@ def raised_cosine(
     -----
     For ``x`` values outside the function's domain, we return 0
 
-    Equation 9 from the online methods of [1]_.
+    Equation 9 from the online methods of [3]_.
 
     Parameters
     ----------
@@ -143,7 +143,7 @@ def raised_cosine(
 
     References
     ----------
-    .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the ventral stream.
+    .. [3] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the ventral stream.
         Nature Neuroscience, 14(9), 1195–1201. http://dx.doi.org/10.1038/nn.2889
 
     """
@@ -203,7 +203,7 @@ def _polar_angle_windows(
 
     Notes
     -----
-    Equation 10 from the online methods of [2]_.
+    Equation 10 from the online methods of [4]_.
 
     Parameters
     ----------
@@ -214,7 +214,7 @@ def _polar_angle_windows(
         make. If an int, will only make the windows in 1d (this is
         mainly for testing purposes)
     window_type
-        Whether to use the raised cosine function from [2]_ or a
+        Whether to use the raised cosine function from [4]_ or a
         Gaussian that has approximately the same structure. If cosine,
         ``transition_region_width`` must be set; if gaussian, then
         ``std_dev`` must be set
@@ -243,7 +243,7 @@ def _polar_angle_windows(
 
     References
     ----------
-    .. [2] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+    .. [4] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
        ventral stream. Nature Neuroscience, 14(9),
        1195–1201. http://dx.doi.org/10.1038/nn.2889
 
@@ -258,7 +258,7 @@ def _polar_angle_windows(
     if window_type == "gaussian" and (std_dev * 8) > n_windows:
         raise Exception(
             f"In order for windows to tile the circle correctly, n_windows ({n_windows}"
-            f") must be greater than 8*std_dev ({8*std_dev})!"
+            f") must be greater than 8*std_dev ({8 * std_dev})!"
         )
     if hasattr(resolution, "__iter__") and len(resolution) == 2:
         theta = utils.polar_angle(resolution, device=device).unsqueeze(0)
@@ -332,7 +332,7 @@ def _log_eccentricity_windows(
         degrees). Parameter :math:`e_r` in equation 11 of the online
         methods.
     window_type
-        Whether to use the raised cosine function from [3]_ or a
+        Whether to use the raised cosine function from [5]_ or a
         Gaussian that has approximately the same structure. If cosine,
         ``transition_region_width`` must be set; if gaussian, then
         ``std_dev`` must be set
@@ -368,11 +368,11 @@ def _log_eccentricity_windows(
 
     Notes
     -----
-    Equation 11 from the online methods of [3]_.
+    Equation 11 from the online methods of [5]_.
 
     References
     ----------
-    .. [3] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+    .. [5] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
        ventral stream. Nature Neuroscience, 14(9),
        1195–1201. http://dx.doi.org/10.1038/nn.2889
 
@@ -426,12 +426,12 @@ def create_pooling_windows(
     r"""Create two sets of 2d pooling windows that span the visual field.
 
     This creates the pooling windows that we use to average image
-    statistics for metamer generation as done in [4]_. This is returned
+    statistics for metamer generation as done in [6]_. This is returned
     as two 3d torch tensors for further use with a model.
 
     Note that these are returned separately as log-eccentricity and
     polar angle tensors and if you want the windows used in the paper
-    [4]_, you'll need to call ``torch.einsum`` (see Examples section)
+    [6]_, you'll need to call ``torch.einsum`` (see Examples section)
     or, better yet, use the ``PoolingWindows`` class, which is provided
     for this purpose.
 
@@ -460,9 +460,9 @@ def create_pooling_windows(
         of polar angle windows, we round the resulting number of polar
         angle windows to the nearest integer, so the ratio in the
         generated windows approximate this. 2 (the default) is the value
-        used in the paper [4]_.
+        used in the paper [6]_.
     window_type
-        Whether to use the raised cosine function from [4]_ or a Gaussian that
+        Whether to use the raised cosine function from [6]_ or a Gaussian that
         has approximately the same structure. If cosine,
         ``transition_region_width`` must be set; if gaussian, then ``std_dev``
         must be set.
@@ -501,36 +501,42 @@ def create_pooling_windows(
     .. plot::
        :include-source:
 
-       import matplotlib.pyplot as plt
-       angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
-       plt.imshow(ecc_w[0], cmap='Grays_r', interpolation='none')
-       plt.imshow(angle_w[0], cmap='Grays_r', interpolation='none')
+       >>> import matplotlib.pyplot as plt
+       >>> import pooling
+       >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
+       >>> fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+       >>> ax[0].imshow(ecc_w[0], cmap="Grays_r", interpolation="none")
+       >>> ax[1].imshow(angle_w[0], cmap="Grays_r", interpolation="none")
+       >>> plt.show()
 
     If you wish to get the windows as shown in Supplementary Figure 1C
-    in the paper [4]_, use ``torch.einsum`` (if you wish to apply these
+    in the paper [6]_, use ``torch.einsum`` (if you wish to apply these
     to images, use the ``PoolingWindows`` class instead, which has many
     more features):
 
     .. plot::
        :include-source:
 
-       import matplotlib.pyplot as plt
-       import torch
-       angle_w, ecc_w = pooling.pooling.create_pooling_windows(.87, (256, 256))
-       # we ignore the last ring of eccentricity windows here because
-       # they're all relatively small, which makes the following plot
-       # look weird. for how to properly handle them, see the
-       # PoolingWindows class
-       windows = torch.einsum('ahw,ehw->eahw', [angle_w, ecc_w[:-1]]).flatten(0, 1)
-       fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-       for w in windows:
-           ax.contour(w, [.5], colors='r')
-       plt.show()
+       >>> import matplotlib.pyplot as plt
+       >>> import pooling
+       >>> import torch
+       >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
+       >>> # we ignore the last ring of eccentricity windows here because
+       >>> # they're all relatively small, which makes the following plot
+       >>> # look weird. for how to properly handle them, see the
+       >>> # PoolingWindows class
+       >>> windows = torch.einsum("ahw,ehw->eahw", [angle_w, ecc_w[:-1]]).flatten(0, 1)
+       >>> fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+       >>> for w in windows:
+       >>>     ax.contour(w, [.5], colors='r')
+       >>> plt.show()
 
     References
     ----------
-    .. [4] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the ventral stream.
-        Nature Neuroscience, 14(9), 1195–1201. http://dx.doi.org/10.1038/nn.2889
+    .. [6] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+       ventral stream. Nature Neuroscience, 14(9),
+       1195–1201. http://dx.doi.org/10.1038/nn.2889
+
 
     """
     ecc_window_spacing = calculate._eccentricity_window_spacing(
