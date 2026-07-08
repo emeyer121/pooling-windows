@@ -39,3 +39,16 @@ jobs:
     - name: Run tests with pytest
       run: |
         pytest --cov-report xml
+  check_urls:
+    runs-on: ubuntu-latest
+    name: Check all urls are valid
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - uses: urlstechie/urlchecker-action@b643b43e2ac605e1475331c7b67247d242b7dce4 # 0.0.34
+      with:
+        file_types: .md,.py,.rst
+        print_all: false
+        timeout: 5
+        retry_count: 3
