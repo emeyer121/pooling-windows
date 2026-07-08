@@ -5,7 +5,6 @@ Here we have provided some tutorials with downloadable notebooks showing how to 
 ```{toctree}
 :maxdepth: 2
 
-generate_windows.md
 sampling_and_aliasing.md
 
 ```
