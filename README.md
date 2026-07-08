@@ -182,7 +182,7 @@ found on the `master` branch).
       users should interact with this code.
     - `pooling.py`: variety of calculations used for constructing and
       investigating the windows, used by `PoolingWindows`.
-    - `utils.py`: miscellaneous utility functions.
+    - `tensors.py`: miscellaneous utility functions.
     - `__init__.py`: boilerplate file for making `pooling` a module.
     - `sampling.py`: checks sampling and aliasing issues, used by the
       `Sampling_and_aliasing.ipynb` notebook, but not by `PoolingWindows`.
