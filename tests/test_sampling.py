@@ -32,7 +32,7 @@ class TestSampling:
         pooling.sampling.check_sampling(
             val_sampling=None,
             pix_sampling=pix_samp,
-            func=pooling.pooling.mother_window,
+            func=pooling.pooling.raised_cosine,
             x=x_eval,
         )
 
@@ -43,7 +43,7 @@ class TestSampling:
             pooling.sampling.check_sampling(
                 val_sampling=2,
                 pix_sampling=2,
-                func=pooling.pooling.mother_window,
+                func=pooling.pooling.raised_cosine,
                 x=x_eval,
             )
 
@@ -79,6 +79,6 @@ class TestSampling:
         _, _, interps, _, _ = pooling.sampling.check_sampling(
             0.5, func=pooling.pooling.gaussian, x=x_eval
         )
-        orig_fun = pooling.pooling.mother_window(x_eval)
+        orig_fun = pooling.pooling.raised_cosine(x_eval)
         cent = np.argmin(abs(x_eval - 0))
         assert not np.allclose(interps[:, cent], np.array(orig_fun))
