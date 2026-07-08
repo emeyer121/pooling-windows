@@ -273,7 +273,7 @@ def create_movie(
     -------
     anim
         The animation object. In order to view, must convert to HTML
-        (call ``pooling.utils.convert_anim_to_html(anim)``) or save (call
+        (call ``pooling.tensors.convert_anim_to_html(anim)``) or save (call
         ``anim.save(movie.mp4)``, must have ``ffmpeg`` installed).
 
     """
