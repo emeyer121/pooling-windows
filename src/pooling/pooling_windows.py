@@ -227,6 +227,12 @@ class PoolingWindows(nn.Module):
         we support for now, it's half a standard deviation away from the
         center, approximately .14)
 
+    References
+    ----------
+    .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
+       ventral stream. Nature Neuroscience, 14(9),
+       1195–1201. http://dx.doi.org/10.1038/nn.2889
+
     """
 
     def __init__(
@@ -255,9 +261,9 @@ class PoolingWindows(nn.Module):
         self._contract_expr = {}
         self.norm_factor = {}
         if window_type == "cosine":
-            assert (
-                transition_region_width is not None
-            ), "cosine windows need transition region widths!"
+            assert transition_region_width is not None, (
+                "cosine windows need transition region widths!"
+            )
             self.transition_region_width = float(transition_region_width)
             self.std_dev = None
             window_width_for_saving = self.transition_region_width
