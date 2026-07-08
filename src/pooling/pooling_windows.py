@@ -265,6 +265,8 @@ class PoolingWindows(nn.Module):
             self.window_intersecting_amplitude = self.window_max_amplitude * np.exp(
                 -0.25 / 2
             )
+        else:
+            raise ValueError("Window types must be either gaussian or cosine!")
         if cache_dir is not None:
             self.cache_dir = op.expanduser(cache_dir)
             if not op.exists(self.cache_dir):
