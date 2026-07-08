@@ -889,6 +889,63 @@ class PoolingWindows(nn.Module):
                 backend="torch",
             )
 
+    def save_model(self, save_dir: str, full_model: bool = False):
+        r"""Save pooling windows model parameters.
+
+        Helper function that can save the full pooling windows model or
+        just the necessary data for model initializaton. We recommend
+        saving only the necessary data since the full model can be large.
+
+        Parameters
+        ----------
+        save_dir
+            The directory you wish to save the model into. The file naming
+            convention will mirror what is described in ``cache_dir``:
+            ``scaling-{scaling}_size-{img_res}_e0-{min_eccentricity}_
+            em-{max_eccentricity}_w-{window_width}_{window_type}_
+            {save_type}.pt``, where {window_width} is
+            ``transition_region_width`` if ``window_type='cosine'``, and
+            ``std_dev`` if it's ``'gaussian'`` and ``save_type='full'`` if
+            ``full_model=True`` and ``save_type='reduced'`` if ``full_model=False``.
+        full_model
+            Option for whether to save full pooling windows model instatiation or
+            only the necessary parameters for building the model.
+
+        """
+        if self.window_type == "cosine":
+            window_width = self.transition_region_width
+        elif self.window_type == "gaussian":
+            window_width = self.std_dev
+
+        for i in range(self.num_scales):
+            scaled_img_res = [np.ceil(j / 2**i) for j in self.img_res]
+
+        save_type = "full" if full_model else "reduced"
+
+        path_template = op.join(
+            save_dir,
+            "scaling-{scaling}_size-{img_res}_"
+            "e0-{min_eccentricity:.03f}_em-{max_eccentricity:.01f}_w"
+            "-{window_width}_{window_type}_{save_type}.pt",
+        )
+
+        format_kwargs = dict(
+            scaling=self.scaling,
+            max_eccentricity=self.max_eccentricity,
+            img_res=",".join([str(int(i)) for i in scaled_img_res]),
+            window_width=window_width,
+            window_type=self.window_type,
+            min_eccentricity=self.min_eccentricity,
+            save_type=save_type,
+        )
+
+        full_path = path_template.format(**format_kwargs)
+
+        if full_model:
+            torch.save({"model": self}, full_path)
+        else:
+            torch.save({"model": self.state_dict_reduced}, full_path)
+
     def plot_windows(
         self,
         ax: plt.Axes | None = None,
