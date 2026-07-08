@@ -62,8 +62,8 @@ class PoolingWindows(nn.Module):
     if they do. The path we'll use is
     ``{cache_dir}/scaling-{scaling}_size-{img_res}_e0-{min_eccentricity}_
     em-{max_eccentricity}_w-{window_width}_{window_type}.pt``, where
-    {window_width} is ``transition_region_width`` if
-    ``window_type='cosine'``, and ``std_dev`` if it's
+    {window_width} is ``transition_region_width=0.5`` if
+    ``window_type='cosine'``, and ``std_dev=1`` if it's
     ``'gaussian'``. We'll cache each scale separately, changing the
     img_res (and potentially min_eccentricity) values in that save path
     appropriately.
@@ -97,10 +97,6 @@ class PoolingWindows(nn.Module):
         Whether to use the raised cosine function from [1]_ or a Gaussian that
         has approximately the same structure. If cosine,
         ``transition_region_width`` must be set.
-    transition_region_width
-        The width of the transition region, parameter :math:`t` in
-        equation 9 from the online methods. 0.5 (the default) is the
-        value used in the paper [1]_.
 
     Attributes
     ----------
@@ -231,8 +227,7 @@ class PoolingWindows(nn.Module):
         max_eccentricity: float = 15,
         num_scales: int = 1,
         cache_dir: str | None = None,
-        window_type: Literal["cosine", "gaussian"] = "cosine",
-        transition_region_width: float | None = 0.5,
+        window_type: Literal["cosine", "gaussian"] = "gaussian",
     ):
         super().__init__()
         if len(img_res) != 2:
@@ -248,10 +243,7 @@ class PoolingWindows(nn.Module):
         self._contract_expr = {}
         self.norm_factor = {}
         if window_type == "cosine":
-            assert (
-                transition_region_width is not None
-            ), "cosine windows need transition region widths!"
-            self.transition_region_width = float(transition_region_width)
+            self.transition_region_width = 0.5
             self.std_dev = None
             window_width_for_saving = self.transition_region_width
             self.window_max_amplitude = 1
