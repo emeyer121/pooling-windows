@@ -78,7 +78,7 @@ Let's look at one of our interpolated functions, centered at `x=0`. We can see i
 pooling.sampling.interpolation_plot(interps, residuals, None, 0, x);
 ```
 
-Now let's look at a movie that shows each of these interpolations, with the actual values as a dotted line in the background. We won't be able to tell the difference!
+Now let's look at a movie that shows each of these interpolations, with the actual values as a dotted line. We won't be able to tell the difference!
 
 ```{code-cell} ipython3
 anim = pooling.sampling.create_movie(interps, residuals, x, full=full)
