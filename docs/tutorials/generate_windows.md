@@ -43,10 +43,16 @@ This notebook provides tutorials on the most common ways of generating and inter
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 import torch
 
 import pooling
+
+mpl.rcParams['xtick.bottom'] = False
+mpl.rcParams['xtick.labelbottom'] = False
+mpl.rcParams['ytick.left'] = False
+mpl.rcParams['ytick.labelleft'] = False
 
 %load_ext autoreload
 %autoreload 2
