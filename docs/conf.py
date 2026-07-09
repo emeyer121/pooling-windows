@@ -15,6 +15,7 @@ author = "Flatiron NeuroRSE"
 
 extensions = [
     "sphinx.ext.napoleon",
+    "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "matplotlib.sphinxext.plot_directive",
     "myst_nb",
@@ -40,3 +41,10 @@ master_doc = "index"
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+
+# Path for static files (custom stylesheets or JavaScript)
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
+
+# Enable automatic stub page generation
+autosummary_generate = True

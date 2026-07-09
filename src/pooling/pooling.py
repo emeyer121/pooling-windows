@@ -1027,7 +1027,7 @@ def polar_angle_windows(
     if window_type == "gaussian" and (std_dev * 8) > n_windows:
         raise Exception(
             f"In order for windows to tile the circle correctly, n_windows ({n_windows}"
-            f") must be greater than 8*std_dev ({8*std_dev})!"
+            f") must be greater than 8*std_dev ({8 * std_dev})!"
         )
     if hasattr(resolution, "__iter__") and len(resolution) == 2:
         theta = utils.polar_angle(resolution, device=device).unsqueeze(0)
@@ -1275,7 +1275,7 @@ def create_pooling_windows(
        >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
        >>> fig, ax = plt.subplots(1, 2, figsize=(8, 4))
        >>> ax[0].imshow(ecc_w[0], cmap="Grays_r", interpolation="none")
-       >>> ax[6].imshow(angle_w[0], cmap="Grays_r", interpolation="none")
+       >>> ax[1].imshow(angle_w[0], cmap="Grays_r", interpolation="none")
        >>> plt.show()
 
     If you wish to get the windows as shown in Supplementary Figure 1C
