@@ -32,7 +32,7 @@ The main object you will interact with is PoolingWindows which will create and p
 
     check_sampling
 
-.. currentmodule:: pooling.utils
+.. currentmodule:: pooling.tensors
 .. autosummary::
     :toctree: generated
     :signatures: none
