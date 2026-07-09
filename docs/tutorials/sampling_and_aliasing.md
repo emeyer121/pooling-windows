@@ -53,7 +53,7 @@ x = torch.linspace(-5, 5, 101)
 sampled, full, interps, coeffs, residuals = pooling.sampling.check_sampling(0.5, x=x)
 ```
 
-This could also be tested using pixels rather than values assuming an image of shape `(100,100)` with increments of `0.5` pixels, sampled every `2` pixels. We will use the `val_sampling` method moving forward.
+This could also be tested using pixels rather than values. For example, we could run the following code for an image size of `(100,100)` and increments of `0.5` pixels, sampled every `2` pixels. However, we will use the previous `val_sampling` method moving forward.
 
 ```{code-cell} ipython3
 x_pix = torch.linspace(-50, 50, 201)
