@@ -1294,7 +1294,7 @@ class PoolingWindows(nn.Module):
             fig.legend(loc="center right", title="Angle slices")
         return fig
 
-    def summarize_window_sizes(self) -> dict:
+    def summarize_window_sizes(self, print_summary: bool = False) -> dict:
         r"""Summarize window sizes.
 
         This function returns a dictionary summarizing the window sizes
@@ -1304,6 +1304,12 @@ class PoolingWindows(nn.Module):
         ``self.max_eccentricity``. We find its center, FWHM (in the
         radial direction), and approximate area (at half-max) in
         degrees. We do the same in pixels, for each scale.
+
+        Parameters
+        ----------
+        print_summary
+            whether or not to automatically display summary of parameters
+            in a tabular format
 
         Returns
         -------
@@ -1336,4 +1342,9 @@ class PoolingWindows(nn.Module):
                     "radial_half"
                 ][idx]
                 sizes[f"{extrem}_window_scale_{i}_area_pixels"] = areas[i]["half"][idx]
+        if print_summary:
+            print(f"{'Parameters':<35} | {'Approx. Values':>14}")
+            print("-" * 52)
+            for param, val in sizes.items():
+                print(f"{param:<35} | {val:>14.6f}")
         return sizes
