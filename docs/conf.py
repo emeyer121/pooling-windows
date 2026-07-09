@@ -19,7 +19,6 @@ extensions = [
     "sphinx.ext.autodoc",
     "matplotlib.sphinxext.plot_directive",
     "myst_nb",
-    "jupytext",
 ]
 
 nb_custom_formats = {

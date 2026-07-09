@@ -53,14 +53,14 @@ x = torch.linspace(-5, 5, 101)
 sampled, full, interps, coeffs, residuals = pooling.sampling.check_sampling(0.5, x=x)
 ```
 
-This could also be tested using pixels rather than values assuming an image of shape `(100,100)` with increments of `0.5` pixels, sampled every `2` pixels. We will use the `val_sampling` method moving forward.
+This could also be tested using pixels rather than values. For example, we could run the following code scaling all of the values by `10` to make more sense in pixel space. Therefore, we could use an image size of `(100,100)` and sample every `5` pixels. We also need to scale the `std_dev` of the `gaussian` function being used to sample.
 
 ```{code-cell} ipython3
-x_pix = torch.linspace(-50, 50, 201)
-pooling.sampling.check_sampling(val_sampling=None, pix_sampling=2, x=x_pix);
+x_pix = torch.linspace(-50, 50, 101)
+pooling.sampling.check_sampling(val_sampling=None, pix_sampling=5, x=x_pix, std_dev=10);
 ```
 
-Let's look at the residuals, the error in each reconstruction. We can see there's problems at the boundaries, but that all the error is on the order of `1e-12`, which is pretty good!
+However, we will use the previous `val_sampling` method for our analyses moving forward. Let's look at the residuals, the error in each reconstruction. We can see there's problems at the boundaries, but that all the error is on the order of `1e-12`, which is pretty good!
 
 ```{code-cell} ipython3
 plt.stem(residuals)
@@ -78,7 +78,7 @@ Let's look at one of our interpolated functions, centered at `x=0`. We can see i
 pooling.sampling.interpolation_plot(interps, residuals, None, 0, x);
 ```
 
-Now let's look at a movie that shows each of these interpolations, with the actual values as a dotted line in the background. We won't be able to tell the difference!
+Now let's look at a movie that shows each of these interpolations, with the actual values as a dotted line. We won't be able to tell the difference!
 
 ```{code-cell} ipython3
 anim = pooling.sampling.create_movie(interps, residuals, x, full=full)
