@@ -223,9 +223,9 @@ def interpolation_plot(
     ylim = [ylim[0] - np.diff(ylim) / 10, ylim[1] + np.diff(ylim) / 10]
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     axes[0].set_ylim(ylim)
-    axes[0].plot(x, interpolated[:, pix], label="interpolation")
+    axes[0].plot(x, interpolated[:, pix], zorder=0, label="interpolation")
     if full is not None:
-        axes[0].plot(x, full[:, pix], "--", zorder=0, label="actual")
+        axes[0].plot(x, full[:, pix], "--", label="actual")
         axes[0].legend()
     axes[1].stem(x, residuals)
     axes[1].scatter(x[pix], residuals[pix], c="r", zorder=10)
