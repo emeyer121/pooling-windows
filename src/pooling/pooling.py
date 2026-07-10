@@ -30,6 +30,7 @@ functions
 """
 
 import math
+import warnings
 from typing import Literal
 
 import numpy as np
@@ -192,9 +193,9 @@ def raised_cosine(
 def _polar_angle_windows(
     n_windows: int,
     resolution: int | tuple[int, int],
-    window_type: Literal["cosine", "gaussian"] = "cosine",
-    transition_region_width: float | None = 0.5,
-    std_dev: float | None = None,
+    window_type: Literal["cosine", "gaussian"] = "gaussian",
+    transition_region_width: float | None = None,
+    std_dev: float | None = 1,
     device: str | torch.device | None = None,
 ) -> torch.Tensor:
     r"""Create polar angle windows.
@@ -287,9 +288,9 @@ def _log_eccentricity_windows(
     window_spacing: float | None = None,
     min_ecc: float = 0.5,
     max_ecc: float = 15,
-    window_type: Literal["cosine", "gaussian"] = "cosine",
-    transition_region_width: float | None = 0.5,
-    std_dev: float | None = None,
+    window_type: Literal["cosine", "gaussian"] = "gaussian",
+    transition_region_width: float | None = None,
+    std_dev: float | None = 1,
     device: str | torch.device | None = None,
     linear: bool = False,
 ) -> torch.Tensor:
@@ -363,7 +364,7 @@ def _log_eccentricity_windows(
 
     Raises
     ------
-    Exception
+    Warning
         If ``std_dev`` is not 1
 
     Notes
@@ -379,7 +380,7 @@ def _log_eccentricity_windows(
     """
     log_func = torch.log if not linear else lambda x: x
     if std_dev is not None and std_dev != 1:
-        raise Exception(
+        warnings.warn(
             "Only std_dev=1 is supported (not sure if Gaussian "
             "windows will uniformly tile image otherwise!)"
         )
@@ -418,9 +419,9 @@ def create_pooling_windows(
     min_eccentricity: float = 0.5,
     max_eccentricity: float = 15,
     radial_to_circumferential_ratio: float = 2,
-    window_type: Literal["cosine", "gaussian"] = "cosine",
-    transition_region_width: float | None = 0.5,
-    std_dev: float | None = None,
+    window_type: Literal["cosine", "gaussian"] = "gaussian",
+    transition_region_width: float | None = None,
+    std_dev: float | None = 1,
     device: str | torch.device | None = None,
 ) -> tuple[torch.Tensor | dict, torch.Tensor | dict]:
     r"""Create two sets of 2d pooling windows that span the visual field.
