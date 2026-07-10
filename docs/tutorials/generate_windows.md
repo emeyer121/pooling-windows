@@ -61,13 +61,18 @@ mpl.rcParams['ytick.labelleft'] = False
 
 ## Creating PoolingWindows Objects
 
-Let's begin by creating a `PoolingWindows` object for image size `(256,256)` and visualize the windows that are created. We must also input a `scaling` value that determines the size of the window (choosing this value will be discussed more later). We have two built-in window types that can be used to generate windows: `gaussian` and `raised cosine`. **remove std_dev once this has been changed in code reorg**
+Let's begin by creating a `PoolingWindows` object for image size `(256,256)` and visualize the window contours that are created. We must also input a `scaling` value that determines the size of the window (see [](choosing-scaling-values)).
 
 ```{code-cell} ipython3
-pw_gauss = pooling.PoolingWindows(.5, (256,256), window_type='gaussian',std_dev=1)
-pw_cosine = pooling.PoolingWindows(.5, (256,256), window_type='cosine')
-pw_gauss.plot_windows()
-pw_cosine.plot_windows()
+pw = pooling.PoolingWindows(0.5, (256,256))
+pw.plot_windows(subset=False)
+```
+
+We can also change a number of other parameters that define the windows: `min_eccentricity` and `max_eccentricity` that define the extent of the windows within the image in degrees of visual angle, `num_scales` which controls the number of window scales generated, `cache_dir` for specifying a path to cache the model in for loading/saving, and `window_type` which can be defined as `gaussian` or `cosine` (**see tutorial for comparison**).
+
+```{code-cell} ipython3
+pw = pooling.PoolingWindows(0.5, (256,256), min_eccentricity=1, max_eccentricity=10, window_type='cosine')
+pw.plot_windows()
 ```
 
 If you want to take advantage of just the eccentricity rings or angular wedges separately, you can also call `pooling.create_pooling_windows`. We will again use `scaling=0.5` and and image size of `(256,256)`. We will also take advantage of [plenoptic's](https://plenoptic.org/) plotting function `po.imshow`.
@@ -75,20 +80,16 @@ If you want to take advantage of just the eccentricity rings or angular wedges s
 ```{code-cell} ipython3
 import plenoptic as po
 
-angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.5, (256, 256))
+angle_w, ecc_w = pooling.pooling.create_pooling_windows(2, (256, 256))
 fig = po.plot.imshow(ecc_w.unsqueeze(0))
 fig = po.plot.imshow(angle_w.unsqueeze(0))
 plt.show()
 ```
 
-It is also simple to reconstruct the window contours from this angle and eccentricity data.
+It is also simple to reconstruct the windows from this angle and eccentricity data.
 
 ```{code-cell} ipython3
 windows = torch.einsum('ahw,ehw->eahw', [angle_w, ecc_w]).flatten(0, 1)
-fig, ax = plt.subplots(1, 1, figsize=(5, 5))
-for w in windows:
-    ax.contour(w, [.5], colors='r')
-plt.show()
 ```
 
 ## Displaying Window Values
@@ -101,14 +102,24 @@ plt.imshow(torch.squeeze(img), cmap='gray')
 ```
 
 ```{code-cell} ipython3
-pw_gauss.plot_window_values(img, subset=False)
-pw_cosine.plot_window_values(img, subset=False)
+pw = pooling.PoolingWindows(1, (256,256))
+pw.plot_window_values(img, subset=False)
 ```
 
 If you would like a summary of the size and values associated with the pooling windows, you can call `summarize_window_sizes`.
 
 ```{code-cell} ipython3
-pw_gauss.summarize_window_sizes()
+summary = pw.summarize_window_sizes(print_summary=True)
 ```
 
+(choosing-scaling-values)=
 ## Choosing Scaling Values
+
+However, the `scaling` values used in previous examples were arbitrary. Let's say you are displaying images for an experiment and want to build pooling windows ranging from 1-10 degrees of eccentricity, tiling the space with 5 angular windows. You can then find the precise scaling value to generate the corresponding `PoolingWindows` object.
+
+```{code-cell} ipython3
+scaling = pooling.calculate.scaling(n_windows=5, min_ecc=1, max_ecc=10, std_dev=1)
+pw = pooling.PoolingWindows(scaling, (256,256), min_eccentricity=1, max_eccentricity=10)
+ax = pw.plot_windows()
+ax.set_title(f"Scaling = {scaling:.4f}");
+```
