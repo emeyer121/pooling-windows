@@ -1,4 +1,4 @@
-"""External utility functions to assist with spatial pooling.
+"""External utility functions to assist with tensor generation.
 
 pooling_windows.py contains the PoolingWindows class, which uses most of these
 functions
@@ -10,7 +10,7 @@ from contextlib import suppress
 import numpy as np
 import torch
 
-__all__ = ["to_numpy", "polar_radius", "polar_angle"]
+__all__ = ["to_numpy"]
 
 
 def __dir__() -> list[str]:
@@ -38,7 +38,7 @@ def to_numpy(x: torch.Tensor | np.ndarray) -> np.ndarray:
     return x
 
 
-def polar_radius(
+def _polar_radius(
     size: int | tuple[int, int],
     exponent: float = 1,
     origin: int | tuple[int, int] | None = None,
@@ -100,7 +100,7 @@ def polar_radius(
     return res
 
 
-def polar_angle(
+def _polar_angle(
     size: int | tuple,
     phase: float = 0,
     origin: int | tuple[int, int] | None = None,
