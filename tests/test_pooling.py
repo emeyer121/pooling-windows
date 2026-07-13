@@ -28,59 +28,64 @@ class TestPooling:
 
     @pytest.mark.parametrize("n_windows", [4, 4.5])
     def test_ecc_nwindows(self, n_windows):
-        pooling.pooling.log_eccentricity_windows((256, 256), n_windows=n_windows)
+        pooling.pooling._log_eccentricity_windows((256, 256), n_windows=n_windows)
 
     @pytest.mark.parametrize("window_spacing", [0.5, 1])
     def test_ecc_window_spacing(self, window_spacing):
-        pooling.pooling.log_eccentricity_windows(
+        pooling.pooling._log_eccentricity_windows(
             (256, 256), window_spacing=window_spacing
         )
 
     @pytest.mark.parametrize("res", [(256, 256), (1000, 1000), 100])
     def test_angle_windows(self, res):
-        pooling.pooling.polar_angle_windows(4, res)
+        pooling.pooling._polar_angle_windows(4, res)
 
     def test_angle_windows_notint(self):
         with pytest.raises(Exception, match="n_windows must be an integer"):
-            pooling.pooling.polar_angle_windows(1.5, (256, 256))
+            pooling.pooling._polar_angle_windows(1.5, (256, 256))
 
     def test_angle_windows_onewin(self):
         with pytest.raises(Exception, match="We cannot handle one window correctly!"):
-            pooling.pooling.polar_angle_windows(1, (256, 256))
+            pooling.pooling._polar_angle_windows(1, (256, 256))
 
     def test_calculations(self):
         # these really shouldn't change, but just in case...
-        assert pooling.pooling.calc_angular_window_spacing(2) == np.pi
-        assert pooling.pooling.calc_angular_n_windows(2) == np.pi
+        assert pooling.pooling.calculate._angular_window_spacing(2) == np.pi
+        assert pooling.pooling.calculate._angular_n_windows(2) == np.pi
         with pytest.raises(
             Exception, match="Exactly one of n_windows or scaling must be set!"
         ):
-            pooling.pooling.calc_eccentricity_window_spacing()
+            pooling.pooling.calculate._eccentricity_window_spacing()
         assert np.allclose(
-            pooling.pooling.calc_eccentricity_window_spacing(n_windows=4),
+            pooling.pooling.calculate._eccentricity_window_spacing(n_windows=4),
             0.8502993454155389,
         )
         assert np.allclose(
-            pooling.pooling.calc_eccentricity_window_spacing(scaling=0.87),
+            pooling.pooling.calculate._eccentricity_window_spacing(scaling=0.87),
             0.8446653390527211,
         )
         assert np.allclose(
-            pooling.pooling.calc_eccentricity_window_spacing(5, 10, scaling=0.87),
+            pooling.pooling.calculate._eccentricity_window_spacing(5, 10, scaling=0.87),
             0.8446653390527211,
         )
         assert np.allclose(
-            pooling.pooling.calc_eccentricity_window_spacing(5, 10, n_windows=4),
+            pooling.pooling.calculate._eccentricity_window_spacing(5, 10, n_windows=4),
             0.1732867951399864,
         )
         assert np.allclose(
-            pooling.pooling.calc_eccentricity_n_windows(0.8502993454155389), 4
+            pooling.pooling.calculate._eccentricity_n_windows(0.8502993454155389), 4
         )
         assert np.allclose(
-            pooling.pooling.calc_eccentricity_n_windows(0.1732867951399864, 5, 10), 4
+            pooling.pooling.calculate._eccentricity_n_windows(
+                0.1732867951399864, 5, 10
+            ),
+            4,
         )
-        assert np.allclose(pooling.pooling.calc_scaling(4), 0.8761474337786708)
-        assert np.allclose(pooling.pooling.calc_scaling(4, 5, 10), 0.17350368946058647)
-        assert np.isinf(pooling.pooling.calc_scaling(4, 0))
+        assert np.allclose(pooling.pooling.calculate.scaling(4), 0.8761474337786708)
+        assert np.allclose(
+            pooling.pooling.calculate.scaling(4, 5, 10), 0.17350368946058647
+        )
+        assert np.isinf(pooling.pooling.calculate.scaling(4, 0))
 
     @pytest.mark.parametrize("num_scales", [1, 3])
     @pytest.mark.parametrize("transition_region_width", [0.5, 1])
