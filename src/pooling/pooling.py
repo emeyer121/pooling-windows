@@ -262,7 +262,7 @@ def _polar_angle_windows(
             f") must be greater than 8*std_dev ({8 * std_dev})!"
         )
     if hasattr(resolution, "__iter__") and len(resolution) == 2:
-        theta = tensors.polar_angle(resolution, device=device).unsqueeze(0)
+        theta = tensors._polar_angle(resolution, device=device).unsqueeze(0)
         theta = theta + (
             np.pi
             - torch.linspace(0, max_angle, n_windows, device=device)
@@ -397,7 +397,7 @@ def _log_eccentricity_windows(
     ).unsqueeze(-1)
     if hasattr(resolution, "__iter__") and len(resolution) == 2:
         ecc = log_func(
-            tensors.polar_radius(resolution, device=device)
+            tensors._polar_radius(resolution, device=device)
             / calculate.deg_to_pix(resolution, max_ecc)
         ).unsqueeze(0)
         shift_arg = shift_arg.unsqueeze(-1)
