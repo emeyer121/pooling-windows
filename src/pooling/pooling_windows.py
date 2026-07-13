@@ -890,7 +890,7 @@ class PoolingWindows(nn.Module):
                 backend="torch",
             )
 
-    def save(self, save_dir: str, full_model: bool = False):
+    def save(self, save_dir: str):
         r"""Save pooling windows model parameters.
 
         Helper function that can save the full pooling windows model or
@@ -908,9 +908,6 @@ class PoolingWindows(nn.Module):
             ``transition_region_width`` if ``window_type='cosine'``, and
             ``std_dev`` if it's ``'gaussian'`` and ``save_type='full'`` if
             ``full_model=True`` and ``save_type='reduced'`` if ``full_model=False``.
-        full_model
-            Option for whether to save full pooling windows model instatiation or
-            only the necessary parameters for building the model.
 
         """
         if self.window_type == "cosine":
@@ -918,15 +915,24 @@ class PoolingWindows(nn.Module):
         elif self.window_type == "gaussian":
             window_width = self.std_dev
 
+        save_dict = {
+            "scaling": self.scaling,
+            "img_res": self.img_res,
+            "min_eccentricity": self.min_eccentricity,
+            "max_eccentricity": self.max_eccentricity,
+            "transition_region_width": self.transition_region_width,
+            "cache_dir": self.cache_dir,
+            "window_type": self.window_type,
+            "std_dev": self.std_dev,
+        }
+
         for i in range(self.num_scales):
             scaled_img_res = [np.ceil(j / 2**i) for j in self.img_res]
 
-        save_type = "full" if full_model else "reduced"
-
-        path_template = (
+        path_template = str(
             Path(save_dir)
-            / "scaling-{scaling}_size-{img_res}_e0-{min_eccentricity:.03f}_em-"
-            "{max_eccentricity:.01f}_w-{window_width}_{window_type}_{save_type}.pt"
+            / "scaling-{scaling}_size-{img_res}_e0-{min_eccentricity:.03f}"
+            "_em-{max_eccentricity:.01f}_w-{window_width}_{window_type}.pt"
         )
 
         full_path = path_template.format(
@@ -936,13 +942,9 @@ class PoolingWindows(nn.Module):
             window_width=window_width,
             window_type=self.window_type,
             min_eccentricity=self.min_eccentricity,
-            save_type=save_type,
         )
 
-        if full_model:
-            torch.save({"model": self}, full_path)
-        else:
-            torch.save({"model": self.state_dict_reduced}, full_path)
+        torch.save({"model": save_dict}, full_path)
 
     def plot_windows(
         self,
