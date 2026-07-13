@@ -12,7 +12,6 @@ The main object you will interact with is PoolingWindows which will create and p
 .. autosummary::
     :toctree: generated
     :signatures: none
-    :template: synthesis_object.rst.jinja
 
     PoolingWindows
 
@@ -20,7 +19,6 @@ The main object you will interact with is PoolingWindows which will create and p
 .. autosummary::
     :toctree: generated
     :signatures: none
-    :template: synthesis_object.rst.jinja
 
     create_pooling_windows
 
@@ -28,7 +26,6 @@ The main object you will interact with is PoolingWindows which will create and p
 .. autosummary::
     :toctree: generated
     :signatures: none
-    :template: synthesis_object.rst.jinja
 
     check_sampling
 
@@ -36,6 +33,5 @@ The main object you will interact with is PoolingWindows which will create and p
 .. autosummary::
     :toctree: generated
     :signatures: none
-    :template: synthesis_object.rst.jinja
 
     to_numpy
