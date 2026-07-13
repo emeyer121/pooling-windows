@@ -10,6 +10,7 @@ pooling.py contains a lot of necessary functions
 import itertools
 import os.path as op
 import warnings
+from pathlib import Path
 from typing import Any, Literal
 
 import matplotlib.pyplot as plt
@@ -889,7 +890,7 @@ class PoolingWindows(nn.Module):
                 backend="torch",
             )
 
-    def save_model(self, save_dir: str, full_model: bool = False):
+    def save(self, save_dir: str, full_model: bool = False):
         r"""Save pooling windows model parameters.
 
         Helper function that can save the full pooling windows model or
@@ -922,14 +923,13 @@ class PoolingWindows(nn.Module):
 
         save_type = "full" if full_model else "reduced"
 
-        path_template = op.join(
-            save_dir,
-            "scaling-{scaling}_size-{img_res}_"
-            "e0-{min_eccentricity:.03f}_em-{max_eccentricity:.01f}_w"
-            "-{window_width}_{window_type}_{save_type}.pt",
+        path_template = (
+            Path(save_dir)
+            / "scaling-{scaling}_size-{img_res}_e0-{min_eccentricity:.03f}_em-"
+            "{max_eccentricity:.01f}_w-{window_width}_{window_type}_{save_type}.pt"
         )
 
-        format_kwargs = dict(
+        full_path = path_template.format(
             scaling=self.scaling,
             max_eccentricity=self.max_eccentricity,
             img_res=",".join([str(int(i)) for i in scaled_img_res]),
@@ -938,8 +938,6 @@ class PoolingWindows(nn.Module):
             min_eccentricity=self.min_eccentricity,
             save_type=save_type,
         )
-
-        full_path = path_template.format(**format_kwargs)
 
         if full_model:
             torch.save({"model": self}, full_path)
