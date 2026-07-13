@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Pooling Windows is a python library for generating foveated pooling windows."""
 
 __all__ = ["PoolingWindows", "pooling", "sampling", "utils"]
 

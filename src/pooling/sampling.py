@@ -1,4 +1,4 @@
-"""functions related to sampling
+"""Functions related to sampling.
 
 handful of functions here, related to sampling and checking whether
 you're sampling correctly, in order to avoid aliasing
@@ -10,10 +10,14 @@ that, see the Sampling_and_Aliasing notebook for some examples
 
 """
 
+from collections.abc import Callable
+from typing import Any
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from matplotlib import animation
+from matplotlib.figure import Figure
 
 from . import utils
 from .pooling import gaussian
@@ -26,13 +30,13 @@ def __dir__() -> list[str]:
 
 
 def check_sampling(
-    val_sampling=0.5,
-    pix_sampling=None,
-    func=gaussian,
-    x=torch.linspace(-5, 5, 101),
-    **func_kwargs,
-):
-    r"""check how sampling relates to interpolation quality
+    val_sampling: float | None = 0.5,
+    pix_sampling: int | None = None,
+    func: Callable[[float | np.ndarray], np.ndarray] = gaussian,
+    x: torch.Tensor | np.ndarray = torch.linspace(-5, 5, 101),
+    **func_kwargs: Any,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    r"""Check how sampling relates to interpolation quality.
 
     Given a function, a domain, and how to sample that domain, this
     function will use linear algebra (``np.linalg.lstsq``) to determine
@@ -55,42 +59,47 @@ def check_sampling(
 
     Parameters
     ----------
-    val_sampling : float or None, optional.
+    val_sampling
         If float, how far apart (in x-values) each sampled function
         should be. This doesn't have to align perfectly with the pixels,
         but should be close. If None, we use ``pix_sampling`` instead.
-    pix_sampling : int or None, optional
+    pix_sampling
         If int, how far apart (in pixels) each sampled function should
         be. If None, we use ``val_sampling`` instead.
-    func : callable, optional
+    func
         the function to check interpolation for. must take ``x`` as its
         first input, all additional kwargs can be specified in
         ``func_kwargs``
-    x : torch.tensor or np.array, optional
+    x
         the 1d tensor/array to evaluate ``func`` on.
-    func_kwargs :
+    func_kwargs
         additional kwargs to pass to ``func``
 
     Returns
     -------
-    sampled : np.array
+    sampled
         the array of sampled functions. will have shape ``(len(x),
         ceil(len(x)/pix_sampling))``
-    full : np.array
+    full
         the array of functions centered at each pixel. will have shape
         ``(len(x), len(x))``
-    interpolated : np.array
+    interpolated
         the array of functions interpolated to each pixel. will have
         shape ``(len(x), len(x))``
-    coeffs : np.array
+    coeffs
         the array of coefficients to transform ``sampled`` to
         ``full``. This has been transposed from the array returned by
         ``np.linalg.lstsq`` and thus will have the same shape as
         ``sampled`` (this is to make it easier to restrict which coeffs
         to look at, since they'll be more easily indexed along first
         dimension)
-    residuals : np.array
+    residuals
         the errors for each interpolation, will have shape ``len(x)``
+
+    Raises
+    ------
+    Exception
+        If neither ``val_sampling`` nor ``pix_sampling`` are set to ``None``
 
     """
     if val_sampling is not None:
@@ -116,32 +125,34 @@ def check_sampling(
         sampled = func(X, **func_kwargs)
         full_X = x.unsqueeze(1) + x
         full = func(full_X, func_kwargs)
-    coeffs, residuals, rank, s = np.linalg.lstsq(sampled, full, rcond=None)
+    coeffs, residuals, _, _ = np.linalg.lstsq(sampled, full, rcond=None)
     interpolated = np.matmul(sampled, coeffs)
     return sampled, full, interpolated, coeffs.T, residuals
 
 
-def plot_coeffs(coeffs, ncols=5, ax_size=(5, 5)):
-    r"""plot interpolation coefficients
+def plot_coeffs(
+    coeffs: np.ndarray, ncols: int = 5, ax_size: tuple[int, int] = (5, 5)
+) -> Figure:
+    r"""Plot interpolation coefficients.
 
     Simple function to plot a bunch of interpolation coefficients on the
     same figure as stem plots
 
     Parameters
     ----------
-    coeffs : np.array
+    coeffs
         the array of coefficients to transform ``sampled`` to
         ``full``. In order to show fewer coefficients (because they're
         so many), index along the first dimension (e.g., ``coeffs[:10]``
         to view first 10)
-    ncols : int, optional
+    ncols
         the number of columns to create in the plot
-    ax_size : tuple, optional
+    ax_size
         the size of each subplots axis
 
     Returns
     -------
-    fig : plt.Figure
+    fig
         the figure containing the plot
     """
     nrows = int(np.ceil(coeffs.shape[0] / ncols))
@@ -157,9 +168,14 @@ def plot_coeffs(coeffs, ncols=5, ax_size=(5, 5)):
 
 
 def interpolation_plot(
-    interpolated, residuals, pix=0, val=None, x=np.linspace(-5, 5, 101), full=None
-):
-    r"""create plot showing interpolation results at specified pixel or value
+    interpolated: np.ndarray,
+    residuals: np.ndarray,
+    pix: int | None = 0,
+    val: float | None = None,
+    x: torch.Tensor | np.ndarray = np.linspace(-5, 5, 101),
+    full: np.ndarray | None = None,
+) -> Figure:
+    r"""Create plot showing interpolation results at specified pixel or value.
 
     We have two subplots: the interpolation (with optional actual
     values) and the residuals
@@ -169,28 +185,31 @@ def interpolation_plot(
 
     Parameters
     ----------
-    interpolated : np.array
+    interpolated
         the array of functions interpolated to each pixel
-    residuals : np.array
+    residuals
         the errors for each interpolation
-    pix : int or None, optional
+    pix
         we plot the interpolated function centered at this pixel
-    val : float or None, optional
+    val
         we plot the interpolated function centered at this x-value
-    x : torch.tensor or np.array, optional
+    x
         the 1d tensor/array passed to ``check_sampling()``. the default
         here is the default there. plotted on x-axis
-    full : np.array, optional
+    full
         the array of functions centered at each pixel. If None, won't
         plot. If not None, will plot as dashed line behind the
         interpolation for comparison
-    framerate : int, optional
-        How many frames a second to display.
 
     Returns
     -------
-    fig  : plt.Figure
+    fig
         figure containing the plot
+
+    Raises
+    ------
+    Exception
+        If neither ``val_sampling`` nor ``pix_sampling`` are set to ``None``
 
     """
     if val is not None:
@@ -216,9 +235,13 @@ def interpolation_plot(
 
 
 def create_movie(
-    interpolated, residuals, x=np.linspace(-5, 5, 101), full=None, framerate=10
-):
-    r"""create movie showing the interpolation results
+    interpolated: np.ndarray,
+    residuals: np.ndarray,
+    x: torch.Tensor | np.ndarray = np.linspace(-5, 5, 101),
+    full: np.ndarray | None = None,
+    framerate: int = 10,
+) -> animation.FuncAnimation:
+    r"""Create movie showing the interpolation results.
 
     We create a simple movie to show this in action. we have two
     subplots: the interpolation (with optional actual values) and the
@@ -232,23 +255,23 @@ def create_movie(
 
     Parameters
     ----------
-    interpolated : np.array
+    interpolated
         the array of functions interpolated to each pixel
-    residuals : np.array
+    residuals
         the errors for each interpolation
-    x : torch.tensor or np.array, optional
+    x
         the 1d tensor/array passed to ``check_sampling()``. the default
         here is the default there. plotted on x-axis
-    full : np.array, optional
+    full
         the array of functions centered at each pixel. If None, won't
         plot. If not None, will plot as dashed line behind the
         interpolation for comparison
-    framerate : int, optional
+    framerate
         How many frames a second to display.
 
     Returns
     -------
-    anim : matplotlib.animation.FuncAnimation
+    anim
         The animation object. In order to view, must convert to HTML
         (call ``pooling.utils.convert_anim_to_html(anim)``) or save (call
         ``anim.save(movie.mp4)``, must have ``ffmpeg`` installed).
@@ -261,7 +284,7 @@ def create_movie(
     interp_line = fig.axes[0].lines[0]
     scat = fig.axes[1].collections[1]
 
-    def movie_plot(i):
+    def _movie_plot(i):  # noqa: ANN202, ANN001
         interp_line.set_data(x, interpolated[:, i])
         scat.set_offsets((x[i], residuals[i]))
         artists = [interp_line, scat]
@@ -270,10 +293,9 @@ def create_movie(
             artists.append(full_line)
         return artists
 
-    plt.close(fig)
     return animation.FuncAnimation(
         fig,
-        movie_plot,
+        _movie_plot,
         frames=len(interpolated),
         blit=True,
         interval=1000.0 / framerate,

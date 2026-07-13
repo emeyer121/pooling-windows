@@ -1,34 +1,34 @@
-#!/usr/bin/env python3
-import warnings
+"""External utility functions to assist with spatial pooling.
+
+pooling_windows.py contains the PoolingWindows class, which uses most of these
+functions
+
+"""
+
 from contextlib import suppress
 
 import numpy as np
 import torch
 
-try:
-    from IPython.display import HTML
-except ImportError:
-    warnings.warn("Unable to import IPython.display.HTML")
-
-__all__ = ["to_numpy", "polar_radius", "polar_angle", "convert_anim_to_html"]
+__all__ = ["to_numpy", "polar_radius", "polar_angle"]
 
 
 def __dir__() -> list[str]:
     return __all__
 
 
-def to_numpy(x):
+def to_numpy(x: torch.Tensor | np.ndarray) -> np.ndarray:
     r"""Cast tensor to numpy in the most conservative way possible.
 
     Parameters
     ----------
-    x: `torch.Tensor` or `np.ndarray`
+    x
        Tensor to be converted to `np.ndarray` on CPU. If it's already an array,
        we do nothing. We also cast it to float32.
 
     Returns
     -------
-    x : np.ndarray
+    x
        array version of `x`
 
     """
@@ -38,7 +38,12 @@ def to_numpy(x):
     return x
 
 
-def polar_radius(size, exponent=1, origin=None, device=None):
+def polar_radius(
+    size: int | tuple[int, int],
+    exponent: float = 1,
+    origin: int | tuple[int, int] | None = None,
+    device: torch.device | str | None = None,
+) -> torch.Tensor:
     """Make distance-from-origin (r) matrix.
 
     Compute a matrix of given size containing samples of a radial ramp
@@ -46,24 +51,24 @@ def polar_radius(size, exponent=1, origin=None, device=None):
 
     Arguments
     ---------
-    size : `int` or `tuple`
+    size
         if an int, we assume the image should be of dimensions `(size,
         size)`. if a tuple, must be a 2-tuple of ints specifying the
         dimensions
-    exponent : `float`
+    exponent
         the exponent of the radial ramp function.
-    origin : `int`, `tuple`, or None
+    origin
         the center of the image. if an int, we assume the origin is at
         `(origin, origin)`. if a tuple, must be a 2-tuple of ints
         specifying the origin (where `(0, 0)` is the upper left).  if
         None, we assume the origin lies at the center of the matrix,
         `(size+1)/2`.
-    device : str or torch.device
+    device
         the device to create this tensor on
 
     Returns
     -------
-    res : torch.Tensor
+    res
         the polar radius matrix
 
     """
@@ -95,7 +100,12 @@ def polar_radius(size, exponent=1, origin=None, device=None):
     return res
 
 
-def polar_angle(size, phase=0, origin=None, device=None):
+def polar_angle(
+    size: int | tuple,
+    phase: float = 0,
+    origin: int | tuple[int, int] | None = None,
+    device: torch.device | str | None = None,
+) -> torch.Tensor:
     """Make polar angle matrix (in radians).
 
     Compute a matrix of given size containing samples of the polar angle (in radians,
@@ -104,22 +114,22 @@ def polar_angle(size, phase=0, origin=None, device=None):
 
     Arguments
     ---------
-    size : `int` or `tuple`
+    size
         if an int, we assume the image should be of dimensions `(size, size)`. if a
         tuple, must be a 2-tuple of ints specifying the dimensions
-    phase : `float`
+    phase
         the phase of the polar angle function (in radians, clockwise from the X-axis)
-    origin : `int`, `tuple`, or None
+    origin
         the center of the image. if an int, we assume the origin is at
         `(origin, origin)`. if a tuple, must be a 2-tuple of ints specifying the
         origin (where `(0, 0)` is the upper left). if None, we assume the origin lies
         at the center of the matrix, `(size+1)/2`.
-    device : str or torch.device
+    device
         the device to create this tensor on
 
     Returns
     -------
-    res : torch.Tensor
+    res
         the polar angle matrix
 
     """
@@ -146,23 +156,3 @@ def polar_angle(size, phase=0, origin=None, device=None):
     res = ((res + (np.pi - phase)) % (2 * np.pi)) - np.pi
 
     return res
-
-
-def convert_anim_to_html(anim):
-    r"""convert a matplotlib animation object to HTML (for display)
-
-    This is a simple little wrapper function that allows the animation
-    to be displayed in a Jupyter notebook
-
-    Parameters
-    ----------
-    anim : `matplotlib.animation.FuncAnimation`
-        The animation object to convert to HTML
-    """
-
-    # to_html5_video will call savefig with a dpi kwarg, so our
-    # custom figure class will raise a warning. we don't want to
-    # worry people, so we go ahead and suppress it
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=UserWarning)
-        return HTML(anim.to_html5_video())
