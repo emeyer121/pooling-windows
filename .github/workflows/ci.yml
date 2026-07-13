@@ -5,7 +5,6 @@ on:
     - cron: "0 0 * * 0" # weekly
   pull_request:
     branches:
-    - main
 
 concurrency:
   # from https://stackoverflow.com/a/72408109/4659293
