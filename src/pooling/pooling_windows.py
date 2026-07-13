@@ -890,7 +890,7 @@ class PoolingWindows(nn.Module):
                 backend="torch",
             )
 
-    def save(self, save_dir: str):
+    def save(self, save_path: str | None = None):
         r"""Save pooling windows model parameters.
 
         Helper function that can save the full pooling windows model or
@@ -899,15 +899,23 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        save_dir
-            The directory you wish to save the model into. The file naming
-            convention will mirror what is described in ``cache_dir``:
+        save_path
+            The directory and file name (if provided) you wish to save the model
+            into. If a ``.pt`` file name is not provided, the file naming convention
+            will mirror what is described in ``cache_dir``:
             ``scaling-{scaling}_size-{img_res}_e0-{min_eccentricity}_
             em-{max_eccentricity}_w-{window_width}_{window_type}_
             {save_type}.pt``, where {window_width} is
             ``transition_region_width`` if ``window_type='cosine'``, and
             ``std_dev`` if it's ``'gaussian'`` and ``save_type='full'`` if
             ``full_model=True`` and ``save_type='reduced'`` if ``full_model=False``.
+
+        Raises
+        ------
+        ValueError
+            If path exists but is not a directory or ``.pt`` file
+        TypeError
+            If ``save_path`` is not a directory or ``.pt`` file!
 
         """
         if self.window_type == "cosine":
@@ -929,20 +937,42 @@ class PoolingWindows(nn.Module):
         for i in range(self.num_scales):
             scaled_img_res = [np.ceil(j / 2**i) for j in self.img_res]
 
-        path_template = str(
-            Path(save_dir)
-            / "scaling-{scaling}_size-{img_res}_e0-{min_eccentricity:.03f}"
-            "_em-{max_eccentricity:.01f}_w-{window_width}_{window_type}.pt"
-        )
+        if Path(save_path).is_file() and Path(save_path).suffix == ".pt":
+            full_path = save_path
+        elif Path(save_path).is_dir():
+            path_template = str(
+                Path(save_path)
+                / "scaling-{scaling}_size-{img_res}_e0-{min_eccentricity:.03f}"
+                "_em-{max_eccentricity:.01f}_w-{window_width}_{window_type}.pt"
+            )
 
-        full_path = path_template.format(
-            scaling=self.scaling,
-            max_eccentricity=self.max_eccentricity,
-            img_res=",".join([str(int(i)) for i in scaled_img_res]),
-            window_width=window_width,
-            window_type=self.window_type,
-            min_eccentricity=self.min_eccentricity,
-        )
+            full_path = path_template.format(
+                scaling=self.scaling,
+                max_eccentricity=self.max_eccentricity,
+                img_res=",".join([str(int(i)) for i in scaled_img_res]),
+                window_width=window_width,
+                window_type=self.window_type,
+                min_eccentricity=self.min_eccentricity,
+            )
+        elif save_path is None:
+            path_template = str(
+                Path(self.cache_dir)
+                / "scaling-{scaling}_size-{img_res}_e0-{min_eccentricity:.03f}"
+                "_em-{max_eccentricity:.01f}_w-{window_width}_{window_type}.pt"
+            )
+
+            full_path = path_template.format(
+                scaling=self.scaling,
+                max_eccentricity=self.max_eccentricity,
+                img_res=",".join([str(int(i)) for i in scaled_img_res]),
+                window_width=window_width,
+                window_type=self.window_type,
+                min_eccentricity=self.min_eccentricity,
+            )
+        elif Path(save_path).exists():
+            raise ValueError("Path exists but is not a directory or ``.pt`` file!")
+        else:
+            raise TypeError("``save_path`` is not a directory or ``.pt`` file!")
 
         torch.save({"model": save_dict}, full_path)
 
