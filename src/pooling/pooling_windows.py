@@ -917,6 +917,25 @@ class PoolingWindows(nn.Module):
         TypeError
             If ``save_path`` is not a directory or ``.pt`` file!
 
+        See Also
+        --------
+        load
+            Method to load in saved pooling windows parameters
+
+        Examples
+        --------
+        To use, just input a path to a directory or ``.pt`` file in order to save the
+        parameters needed for initializing the pooling window model.
+
+        >>> import pooling
+        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
+        >>> pw.save("../pooling-windows/")
+
+
+        >>> import pooling
+        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
+        >>> pw.save("pw_model.pt")
+
         """
         if self.window_type == "cosine":
             window_width = self.transition_region_width
@@ -937,7 +956,7 @@ class PoolingWindows(nn.Module):
         for i in range(self.num_scales):
             scaled_img_res = [np.ceil(j / 2**i) for j in self.img_res]
 
-        if Path(save_path).is_file() and Path(save_path).suffix == ".pt":
+        if Path(save_path).suffix == ".pt":
             full_path = save_path
         elif Path(save_path).is_dir():
             path_template = str(
@@ -954,25 +973,10 @@ class PoolingWindows(nn.Module):
                 window_type=self.window_type,
                 min_eccentricity=self.min_eccentricity,
             )
-        elif save_path is None:
-            path_template = str(
-                Path(self.cache_dir)
-                / "scaling-{scaling}_size-{img_res}_e0-{min_eccentricity:.03f}"
-                "_em-{max_eccentricity:.01f}_w-{window_width}_{window_type}.pt"
-            )
-
-            full_path = path_template.format(
-                scaling=self.scaling,
-                max_eccentricity=self.max_eccentricity,
-                img_res=",".join([str(int(i)) for i in scaled_img_res]),
-                window_width=window_width,
-                window_type=self.window_type,
-                min_eccentricity=self.min_eccentricity,
-            )
         elif Path(save_path).exists():
-            raise ValueError("Path exists but is not a directory or ``.pt`` file!")
+            raise ValueError("Path exists but is not a directory or .pt file!")
         else:
-            raise TypeError("``save_path`` is not a directory or ``.pt`` file!")
+            raise TypeError("save_path is not a directory or .pt file!")
 
         torch.save({"model": save_dict}, full_path)
 
