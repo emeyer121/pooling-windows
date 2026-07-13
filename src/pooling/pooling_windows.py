@@ -890,12 +890,10 @@ class PoolingWindows(nn.Module):
                 backend="torch",
             )
 
-    def save(self, save_path: str | None = None):
+    def save(self, save_path: str):
         r"""Save pooling windows model parameters.
 
-        Helper function that can save the full pooling windows model or
-        just the necessary data for model initializaton. We recommend
-        saving only the necessary data since the full model can be large.
+        Helper function that can save the necessary data for model initializaton.
 
         Parameters
         ----------
@@ -979,6 +977,50 @@ class PoolingWindows(nn.Module):
             raise TypeError("save_path is not a directory or .pt file!")
 
         torch.save({"model": save_dict}, full_path)
+
+    def load(self, load_path: str):
+        r"""Load pooling windows parameters into current model.
+
+        Helper function that can load the necessary data for model into
+        current model instantiation. Using this function will override the
+        parameters that were used to originally create this model.
+
+        Parameters
+        ----------
+        load_path
+            The path to the ``.pt`` file name you wish to load.
+
+        Raises
+        ------
+        TypeError
+            If ``save_path`` is not a ``.pt`` file!
+
+        See Also
+        --------
+        save
+            Method to save pooling windows parameters as ``.pt`` file
+
+        Examples
+        --------
+        To use, just input a path to a ``.pt`` file in order to load the
+        parameters needed for initializing the pooling window model.
+
+        >>> import pooling
+        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
+        >>> pw.save("pw_model.pt")
+        >>> model = pw.load("pw_model.pt")["model"]
+
+        """
+        model_dict = torch.load(load_path)["model"]
+
+        self.scaling = model_dict["scaling"]
+        self.img_res = model_dict["img_res"]
+        self.min_eccentricity = model_dict["min_eccentricity"]
+        self.max_eccentricity = model_dict["max_eccentricity"]
+        self.transition_region_width = model_dict["transition_region_width"]
+        self.cache_dir = model_dict["cache_dir"]
+        self.window_type = model_dict["window_type"]
+        self.std_dev = model_dict["std_dev"]
 
     def plot_windows(
         self,
