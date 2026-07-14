@@ -921,7 +921,7 @@ class PoolingWindows(nn.Module):
         >>> import pooling
         >>> pw = pooling.PoolingWindows(0.5, (256, 256))
         >>> pw.save("./saved_data/")
-        >>> pooling.poolingWindows.load(
+        >>> pw_new = pooling.poolingWindows.load(
         ...     "./saved_data/scaling-0.5_size-256,256_e0-0.500_em-15.0"
                 "_w-1.0_gaussian.pt"
                 )
@@ -930,7 +930,7 @@ class PoolingWindows(nn.Module):
         >>> import pooling
         >>> pw = pooling.PoolingWindows(0.5, (256, 256))
         >>> pw.save("pw_model.pt")
-        >>> pooling.poolingWindows.load("pw_model.pt")
+        >>> pw_new = pooling.poolingWindows.load("pw_model.pt")
 
         """
         if self.window_type == "cosine":
@@ -1002,6 +1002,8 @@ class PoolingWindows(nn.Module):
         >>> pw = pooling.PoolingWindows(0.5, (256, 256))
         >>> pw.save("pw_model.pt")
         >>> pw_new = pooling.PoolingWindows.load("pw_model.pt")
+        >>> pw_new
+        PoolingWindows()
 
         """
         load_mod = torch.load(load_path, weights_only=True, map_location=device)
