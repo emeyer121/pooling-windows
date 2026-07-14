@@ -988,11 +988,6 @@ class PoolingWindows(nn.Module):
         pw
             A PoolingWindows object created with parameters from loaded dictionary.
 
-        Raises
-        ------
-        TypeError
-            If loaded file does not have ``PWmodel`` dictionary key
-
         See Also
         --------
         save
@@ -1010,9 +1005,6 @@ class PoolingWindows(nn.Module):
 
         """
         load_mod = torch.load(load_path, weights_only=True, map_location=device)
-
-        if "PWmodel" not in load_mod:
-            raise TypeError("File does not have 'PWmodel' dictionary!")
 
         model_dict = load_mod["PWmodel"]
 
