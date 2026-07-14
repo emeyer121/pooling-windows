@@ -223,6 +223,34 @@ class TestPooling:
                 0.8, rand_img.shape[-2:], num_scales=2, cache_dir=tmp_path
             )
 
+    def test_PoolingWindows_save(self, rand_img, tmp_path):
+        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:])
+        pw.save(tmp_path)
+        assert pathlib.Path(
+            tmp_path / "scaling-0.8_size-256,256_e0-0.500_em-15.0_w-0.5_cosine.pt"
+        ).exists()
+        assert pathlib.Path(
+            tmp_path / "scaling-0.8_size-256,256_e0-0.500_em-15.0_w-0.5_cosine.pt"
+        ).is_file()
+
+    def test_PoolingWindows_savefile(self, rand_img, tmp_path):
+        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:])
+        pw.save(tmp_path / "model.pt")
+        assert pathlib.Path(tmp_path / "model.pt").exists()
+        assert pathlib.Path(tmp_path / "model.pt").is_file()
+
+    @pytest.mark.parametrize("file_type", [".pt", ".csv"])
+    def test_PoolingWindows_load(self, rand_img, tmp_path, file_type):
+        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:])
+        pw.save(tmp_path / f"model.{file_type}")
+        pw_new = pooling.PoolingWindows.load(tmp_path / f"model.{file_type}")
+        assert pw_new.scaling == 0.8
+        assert pw_new.img_res == (256, 256)
+
+    def test_PoolingWindows_nofile_load(self):
+        with pytest.raises(FileNotFoundError, match="No such file or directory:"):
+            pooling.PoolingWindows.load("fake_file.pt")
+
     def test_PoolingWindows_sep(self, rand_img, pool_win):
         # test the window and pool function separate of the forward function
         pooled_x1 = pool_win(rand_img)
