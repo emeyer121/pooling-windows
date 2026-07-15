@@ -71,17 +71,24 @@ pw.plot_windows(subset=False)
 We can also change a number of other parameters that define the windows: `min_eccentricity` and `max_eccentricity` that define the extent of the windows within the image in degrees of visual angle, `num_scales` which controls the number of window scales generated, `cache_dir` for specifying a path to cache the model in for loading/saving, and `window_type` which can be defined as `gaussian` or `cosine` (**see tutorial for comparison**).
 
 ```{code-cell} ipython3
-pw = pooling.PoolingWindows(0.5, (256,256), min_eccentricity=1, max_eccentricity=10, window_type='cosine')
+pw = pooling.PoolingWindows(
+  scaling=0.5,
+  img_res=(256,256),
+  min_eccentricity=1,
+  max_eccentricity=10,
+  window_type='cosine'
+  )
 pw.plot_windows()
 ```
 
-If you want to take advantage of just the eccentricity rings or angular wedges separately, you can also call `pooling.create_pooling_windows`. We will again use `scaling=0.5` and and image size of `(256,256)`. We will also take advantage of [plenoptic's](https://plenoptic.org/) plotting function `po.imshow`.
+If you want to take advantage of just the eccentricity rings or angular wedges separately, you can also call `pooling.create_pooling_windows`. Here we will use `scaling=2` and and image size of `(256,256)`. We will also take advantage of [plenoptic's](https://plenoptic.org/) plotting function `po.imshow`.
 
 ```{code-cell} ipython3
 import plenoptic as po
 
 angle_w, ecc_w = pooling.pooling.create_pooling_windows(2, (256, 256))
-fig = po.plot.imshow(ecc_w.unsqueeze(0))
+# only show first 8 eccentricity rings
+fig = po.plot.imshow(ecc_w[:8].unsqueeze(0))
 fig = po.plot.imshow(angle_w.unsqueeze(0))
 plt.show()
 ```
@@ -102,14 +109,15 @@ plt.imshow(torch.squeeze(img), cmap='gray')
 ```
 
 ```{code-cell} ipython3
-pw = pooling.PoolingWindows(1, (256,256))
+pw = pooling.PoolingWindows(0.8, (256,256))
 pw.plot_window_values(img, subset=False)
 ```
 
 If you would like a summary of the size and values associated with the pooling windows, you can call `summarize_window_sizes`.
 
 ```{code-cell} ipython3
-summary = pw.summarize_window_sizes(print_summary=True)
+_, print_summary = pw.summarize_window_sizes()
+print(print_summary)
 ```
 
 (choosing-scaling-values)=
@@ -122,4 +130,24 @@ scaling = pooling.calculate.scaling(n_windows=5, min_ecc=1, max_ecc=10, std_dev=
 pw = pooling.PoolingWindows(scaling, (256,256), min_eccentricity=1, max_eccentricity=10)
 ax = pw.plot_windows()
 ax.set_title(f"Scaling = {scaling:.4f}");
+```
+
+## Checking Windows
+We also have a few additional visualization functions, including plotting the window widths and areas:
+
+```{code-cell} ipython3
+mpl.rcParams['xtick.bottom'] = True
+mpl.rcParams['xtick.labelbottom'] = True
+mpl.rcParams['ytick.left'] = True
+mpl.rcParams['ytick.labelleft'] = True
+
+fig, ax = plt.subplots(1,2, figsize=(10, 4))
+pw.plot_window_widths(ax=ax[0]);
+pw.plot_window_areas(ax=ax[1]);
+```
+
+and checking whether the windows have been normalized properly:
+
+```{code-cell} ipython3
+pw.plot_window_checks();
 ```
