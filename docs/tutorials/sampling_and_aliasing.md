@@ -14,7 +14,7 @@ kernelspec:
 ```{admonition} Run this notebook yourself!
 :class: important
 
-Download the executed notebook: **{nb-download}`Sampling_and_Aliasing.ipynb`**!
+Download the executed notebook: **{nb-download}`sampling_and_aliasing.ipynb`**!
 
 ```
 
