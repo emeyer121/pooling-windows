@@ -911,7 +911,7 @@ class PoolingWindows(nn.Module):
         See Also
         --------
         load
-            Method to load in saved pooling windows parameters
+            Method to load in the saved pooling windows parameters
 
         Examples
         --------
@@ -972,11 +972,10 @@ class PoolingWindows(nn.Module):
 
     @classmethod
     def load(cls, load_path: str, device: Literal["cpu", "gpu"] = "cpu") -> nn.Module:
-        r"""Load pooling windows parameters into current model.
+        r"""Load pooling windows parameters and initialize model.
 
-        Helper function that can load the necessary data for model into
-        current model instantiation. Using this function will override the
-        parameters that were used to originally create this model.
+        Helper function that can load the necessary data for model and output
+        model instatiation with those parameters.
 
         Parameters
         ----------
@@ -991,7 +990,7 @@ class PoolingWindows(nn.Module):
         See Also
         --------
         save
-            Method to save pooling windows parameters as ``.pt`` file
+            Method to save pooling windows parameters
 
         Examples
         --------
