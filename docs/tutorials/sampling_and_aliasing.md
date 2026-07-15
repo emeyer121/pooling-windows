@@ -14,7 +14,7 @@ kernelspec:
 ```{admonition} Run this notebook yourself!
 :class: important
 
-Download the executed notebook: **{nb-download}`Sampling_and_Aliasing.ipynb`**!
+Download the executed notebook: **{nb-download}`sampling_and_aliasing.ipynb`**!
 
 ```
 
@@ -34,10 +34,7 @@ import pooling
 %matplotlib inline
 
 # Animation-related settings
-plt.rcParams["animation.html"] = "html5"
-# use single-threaded ffmpeg for animation writer
-plt.rcParams["animation.writer"] = "ffmpeg"
-plt.rcParams["animation.ffmpeg_args"] = ["-threads", "1"]
+plt.rcParams["animation.html"] = "jshtml"
 ```
 
 ## Successful sampling

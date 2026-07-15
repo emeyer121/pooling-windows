@@ -21,10 +21,6 @@ extensions = [
     "myst_nb",
 ]
 
-nb_custom_formats = {
-    ".md": ["jupytext.reads", {"fmt": "mystnb"}],
-}
-
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
@@ -34,6 +30,28 @@ source_suffix = [".rst", ".md"]
 
 # The master toctree document.
 master_doc = "index"
+
+# Napoleon settings
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+# when napoleon_use_rtype is true, the return type is often confused. setting this to
+# false let's sphinx-autodoc-typehints handle it instead.
+napoleon_use_rtype = False
+
+# AUTOSUMMARY / AUTODOC
+autodoc_default_options = {
+    "members": True,
+    "show-inheritance": False,
+    "member-order": "groupwise",
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
