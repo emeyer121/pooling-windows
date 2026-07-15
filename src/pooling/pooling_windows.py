@@ -1326,9 +1326,11 @@ class PoolingWindows(nn.Module):
                     "radial_half"
                 ][idx]
                 sizes[f"{extrem}_window_scale_{i}_area_pixels"] = areas[i]["half"][idx]
-        if print_summary:
-            print(f"{'Parameters':<35} | {'Approx. Values':>14}")
-            print("-" * 52)
-            for param, val in sizes.items():
-                print(f"{param:<35} | {val:>14.6f}")
-        return sizes
+
+        header_str = f"{'Parameters':<35} | {'Approx. Values':>14} \n" + "-" * 52 + "\n"
+        size_str = ""
+        for param, val in sizes.items():
+            size_str += f"{param:<35} | {val:>14.6f} \n"
+        print_str = header_str + size_str
+
+        return sizes, print_str

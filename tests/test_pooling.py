@@ -222,7 +222,7 @@ class TestPooling:
                 pw(im[(i,)], idx=i, weights=torch.ones(num_scales, 1, 1, 1, 1))
 
     def test_PoolingWindows_summarize(self, rand_img, pool_win):
-        sizes = pool_win.summarize_window_sizes()
+        sizes, _ = pool_win.summarize_window_sizes()
         assert np.allclose(sizes["min_window_center_degrees"], 0.8201941016011038)
         assert np.allclose(sizes["min_window_fwhm_degrees"], 0.4100970508005519)
         assert np.allclose(sizes["min_window_area_degrees"], 0.06604397097574137)
