@@ -10,7 +10,6 @@ pooling.py contains a lot of necessary functions
 import itertools
 import os.path as op
 import warnings
-from pathlib import Path
 from typing import Any, Literal
 
 import matplotlib.pyplot as plt
@@ -893,20 +892,14 @@ class PoolingWindows(nn.Module):
     def save(self, save_path: str):
         r"""Save pooling windows model parameters.
 
-        Helper function that can save the necessary data for model initializaton.
+        This function saves all necessary data for model initialization at the
+        specified path. It does not save the window tensors, set ``cache_dir``
+        argument to save window tensors during initialization.
 
         Parameters
         ----------
         save_path
-            The directory and file name (if provided) you wish to save the model
-            into. If a file name is not provided, the file naming convention
-            will mirror what is described in ``cache_dir``:
-            ``scaling-{scaling}_size-{img_res}_e0-{min_eccentricity}_
-            em-{max_eccentricity}_w-{window_width}_{window_type}_
-            {save_type}.pt``, where {window_width} is
-            ``transition_region_width`` if ``window_type='cosine'``, and
-            ``std_dev`` if it's ``'gaussian'`` and ``save_type='full'`` if
-            ``full_model=True`` and ``save_type='reduced'`` if ``full_model=False``.
+            The file path you wish to save the model parameters into
 
         See Also
         --------
@@ -915,29 +908,15 @@ class PoolingWindows(nn.Module):
 
         Examples
         --------
-        To use, just input a path to a directory or file in order to save the
-        parameters needed for initializing the pooling window model.
+        To use, just input a file path in order to save the parameters needed for
+        initializing the pooling window model.
 
         >>> import pooling
         >>> pw = pooling.PoolingWindows(0.5, (256, 256))
-        >>> pw.save("./saved_data/")
-        >>> pw_new = pooling.poolingWindows.load(
-        ...     "./saved_data/scaling-0.5_size-256,256_e0-0.500_em-15.0"
-                "_w-1.0_gaussian.pt"
-                )
-
-
-        >>> import pooling
-        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
-        >>> pw.save("pw_model.pt")
-        >>> pw_new = pooling.poolingWindows.load("pw_model.pt")
+        >>> pw.save("./saved_data/model_params.pt")
+        >>> pw_new = pooling.poolingWindows.load("./saved_data/model_params.pt")
 
         """
-        if self.window_type == "cosine":
-            window_width = self.transition_region_width
-        elif self.window_type == "gaussian":
-            window_width = self.std_dev
-
         save_dict = {
             "scaling": self.scaling,
             "img_res": self.img_res,
@@ -947,31 +926,10 @@ class PoolingWindows(nn.Module):
             "window_type": self.window_type,
         }
 
-        for i in range(self.num_scales):
-            scaled_img_res = [np.ceil(j / 2**i) for j in self.img_res]
-
-        if Path(save_path).is_dir():
-            path_template = str(
-                Path(save_path)
-                / "scaling-{scaling}_size-{img_res}_e0-{min_eccentricity:.03f}"
-                "_em-{max_eccentricity:.01f}_w-{window_width}_{window_type}.pt"
-            )
-
-            full_path = path_template.format(
-                scaling=self.scaling,
-                max_eccentricity=self.max_eccentricity,
-                img_res=",".join([str(int(i)) for i in scaled_img_res]),
-                window_width=window_width,
-                window_type=self.window_type,
-                min_eccentricity=self.min_eccentricity,
-            )
-        else:
-            full_path = save_path
-
-        torch.save({"PWmodel": save_dict}, full_path)
+        torch.save(save_dict, save_path)
 
     @classmethod
-    def load(cls, load_path: str, device: Literal["cpu", "gpu"] = "cpu") -> nn.Module:
+    def load(cls, load_path: str, cache_dir: str | None = None) -> nn.Module:
         r"""Load pooling windows parameters and initialize model.
 
         Helper function that can load the necessary data for model and output
@@ -980,12 +938,15 @@ class PoolingWindows(nn.Module):
         Parameters
         ----------
         load_path
-            The path to the file you wish to load.
+            The path to the file you wish to load
+        cache_dir
+            Optional path to a new cache directory for saving the window tensors
+            during model initialization if overriding the original is useful
 
         Returns
         -------
         pw
-            A PoolingWindows object created with parameters from loaded dictionary.
+            A PoolingWindows object created with parameters from loaded dictionary
 
         See Also
         --------
@@ -1005,17 +966,18 @@ class PoolingWindows(nn.Module):
         PoolingWindows()
 
         """
-        load_mod = torch.load(load_path, weights_only=True, map_location=device)
+        load_model = torch.load(load_path, weights_only=True)
 
-        model_dict = load_mod["PWmodel"]
+        if cache_dir is None:
+            cache_dir = load_model["cache_dir"]
 
         pw = cls(
-            scaling=model_dict["scaling"],
-            img_res=model_dict["img_res"],
-            min_eccentricity=model_dict["min_eccentricity"],
-            max_eccentricity=model_dict["max_eccentricity"],
-            cache_dir=model_dict["cache_dir"],
-            window_type=model_dict["window_type"],
+            scaling=load_model["scaling"],
+            img_res=load_model["img_res"],
+            min_eccentricity=load_model["min_eccentricity"],
+            max_eccentricity=load_model["max_eccentricity"],
+            cache_dir=cache_dir,
+            window_type=load_model["window_type"],
         )
 
         return pw
