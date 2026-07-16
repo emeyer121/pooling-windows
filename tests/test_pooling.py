@@ -148,9 +148,9 @@ class TestPooling:
     @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
     def test_PoolingWindows_todevice(self, pool_win):
         pool_win.to("cpu")
-        assert pool_win.angle_windows[0].device == "cpu"
+        assert pool_win.angle_windows[0].device.type == "cpu"
         pool_win.to("cuda")
-        assert pool_win.angle_windows[0].device == "cuda"
+        assert pool_win.angle_windows[0].device.type == "cuda"
 
     @pytest.mark.parametrize("offset", [0.2, 0.5])
     def test_PoolingWindows_merge(self, rand_img, pool_win, offset):
@@ -225,27 +225,40 @@ class TestPooling:
 
     def test_PoolingWindows_save(self, rand_img, tmp_path):
         pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:])
-        pw.save(tmp_path)
-        assert pathlib.Path(
-            tmp_path / "scaling-0.8_size-256,256_e0-0.500_em-15.0_w-0.5_cosine.pt"
-        ).exists()
-        assert pathlib.Path(
-            tmp_path / "scaling-0.8_size-256,256_e0-0.500_em-15.0_w-0.5_cosine.pt"
-        ).is_file()
-
-    def test_PoolingWindows_savefile(self, rand_img, tmp_path):
-        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:])
         pw.save(tmp_path / "model.pt")
         assert pathlib.Path(tmp_path / "model.pt").exists()
         assert pathlib.Path(tmp_path / "model.pt").is_file()
 
+    @pytest.mark.parametrize("scaling", [0.5, 1])
+    @pytest.mark.parametrize("ecc", [[0.5, 10], [1, 15]])
+    @pytest.mark.parametrize("num_scales", [1, 3])
+    @pytest.mark.parametrize("window_type", ["gaussian", "cosine"])
     @pytest.mark.parametrize("file_type", [".pt", ".csv"])
-    def test_PoolingWindows_load(self, rand_img, tmp_path, file_type):
-        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:])
+    def test_PoolingWindows_saveload(
+        self, scaling, rand_img, ecc, num_scales, window_type, tmp_path, file_type
+    ):
+        pw = pooling.PoolingWindows(
+            scaling,
+            rand_img.shape[-2:],
+            min_eccentricity=ecc[0],
+            max_eccentricity=ecc[1],
+            num_scales=num_scales,
+            window_type=window_type,
+        )
+        pw_dict = pw.__dict__
         pw.save(tmp_path / f"model.{file_type}")
         pw_new = pooling.PoolingWindows.load(tmp_path / f"model.{file_type}")
-        assert pw_new.scaling == 0.8
-        assert pw_new.img_res == (256, 256)
+        pw_new_dict = pw_new.__dict__
+        for key in pw_dict:
+            assert pw_dict[key] == pw_new_dict[key]
+
+    @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
+    def test_PoolingWindows_saveload_device(self, pool_win, tmp_path):
+        pool_win.to("cuda")
+        pool_win.save(tmp_path / "model.pt")
+        assert pool_win.angle_windows[0].device.type == "cuda"
+        pool_win.load(tmp_path / "model.pt", map_location="cpu")
+        assert pool_win.angle_windows[0].device.type == "cpu"
 
     def test_PoolingWindows_nofile_load(self):
         with pytest.raises(FileNotFoundError, match="No such file or directory:"):
