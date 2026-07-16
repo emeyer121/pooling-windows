@@ -877,13 +877,13 @@ class PoolingWindows(nn.Module):
         r"""Save pooling windows model parameters.
 
         This function saves all necessary data for model initialization at the
-        specified path. It does not save the window tensors, set ``cache_dir``
-        argument to save window tensors during initialization.
+        specified path. It does not save the window tensors' these are saved
+        during object initialization if the ``cache_dir`` argument was set.
 
         Parameters
         ----------
         save_path
-            The file path you wish to save the model parameters into
+            The file path you wish to save the model parameters to.
 
         See Also
         --------
@@ -929,18 +929,19 @@ class PoolingWindows(nn.Module):
         load_path
             The path to the file you wish to load
         cache_dir
-            Optional path to a new cache directory for saving the window tensors
-            during model initialization if overriding the original is useful
+            Optional path to a new cache directory to pass the model initialization,
+            overriding the saved value. This allows you to e.g., load from a cache
+            at a different location.
 
         Returns
         -------
         pw
-            A PoolingWindows object created with parameters from loaded dictionary
+            A PoolingWindows object created with parameters from loaded dictionary.
 
         See Also
         --------
         save
-            Method to save pooling windows parameters
+            Method to save pooling windows parameters.
 
         Examples
         --------
@@ -958,17 +959,9 @@ class PoolingWindows(nn.Module):
         load_model = torch.load(load_path, weights_only=True, **kwargs)
 
         if cache_dir is None:
-            cache_dir = load_model["cache_dir"]
+            cache_dir = load_model.pop("cache_dir")
 
-        pw = cls(
-            scaling=load_model["scaling"],
-            img_res=load_model["img_res"],
-            min_eccentricity=load_model["min_eccentricity"],
-            max_eccentricity=load_model["max_eccentricity"],
-            num_scales=load_model["num_scales"],
-            cache_dir=cache_dir,
-            window_type=load_model["window_type"],
-        )
+        pw = cls(**load_model)
 
         return pw
 
