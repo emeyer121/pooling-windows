@@ -929,11 +929,15 @@ class PoolingWindows(nn.Module):
         torch.save(save_dict, save_path)
 
     @classmethod
-    def load(cls, load_path: str, cache_dir: str | None = None) -> nn.Module:
+    def load(
+        cls, load_path: str, cache_dir: str | None = None, **kwargs: Any
+    ) -> nn.Module:
         r"""Load pooling windows parameters and initialize model.
 
         Helper function that can load the necessary data for model and output
         model instatiation with those parameters.
+
+        Any additional kwargs get passed to ``torch.load``
 
         Parameters
         ----------
@@ -966,7 +970,7 @@ class PoolingWindows(nn.Module):
         PoolingWindows()
 
         """
-        load_model = torch.load(load_path, weights_only=True)
+        load_model = torch.load(load_path, weights_only=True, **kwargs)
 
         if cache_dir is None:
             cache_dir = load_model["cache_dir"]
