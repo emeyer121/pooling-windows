@@ -61,12 +61,9 @@ class PoolingWindows(nn.Module):
     appropriate cached windows exist before creating them and load them
     if they do. The path we'll use is
     ``{cache_dir}/scaling-{scaling}_size-{img_res}_e0-{min_eccentricity}_
-    em-{max_eccentricity}_w-{window_width}_{window_type}.pt``, where
-    {window_width} is ``transition_region_width=0.5`` if
-    ``window_type='cosine'``, and ``std_dev=1`` if it's
-    ``'gaussian'``. We'll cache each scale separately, changing the
-    img_res (and potentially min_eccentricity) values in that save path
-    appropriately.
+    em-{max_eccentricity}_{window_type}.pt``. We'll cache each scale separately,
+    changing the img_res (and potentially min_eccentricity) values in that save
+    path appropriately.
 
     Parameters
     ----------
@@ -95,8 +92,7 @@ class PoolingWindows(nn.Module):
         don't check for or cache the windows.
     window_type
         Whether to use the raised cosine function from [1]_ or a Gaussian that
-        has approximately the same structure. If cosine,
-        ``transition_region_width`` must be set.
+        has approximately the same structure.
 
     Attributes
     ----------
@@ -209,8 +205,8 @@ class PoolingWindows(nn.Module):
         Gaussian that has approximately the same structure.
     window_max_amplitude : float
         The max amplitude of an individual window. This will always be 1
-        for raised-cosine windows, for gaussian ones with ``std_dev=1``,
-        the only value we support for now, it's approximately 0.16.
+        for raised-cosine windows. For gaussian windows, this value depends
+        on the standard deviation. For ``std_dev=1``, it's approximately 0.16.
     window_intersecting_amplitude : float
         The amplitude at which two neighboring windows intersect. This
         will always be .5 for raised-cosine windows, but for gaussian ones

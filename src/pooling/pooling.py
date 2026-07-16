@@ -381,8 +381,8 @@ def _log_eccentricity_windows(
     log_func = torch.log if not linear else lambda x: x
     if std_dev is not None and std_dev != 1:
         warnings.warn(
-            "Only std_dev=1 is supported (not sure if Gaussian "
-            "windows will uniformly tile image otherwise!)"
+            "Only std_dev=1 has been tested -- not sure if Gaussian "
+            "windows will uniformly tile image otherwise! Use at your own risk."
         )
     if window_spacing is None:
         window_spacing = calculate._eccentricity_window_spacing(
