@@ -906,6 +906,7 @@ class PoolingWindows(nn.Module):
             "img_res": self.img_res,
             "min_eccentricity": self.min_eccentricity,
             "max_eccentricity": self.max_eccentricity,
+            "num_scales": self.num_scales,
             "cache_dir": self.cache_dir,
             "window_type": self.window_type,
         }
@@ -964,6 +965,7 @@ class PoolingWindows(nn.Module):
             img_res=load_model["img_res"],
             min_eccentricity=load_model["min_eccentricity"],
             max_eccentricity=load_model["max_eccentricity"],
+            num_scales=load_model["num_scales"],
             cache_dir=cache_dir,
             window_type=load_model["window_type"],
         )
