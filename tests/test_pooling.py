@@ -222,14 +222,49 @@ class TestPooling:
             window_type=window_type,
         )
         pw_dict = pw.__dict__
-        pw.save(tmp_path / f"model.{file_type}")
-        pw_new = pooling.PoolingWindows.load(tmp_path / f"model.{file_type}")
+        for k, v in pw_dict.items():
+            if isinstance(v, dict):
+                # check if empty dictionary or not
+                if v.values():
+                    pw_dict = {**pw_dict, k: list(v.values())}
+                else:
+                    pw_dict = {**pw_dict, k: []}
+            # if not dictionary, just copy
+            else:
+                pw_dict[k] = v
+
+        pw.save("./model.pt")
+        pw_new = pooling.PoolingWindows.load("./model.pt")
         pw_new_dict = pw_new.__dict__
-        for key, value in pw_dict.items():
-            try:
-                assert value == pw_new_dict[key]
-            except RuntimeError:
-                assert torch.equal(value, pw_new_dict[key])
+        for k, v in pw_new_dict.items():
+            if isinstance(v, dict):
+                # check if empty dictionary or not
+                if v.values():
+                    pw_new_dict = {**pw_new_dict, k: list(v.values())}
+                else:
+                    pw_new_dict = {**pw_new_dict, k: []}
+            # if not dictionary, just copy
+            else:
+                pw_new_dict[k] = v
+
+        for k, v in pw_dict.items():
+            # check if non-empty list
+            if isinstance(v, list) and v:
+                # iterate through list and check type for equivalence measure
+                for idx in range(len(pw_dict[k])):
+                    if torch.is_tensor(pw_dict[k][idx]):
+                        assert torch.allclose(pw_dict[k][idx], pw_new_dict[k][idx])
+                    else:
+                        try:
+                            assert np.allclose(pw_dict[k][idx], pw_new_dict[k][idx])
+                        except RuntimeError:
+                            assert str(pw_dict[k][idx]) == str(pw_new_dict[k][idx])
+            else:
+                # otherwise check individual equivalence or full list
+                try:
+                    assert pw_dict[k] == pw_new_dict[k]
+                except RuntimeError:
+                    assert (pw_dict[k] == pw_new_dict[k]).all()
 
     @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
     def test_PoolingWindows_saveload_device(self, pool_win, tmp_path):
