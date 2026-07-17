@@ -207,6 +207,30 @@ class PoolingWindows(nn.Module):
         hard-coded at ``1``, therefore it's half a standard deviation away from
         the center, approximately 0.14.
 
+    Notes
+    -----
+    The windows here are created using ``pooling.pooling.create_pooling_windows``, which
+     is called within ``pooling.PoolingWindows`` but can also be used on its own.
+    Although we have hard-coded the standard deviation (for ``window_type="gaussian"``)
+    and transition region width (for ``window_type="cosine"``) when creating the
+    ``PoolingWindows`` object, it is possible to manually adjust these parameters when
+    using ``create_pooling_windows``. However, only the default values have been tested!
+    It is unclear whether the windows will uniformly tile the images otherwise.
+
+    >>> import matplotlib.pyplot as plt
+    >>> import pooling
+    >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(
+                                            scaling=0.8,
+                                            img_res=(256, 256),
+                                            min_eccentricity=1,
+                                            max_eccentricity=10,
+                                            radial_to_circumferential_ratio=2,
+                                            window_type="gaussian",
+                                            transition_region_width=None,
+                                            std_dev=1,
+                                            device="cpu"
+                                            )
+
     References
     ----------
     .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
