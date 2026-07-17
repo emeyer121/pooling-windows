@@ -225,8 +225,11 @@ class TestPooling:
         pw.save(tmp_path / f"model.{file_type}")
         pw_new = pooling.PoolingWindows.load(tmp_path / f"model.{file_type}")
         pw_new_dict = pw_new.__dict__
-        for key in pw_dict:
-            assert pw_dict[key] == pw_new_dict[key]
+        for key, value in pw_dict.items():
+            try:
+                assert value == pw_new_dict[key]
+            except RuntimeError:
+                assert torch.equal(value, pw_new_dict[key])
 
     @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
     def test_PoolingWindows_saveload_device(self, pool_win, tmp_path):
