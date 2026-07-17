@@ -236,8 +236,9 @@ class TestPooling:
         pool_win.to("cuda")
         pool_win.save(tmp_path / "model.pt")
         assert pool_win.angle_windows[0].device.type == "cuda"
-        pool_win.load(tmp_path / "model.pt", map_location="cpu")
-        assert pool_win.angle_windows[0].device.type == "cpu"
+        pw = pooling.PoolingWindows.load(tmp_path / "model.pt")
+        pw.to("cpu")
+        assert pw.angle_windows[0].device.type == "cpu"
 
     def test_PoolingWindows_nofile_load(self):
         with pytest.raises(FileNotFoundError, match="No such file or directory:"):
