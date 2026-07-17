@@ -219,7 +219,7 @@ class TestPooling:
             for i in range(num_scales):
                 pw(im[(i,)], idx=i, weights=torch.ones(num_scales, 1, 1, 1, 1))
 
-    def test_PoolingWindows_summarize(self, rand_img, pool_win):
+    def test_PoolingWindows_summarize_gaussian(self, pool_win):
         sizes = pool_win.summarize_window_sizes()
         assert np.allclose(sizes["min_window_center_degrees"], 0.6169492446746707)
         assert np.allclose(sizes["min_window_fwhm_degrees"], 0.30847462233733536)
@@ -241,3 +241,27 @@ class TestPooling:
         assert np.allclose(sizes["max_window_scale_1_center_pixels"], 61.59275634438966)
         assert np.allclose(sizes["max_window_scale_1_fwhm_pixels"], 30.79637817219483)
         assert np.allclose(sizes["max_window_scale_1_area_pixels"], 372.44244904524686)
+
+    def test_PoolingWindows_summarize_cosine(self, rand_img):
+        pw = pooling.PoolingWindows(
+            0.5, rand_img.shape[2:], num_scales=2, window_type="cosine"
+        )
+        sizes = pw.summarize_window_sizes()
+        assert np.allclose(sizes["min_window_center_degrees"], 0.8201941016011038)
+        assert np.allclose(sizes["min_window_fwhm_degrees"], 0.4100970508005519)
+        assert np.allclose(sizes["min_window_area_degrees"], 0.06604397097574137)
+        assert np.allclose(sizes["max_window_center_degrees"], 15.980724561828527)
+        assert np.allclose(sizes["max_window_fwhm_degrees"], 7.990362280914264)
+        assert np.allclose(sizes["max_window_area_degrees"], 25.072222129865402)
+        assert np.allclose(sizes["min_window_scale_0_center_pixels"], 6.998989666996086)
+        assert np.allclose(sizes["min_window_scale_0_fwhm_pixels"], 3.499494833498043)
+        assert np.allclose(sizes["min_window_scale_0_area_pixels"], 4.80917520207354)
+        assert np.allclose(sizes["max_window_scale_0_center_pixels"], 136.3688495942701)
+        assert np.allclose(sizes["max_window_scale_0_fwhm_pixels"], 68.18442479713505)
+        assert np.allclose(sizes["max_window_scale_0_area_pixels"], 1825.7034994476212)
+        assert np.allclose(sizes["min_window_scale_1_center_pixels"], 3.499494833498043)
+        assert np.allclose(sizes["min_window_scale_1_fwhm_pixels"], 1.7497474167490215)
+        assert np.allclose(sizes["min_window_scale_1_area_pixels"], 1.202293800518385)
+        assert np.allclose(sizes["max_window_scale_1_center_pixels"], 68.18442479713505)
+        assert np.allclose(sizes["max_window_scale_1_fwhm_pixels"], 34.092212398567526)
+        assert np.allclose(sizes["max_window_scale_1_area_pixels"], 456.4258748619053)
