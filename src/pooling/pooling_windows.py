@@ -265,13 +265,11 @@ class PoolingWindows(nn.Module):
         if window_type == "cosine":
             self._transition_region_width = 0.5
             self._std_dev = None
-            window_width_for_saving = self._transition_region_width
             self.window_max_amplitude = 1
             self.window_intersecting_amplitude = 0.5
         elif window_type == "gaussian":
             self._std_dev = 1
             self._transition_region_width = None
-            window_width_for_saving = self._std_dev
             # 1 / (std_dev * GAUSSIAN_SUM) is the max in a single
             # direction (radial or angular), so the max for a single
             # window is its square
@@ -293,8 +291,8 @@ class PoolingWindows(nn.Module):
             cache_path_template = op.join(
                 self.cache_dir,
                 "scaling-{scaling}_size-{img_res}_"
-                "e0-{min_eccentricity:.03f}_em-{max_eccentricity:.01f}_w"
-                "-{window_width}_{window_type}.pt",
+                "e0-{min_eccentricity:.03f}_em-{max_eccentricity:.01f}_"
+                "{window_type}.pt",
             )
         else:
             self.cache_dir = cache_dir
@@ -332,7 +330,6 @@ class PoolingWindows(nn.Module):
                     scaling=scaling,
                     max_eccentricity=self.max_eccentricity,
                     img_res=",".join([str(int(i)) for i in scaled_img_res]),
-                    window_width=window_width_for_saving,
                     window_type=window_type,
                     min_eccentricity=self.min_eccentricity,
                 )
