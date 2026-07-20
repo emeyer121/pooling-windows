@@ -211,7 +211,7 @@ class TestPooling:
     @pytest.mark.parametrize("window_type", ["gaussian", "cosine"])
     @pytest.mark.parametrize("file_type", [".pt", ".csv"])
     def test_PoolingWindows_saveload(
-        self, scaling, rand_img, ecc, num_scales, window_type, tmp_path, file_type
+        self, scaling, rand_img, ecc, num_scales, window_type
     ):
         pw = pooling.PoolingWindows(
             scaling,
