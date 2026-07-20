@@ -211,7 +211,7 @@ class TestPooling:
     @pytest.mark.parametrize("window_type", ["gaussian", "cosine"])
     @pytest.mark.parametrize("file_type", [".pt", ".csv"])
     def test_PoolingWindows_saveload(
-        self, scaling, rand_img, ecc, num_scales, window_type
+        self, scaling, rand_img, ecc, num_scales, window_type, tmp_path, file_type
     ):
         pw = pooling.PoolingWindows(
             scaling,
@@ -233,8 +233,10 @@ class TestPooling:
             else:
                 pw_dict[k] = v
 
-        pw.save("./model.pt")
-        pw_new = pooling.PoolingWindows.load("./model.pt")
+        pw.save(tmp_path / pathlib.Path(f"./model{file_type}"))
+        pw_new = pooling.PoolingWindows.load(
+            tmp_path / pathlib.Path(f"./model{file_type}")
+        )
         pw_new_dict = pw_new.__dict__
         for k, v in pw_new_dict.items():
             if isinstance(v, dict):
@@ -311,7 +313,7 @@ class TestPooling:
             for i in range(num_scales):
                 pw(im[(i,)], idx=i, weights=torch.ones(num_scales, 1, 1, 1, 1))
 
-    def test_PoolingWindows_summarize(self, rand_img, pool_win):
+    def test_PoolingWindows_summarize(self, pool_win):
         sizes = pool_win.summarize_window_sizes()
         assert np.allclose(sizes["min_window_center_degrees"], 0.6169492446746707)
         assert np.allclose(sizes["min_window_fwhm_degrees"], 0.30847462233733536)
