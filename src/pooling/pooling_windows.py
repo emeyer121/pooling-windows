@@ -917,8 +917,8 @@ class PoolingWindows(nn.Module):
         r"""Save pooling windows model parameters.
 
         This function saves all necessary data for model initialization at the
-        specified path. It does not save the window tensors' these are saved
-        during object initialization if the ``cache_dir`` argument was set.
+        specified path. It does not save the window tensors themselves; these
+        are saved during object initialization if the ``cache_dir`` argument was set.
 
         Parameters
         ----------
@@ -962,8 +962,6 @@ class PoolingWindows(nn.Module):
         Helper function that can load the necessary data for model and output
         model instatiation with those parameters.
 
-        Any additional kwargs get passed to ``torch.load``
-
         Parameters
         ----------
         load_path
@@ -972,6 +970,8 @@ class PoolingWindows(nn.Module):
             Optional path to a new cache directory to pass the model initialization,
             overriding the saved value. This allows you to e.g., load from a cache
             at a different location.
+        kwargs
+            Any additional kwargs to pass to ``torch.load``
 
         Returns
         -------
