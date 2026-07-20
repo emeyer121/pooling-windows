@@ -998,8 +998,8 @@ class PoolingWindows(nn.Module):
         """
         load_model = torch.load(load_path, weights_only=True, **kwargs)
 
-        if cache_dir is None:
-            cache_dir = load_model.pop("cache_dir")
+        if cache_dir is not None:
+            load_model["cache_dir"] = cache_dir
 
         pw = cls(**load_model)
 

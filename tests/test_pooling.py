@@ -227,6 +227,19 @@ class TestPooling:
         assert pathlib.Path(tmp_path / "model.pt").exists()
         assert pathlib.Path(tmp_path / "model.pt").is_file()
 
+    def test_PoolingWindows_loadcache(self, rand_img, tmp_path):
+        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:], cache_dir=tmp_path)
+        assert pathlib.Path(pw.cache_dir) == tmp_path
+        pw.save(tmp_path / "model.pt")
+        new_path = tmp_path / "newdir"
+        new_path.mkdir()
+        pw_load = pooling.PoolingWindows.load(
+            tmp_path / "model.pt", cache_dir=tmp_path / "newdir/"
+        )
+        assert pathlib.Path(pw_load.cache_dir) == pathlib.Path(
+            str(tmp_path) + "/newdir/"
+        )
+
     @pytest.mark.parametrize("scaling", [0.5, 1])
     @pytest.mark.parametrize("ecc", [[0.5, 10], [1, 15]])
     @pytest.mark.parametrize("num_scales", [1, 3])
@@ -277,7 +290,6 @@ class TestPooling:
         pool_win.save(tmp_path / "model.pt")
         assert pool_win.angle_windows[0].device.type == "cuda"
         pw = pooling.PoolingWindows.load(tmp_path / "model.pt")
-        pw.to("cpu")
         assert pw.angle_windows[0].device.type == "cpu"
 
     def test_PoolingWindows_nofile_load(self):
