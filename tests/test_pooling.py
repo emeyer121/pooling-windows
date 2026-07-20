@@ -248,22 +248,34 @@ class TestPooling:
                 pw_new_dict[k] = v
 
         for k, v in pw_dict.items():
-            # check if non-empty list
             if isinstance(v, list) and v:
                 # iterate through list and check type for equivalence measure
                 for idx in range(len(pw_dict[k])):
                     if torch.is_tensor(pw_dict[k][idx]):
                         assert torch.allclose(pw_dict[k][idx], pw_new_dict[k][idx])
+                    elif isinstance(pw_dict[k][idx], dict):
+                        for kk, _ in pw_dict[k][idx].items():
+                            assert (
+                                pw_dict[k][idx][kk] == pw_new_dict[k][idx][kk]
+                            ).all()
                     else:
                         try:
-                            assert np.allclose(pw_dict[k][idx], pw_new_dict[k][idx])
-                        except RuntimeError:
-                            assert str(pw_dict[k][idx]) == str(pw_new_dict[k][idx])
+                            if (pw_dict[k][idx] is None) or isinstance(
+                                pw_dict[k][idx], str
+                            ):
+                                assert pw_dict[k][idx] == pw_new_dict[k][idx]
+                            else:
+                                assert np.allclose(pw_dict[k][idx], pw_new_dict[k][idx])
+                        except (RuntimeError, TypeError):
+                            assert (
+                                pw_dict[k][idx].contraction_list
+                                == pw_new_dict[k][idx].contraction_list
+                            )
             else:
                 # otherwise check individual equivalence or full list
                 try:
                     assert pw_dict[k] == pw_new_dict[k]
-                except RuntimeError:
+                except (RuntimeError, ValueError):
                     assert (pw_dict[k] == pw_new_dict[k]).all()
 
     @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
