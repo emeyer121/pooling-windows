@@ -209,27 +209,54 @@ class PoolingWindows(nn.Module):
 
     Notes
     -----
-    The windows here are created using ``pooling.pooling.create_pooling_windows``, which
-     is called within ``pooling.PoolingWindows`` but can also be used on its own.
-    Although we have hard-coded the standard deviation (for ``window_type="gaussian"``)
-    and transition region width (for ``window_type="cosine"``) when creating the
-    ``PoolingWindows`` object, it is possible to manually adjust these parameters when
-    using ``create_pooling_windows``. However, only the default values have been tested!
-    It is unclear whether the windows will uniformly tile the images otherwise.
+    The windows used by this object are created using
+    ``pooling.pooling.create_pooling_windows``, which can also be used in conjunction
+    with ``pooling.pooling.normalize_windows`` to reproduce the windows.
+    Although we have hard-coded the standard deviation (to 1, for
+    ``window_type="gaussian"``) and transition region width (to 0.5, for
+    ``window_type="cosine"``) when creating the ``PoolingWindows`` object, it is
+    possible to manually adjust these parameters when using ``create_pooling_windows``.
+    However, only the default values have been tested! It is unclear whether the
+    windows will uniformly tile the images otherwise.
+
+    To create gaussian windows:
 
     >>> import matplotlib.pyplot as plt
     >>> import pooling
     >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(
-                                            scaling=0.8,
-                                            img_res=(256, 256),
-                                            min_eccentricity=1,
-                                            max_eccentricity=10,
-                                            radial_to_circumferential_ratio=2,
-                                            window_type="gaussian",
-                                            transition_region_width=None,
-                                            std_dev=1,
-                                            device="cpu"
-                                            )
+            scaling=0.8,
+            img_res=(256, 256),
+            min_eccentricity=1,
+            max_eccentricity=10,
+            radial_to_circumferential_ratio=2,
+            window_type="gaussian",
+            transition_region_width=None,
+            std_dev=1,
+            device="cpu"
+        )
+
+    To create raised cosine windows:
+
+    >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(
+            scaling=0.8,
+            img_res=(256, 256),
+            min_eccentricity=1,
+            max_eccentricity=10,
+            radial_to_circumferential_ratio=2,
+            window_type="cosine",
+            transition_region_width=0.5,
+            std_dev=None,
+            device="cpu"
+        )
+
+    To normalize resulting windows:
+
+    >>> ecc_windows, scale_factor = pooling.pooling.normalize_windows(
+            angle_windows=angle_w,
+            ecc_windows=ecc_w,
+            window_eccentricity=1,
+            scale=0
+        )
 
     References
     ----------
