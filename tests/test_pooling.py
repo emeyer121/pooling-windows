@@ -11,6 +11,28 @@ import pooling
 from conftest import DEVICE
 
 
+def unpack_dict(pw):
+    pw_dict = pw.__dict__
+    for k, v in pw_dict.items():
+        if k.startswith(("_", "training")):
+            continue
+        else:
+            # check if dictionary
+            if isinstance(v, dict):
+                pw_dict = {**pw_dict, k: list(v.values())}
+            # check if list of dictionaries and concat with new keys
+            elif isinstance(v, list) and v and isinstance(v[0], dict):
+                listofdicts = {}
+                for num, d in enumerate(pw_dict[k]):
+                    listofdicts.update({f"{k}_{num}_{k_}": v_ for k_, v_ in d.items()})
+                pw_dict = {**pw_dict, k: list(listofdicts.values())}
+            # if not dictionary, just copy
+            else:
+                pw_dict[k] = v
+
+    return pw_dict
+
+
 class TestPooling:
     def test_creation(self):
         pooling.pooling.create_pooling_windows(0.87, (256, 256))
@@ -221,63 +243,32 @@ class TestPooling:
             num_scales=num_scales,
             window_type=window_type,
         )
-        pw_dict = pw.__dict__
-        for k, v in pw_dict.items():
-            if isinstance(v, dict):
-                # check if empty dictionary or not
-                if v.values():
-                    pw_dict = {**pw_dict, k: list(v.values())}
-                else:
-                    pw_dict = {**pw_dict, k: []}
-            # if not dictionary, just copy
-            else:
-                pw_dict[k] = v
+        pw_dict = unpack_dict(pw)
 
         pw.save(tmp_path / pathlib.Path(f"./model{file_type}"))
         pw_new = pooling.PoolingWindows.load(
             tmp_path / pathlib.Path(f"./model{file_type}")
         )
-        pw_new_dict = pw_new.__dict__
-        for k, v in pw_new_dict.items():
-            if isinstance(v, dict):
-                # check if empty dictionary or not
-                if v.values():
-                    pw_new_dict = {**pw_new_dict, k: list(v.values())}
-                else:
-                    pw_new_dict = {**pw_new_dict, k: []}
-            # if not dictionary, just copy
-            else:
-                pw_new_dict[k] = v
+        pw_new_dict = unpack_dict(pw_new)
 
         for k, v in pw_dict.items():
-            if isinstance(v, list) and v:
-                # iterate through list and check type for equivalence measure
+            # only test public attributes
+            if k.startswith(("_", "training")):
+                continue
+            # if list, iterate through list and check type for equivalence measure
+            if isinstance(v, list):
                 for idx in range(len(pw_dict[k])):
-                    if torch.is_tensor(pw_dict[k][idx]):
+                    if isinstance(pw_dict[k][idx], torch.Tensor):
                         assert torch.allclose(pw_dict[k][idx], pw_new_dict[k][idx])
-                    elif isinstance(pw_dict[k][idx], dict):
-                        for kk, _ in pw_dict[k][idx].items():
-                            assert (
-                                pw_dict[k][idx][kk] == pw_new_dict[k][idx][kk]
-                            ).all()
+                    elif isinstance(pw_dict[k][idx], np.ndarray):
+                        assert np.allclose(pw_dict[k][idx], pw_new_dict[k][idx])
                     else:
-                        try:
-                            if (pw_dict[k][idx] is None) or isinstance(
-                                pw_dict[k][idx], str
-                            ):
-                                assert pw_dict[k][idx] == pw_new_dict[k][idx]
-                            else:
-                                assert np.allclose(pw_dict[k][idx], pw_new_dict[k][idx])
-                        except (RuntimeError, TypeError):
-                            assert (
-                                pw_dict[k][idx].contraction_list
-                                == pw_new_dict[k][idx].contraction_list
-                            )
+                        assert pw_dict[k][idx] == pw_new_dict[k][idx]
             else:
                 # otherwise check individual equivalence or full list
                 try:
                     assert pw_dict[k] == pw_new_dict[k]
-                except (RuntimeError, ValueError):
+                except ValueError:
                     assert (pw_dict[k] == pw_new_dict[k]).all()
 
     @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
