@@ -121,18 +121,6 @@ If you would like a summary of the size and values associated with the pooling w
 pw.summarize_window_sizes()
 ```
 
-(choosing-scaling-values)=
-## Choosing Scaling Values
-
-However, the `scaling` values used in previous examples were arbitrary. Let's say you are displaying images for an experiment and want to build pooling windows ranging from 1-10 degrees of eccentricity, tiling the space with 5 angular windows. You can then find the precise scaling value to generate the corresponding `PoolingWindows` object.
-
-```{code-cell} ipython3
-scaling = pooling.calculate.scaling(n_windows=5, min_ecc=1, max_ecc=10, std_dev=1)
-pw = pooling.PoolingWindows(scaling, (256,256), min_eccentricity=1, max_eccentricity=10)
-ax = pw.plot_windows()
-ax.set_title(f"Scaling = {scaling:.4f}");
-```
-
 ## Checking Windows
 We also have a few additional visualization functions, including plotting the window widths and areas:
 
@@ -151,4 +139,16 @@ and checking whether the windows have been normalized properly:
 
 ```{code-cell} ipython3
 pw.plot_window_checks();
+```
+
+(choosing-scaling-values)=
+## Choosing Scaling Values
+
+However, the `scaling` values used in previous examples were arbitrary. Let's say you are displaying images for an experiment and want to build pooling windows ranging from 1-10 degrees of eccentricity, tiling the space with 5 angular windows. You can then find the precise scaling value to generate the corresponding `PoolingWindows` object.
+
+```{code-cell} ipython3
+scaling = pooling.calculate.scaling(n_windows=5, min_ecc=1, max_ecc=10, std_dev=1)
+pw = pooling.PoolingWindows(scaling, (256,256), min_eccentricity=1, max_eccentricity=10)
+ax = pw.plot_windows()
+ax.set_title(f"Scaling = {scaling:.4f}");
 ```
