@@ -538,7 +538,7 @@ def create_pooling_windows(
     See [7]_ for an example:
 
     >>> ecc_windows, scale_factor = pooling.pooling.normalize_windows(
-    ...     angle_windows=angle_w, ecc_windows=ecc_w, window_eccentricity=1, scale=0
+    ...     angle_windows=angle_w, ecc_windows=ecc_w, window_eccentricity=1
     ... )
 
     You can display the various angle and eccentricity windows by plotting a
