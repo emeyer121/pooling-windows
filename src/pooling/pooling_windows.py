@@ -1437,6 +1437,15 @@ class PoolingWindows(nn.Module):
         Exception
             If ``units`` are not "pixels" or "degrees"
 
+        Examples
+        --------
+        In order to display the window size parameters nicely, ``pprint``
+        is recommended:
+
+        >>> from pprint import pprint
+        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
+        >>> summary = pw.summarize_window_sizes()
+        >>> pprint(summary)
 
         """
         min_idx = np.abs(
