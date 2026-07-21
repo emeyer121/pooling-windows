@@ -224,9 +224,6 @@ class PoolingWindows(nn.Module):
     .. [1] Freeman, J., & Simoncelli, E. P. (2011). Metamers of the
        ventral stream. Nature Neuroscience, 14(9),
        1195–1201. http://dx.doi.org/10.1038/nn.2889
-    .. [2] Broderick, W. F., Rufo, G., Winawer, J. & Simoncelli, E. P.
-       (2023). Foveated metamers of the early visual system. eLife,
-       12:RP90554. http://dx.doi.org/10.7554/eLife.90554.2
 
     """
 
