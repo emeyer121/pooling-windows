@@ -415,7 +415,7 @@ def _log_eccentricity_windows(
 
 def create_pooling_windows(
     scaling: float | None,
-    resolution: tuple[int, int],
+    img_res: tuple[int, int],
     min_eccentricity: float = 0.5,
     max_eccentricity: float = 15,
     radial_to_circumferential_ratio: float = 2,
@@ -441,7 +441,7 @@ def create_pooling_windows(
     scaling
         The ratio of the eccentricity window's radial full-width at
         half-maximum to eccentricity (see the `calculate.scaling` function).
-    resolution
+    img_res
         2-tuple of ints specifying the resolution of the 2d images to
         make.
     min_eccentricity
@@ -481,12 +481,12 @@ def create_pooling_windows(
     -------
     angle_windows
         The 3d tensor of 2d polar angle windows. Its shape will be
-        ``(n_angle_windows, *resolution)``, where the number of windows
+        ``(n_angle_windows, *img_res)``, where the number of windows
         is inferred in this function based on the values of ``scaling``
         and ``radial_to_circumferential_width``.
     ecc_windows
         The 3d tensor of 2d log-eccentricity windows. Its shape will be
-        ``(n_eccen_windows, *resolution)``, where the number of windows
+        ``(n_eccen_windows, *img_res)``, where the number of windows
         is inferred in this function based on the values of ``scaling``,
         ``min_ecc``, and ``max_ecc``.
 
@@ -573,7 +573,7 @@ def create_pooling_windows(
        >>> windows = torch.einsum("ahw,ehw->eahw", [angle_w, ecc_w[:-1]]).flatten(0, 1)
        >>> fig, ax = plt.subplots(1, 1, figsize=(5, 5))
        >>> for w in windows:
-       >>>     ax.contour(w, [.5], colors='r')
+       ...     ax.contour(w, [0.5], colors="r")
        >>> plt.show()
 
     See Also
@@ -603,14 +603,14 @@ def create_pooling_windows(
     n_polar_windows = int(round(n_polar_windows))
     angle_tensor = _polar_angle_windows(
         n_polar_windows,
-        resolution,
+        img_res,
         window_type,
         transition_region_width=transition_region_width,
         std_dev=std_dev,
         device=device,
     )
     ecc_tensor = _log_eccentricity_windows(
-        resolution,
+        img_res,
         None,
         ecc_window_spacing,
         min_eccentricity,
