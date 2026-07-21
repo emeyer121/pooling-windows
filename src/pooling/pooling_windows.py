@@ -1294,7 +1294,7 @@ class PoolingWindows(nn.Module):
             fig.legend(loc="center right", title="Angle slices")
         return fig
 
-    def summarize_window_sizes(self, print_summary: bool = False) -> dict:
+    def summarize_window_sizes(self, units: str = "pixels") -> dict:
         r"""Summarize window sizes.
 
         This function returns a dictionary summarizing the window sizes
@@ -1307,15 +1307,20 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        print_summary
-            whether or not to automatically display summary of parameters
-            in a tabular format
+        units
+            Which units to return the window size summary in
 
         Returns
         -------
         sizes
             dictionary with the keys described above, summarizing window
             sizes. all values are scalar floats
+
+        Raises
+        ------
+        Exception
+            If ``units`` are not "pixels" or "degrees"
+
 
         """
         min_idx = np.abs(
@@ -1325,28 +1330,30 @@ class PoolingWindows(nn.Module):
             self.central_eccentricity_degrees - self.max_eccentricity
         ).argmin()
         sizes = {}
-        central_ecc = self.central_eccentricity_degrees
-        widths = self.window_width_degrees
-        areas = self.window_approx_area_degrees
-        for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
-            sizes[f"{extrem}_window_center_degrees"] = central_ecc[idx]
-            sizes[f"{extrem}_window_fwhm_degrees"] = widths["radial_half"][idx]
-            sizes[f"{extrem}_window_area_degrees"] = areas["half"][idx]
-        central_ecc = self.central_eccentricity_pixels
-        widths = self.window_width_pixels
-        areas = self.window_approx_area_pixels
-        for i in range(len(central_ecc)):
+        if units == "degrees":
+            central_ecc = self.central_eccentricity_degrees
+            widths = self.window_width_degrees
+            areas = self.window_approx_area_degrees
             for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
-                sizes[f"{extrem}_window_scale_{i}_center_pixels"] = central_ecc[i][idx]
-                sizes[f"{extrem}_window_scale_{i}_fwhm_pixels"] = widths[i][
-                    "radial_half"
-                ][idx]
-                sizes[f"{extrem}_window_scale_{i}_area_pixels"] = areas[i]["half"][idx]
+                sizes[f"{extrem}_window_center_degrees"] = central_ecc[idx]
+                sizes[f"{extrem}_window_fwhm_degrees"] = widths["radial_half"][idx]
+                sizes[f"{extrem}_window_area_degrees"] = areas["half"][idx]
+        elif units == "pixels":
+            central_ecc = self.central_eccentricity_pixels
+            widths = self.window_width_pixels
+            areas = self.window_approx_area_pixels
+            for i in range(len(central_ecc)):
+                for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
+                    sizes[f"{extrem}_window_scale_{i}_center_pixels"] = central_ecc[i][
+                        idx
+                    ]
+                    sizes[f"{extrem}_window_scale_{i}_fwhm_pixels"] = widths[i][
+                        "radial_half"
+                    ][idx]
+                    sizes[f"{extrem}_window_scale_{i}_area_pixels"] = areas[i]["half"][
+                        idx
+                    ]
+        else:
+            raise Exception(f"units must be one of {'pixels', 'degrees'}, not {units}!")
 
-        header_str = f"{'Parameters':<35} | {'Approx. Values':>14} \n" + "-" * 52 + "\n"
-        size_str = ""
-        for param, val in sizes.items():
-            size_str += f"{param:<35} | {val:>14.6f} \n"
-        print_str = header_str + size_str
-
-        return sizes, print_str
+        return sizes
