@@ -537,21 +537,20 @@ def create_pooling_windows(
     so that each eccentricity contributes equally, facilitating optimization.
     See [7]_ for an example:
 
-    >>> ecc_windows, scale_factor = pooling.pooling.normalize_windows(
-    ...     angle_windows=angle_w, ecc_windows=ecc_w, window_eccentricity=1
-    ... )
-
     You can display the various angle and eccentricity windows by plotting a
     specified index:
 
     .. plot::
        :include-source:
+       :context: close-figs
 
        >>> import matplotlib.pyplot as plt
        >>> angle_w, ecc_w = pooling.pooling.create_pooling_windows(0.87, (256, 256))
        >>> fig, ax = plt.subplots(1, 2, figsize=(8, 4))
        >>> ax[0].imshow(ecc_w[0], cmap="Grays_r", interpolation="none")
+       <matplotlib.image.AxesImage ...>
        >>> ax[1].imshow(angle_w[0], cmap="Grays_r", interpolation="none")
+       <matplotlib.image.AxesImage ...>
        >>> plt.show()
 
     If you wish to get the windows as shown in Supplementary Figure 1C
@@ -561,6 +560,7 @@ def create_pooling_windows(
 
     .. plot::
        :include-source:
+       :context: close-figs
 
        >>> import matplotlib.pyplot as plt
        >>> import pooling
@@ -574,6 +574,7 @@ def create_pooling_windows(
        >>> fig, ax = plt.subplots(1, 1, figsize=(5, 5))
        >>> for w in windows:
        ...     ax.contour(w, [0.5], colors="r")
+       <matplotlib.contour.QuadContourSet ...>
        >>> plt.show()
 
     See Also
