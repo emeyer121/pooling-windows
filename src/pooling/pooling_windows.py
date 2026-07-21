@@ -1301,9 +1301,9 @@ class PoolingWindows(nn.Module):
         at the minimum and maximum eccentricity. Let ``min_window`` be
         the window whose center is closest to ``self.min_eccentricity``
         and ``max_window`` the one whose center is closest to
-        ``self.max_eccentricity``. We find its center, FWHM (in the
-        radial direction), and approximate area (at half-max) in
-        degrees. We do the same in pixels, for each scale.
+        ``self.max_eccentricity``. If ``units="degrees"``, we find its
+        center, FWHM (in the radial direction), and approximate area (at
+        half-max). If ``units="pixels"``, we do the same for each scale.
 
         Parameters
         ----------
