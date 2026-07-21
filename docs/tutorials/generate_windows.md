@@ -39,7 +39,7 @@ Download the executed notebook: **{nb-download}`Generate_Windows.ipynb`**!
 (generate-windows-nb)=
 # Generate Windows
 
-This notebook provides tutorials on the most common ways of generating and interacting with pooling windows. These can be used generally for building foveated windows and interacting with the resulting weight from averages across windows. We will also discuss how to use these windows for metamer generation in the next tutorial (link).
+This notebook provides tutorials on the most common ways of generating and interacting with pooling windows. These can be used generally for building foveated windows and interacting with the resulting weights across windows.
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
@@ -68,7 +68,7 @@ pw = pooling.PoolingWindows(0.5, (256,256))
 pw.plot_windows(subset=False)
 ```
 
-We can also change a number of other parameters that define the windows: `min_eccentricity` and `max_eccentricity` that define the extent of the windows within the image in degrees of visual angle, `num_scales` which controls the number of window scales generated, `cache_dir` for specifying a path to cache the model in for loading/saving, and `window_type` which can be defined as `gaussian` or `cosine` (**see tutorial for comparison**).
+We can also change a number of other parameters that define the windows: `min_eccentricity` and `max_eccentricity` that define the extent of the windows within the image in degrees of visual angle, `num_scales` which controls the number of window scales generated, `cache_dir` for specifying a directory to cache the windows, and `window_type` which can be defined as `gaussian` or `cosine`.
 
 ```{code-cell} ipython3
 pw = pooling.PoolingWindows(
@@ -81,7 +81,7 @@ pw = pooling.PoolingWindows(
 pw.plot_windows()
 ```
 
-If you want to take advantage of just the eccentricity rings or angular wedges separately, you can also call `pooling.create_pooling_windows`. Here we will use `scaling=2` and and image size of `(256,256)`. We will also take advantage of [plenoptic's](https://plenoptic.org/) plotting function `po.imshow`.
+If you want to just generate the eccentricity rings and angular wedges separately, you can also call `pooling.create_pooling_windows`. Here we will use `scaling=2` and and image size of `(256,256)`. We will also take advantage of [plenoptic's](https://plenoptic.org/) plotting function `po.imshow`.
 
 ```{code-cell} ipython3
 import plenoptic as po
@@ -98,6 +98,8 @@ It is also simple to reconstruct the windows from this angle and eccentricity da
 ```{code-cell} ipython3
 windows = torch.einsum('ahw,ehw->eahw', [angle_w, ecc_w]).flatten(0, 1)
 ```
+
+However, in order to reproduce the results in `pooling.PoolingWindows`, you would also need to normalize the windows so that they have an L1-norm of 1. This ensures that each eccentricity contributes equally, which can be useful when generating model metamers.
 
 ## Displaying Window Values
 
@@ -116,8 +118,7 @@ pw.plot_window_values(img, subset=False)
 If you would like a summary of the size and values associated with the pooling windows, you can call `summarize_window_sizes`.
 
 ```{code-cell} ipython3
-_, print_summary = pw.summarize_window_sizes()
-print(print_summary)
+pw.summarize_window_sizes()
 ```
 
 (choosing-scaling-values)=
