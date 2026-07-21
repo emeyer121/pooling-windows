@@ -1451,24 +1451,20 @@ class PoolingWindows(nn.Module):
             widths = self.window_width_degrees
             areas = self.window_approx_area_degrees
             for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
-                sizes[f"{extrem}_window_center_degrees"] = central_ecc[idx]
-                sizes[f"{extrem}_window_fwhm_degrees"] = widths["radial_half"][idx]
-                sizes[f"{extrem}_window_area_degrees"] = areas["half"][idx]
+                sizes[f"{extrem}_window_center"] = central_ecc[idx]
+                sizes[f"{extrem}_window_fwhm"] = widths["radial_half"][idx]
+                sizes[f"{extrem}_window_area"] = areas["half"][idx]
         elif units == "pixels":
             central_ecc = self.central_eccentricity_pixels
             widths = self.window_width_pixels
             areas = self.window_approx_area_pixels
             for i in range(len(central_ecc)):
                 for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
-                    sizes[f"{extrem}_window_scale_{i}_center_pixels"] = central_ecc[i][
+                    sizes[f"{extrem}_window_scale_{i}_center"] = central_ecc[i][idx]
+                    sizes[f"{extrem}_window_scale_{i}_fwhm"] = widths[i]["radial_half"][
                         idx
                     ]
-                    sizes[f"{extrem}_window_scale_{i}_fwhm_pixels"] = widths[i][
-                        "radial_half"
-                    ][idx]
-                    sizes[f"{extrem}_window_scale_{i}_area_pixels"] = areas[i]["half"][
-                        idx
-                    ]
+                    sizes[f"{extrem}_window_scale_{i}_area"] = areas[i]["half"][idx]
         else:
             raise Exception(f"units must be one of {'pixels', 'degrees'}, not {units}!")
 
