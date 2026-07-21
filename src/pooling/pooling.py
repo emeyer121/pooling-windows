@@ -624,14 +624,13 @@ def create_pooling_windows(
 
 
 def normalize_windows(
-    angle_windows: dict,
-    ecc_windows: dict,
+    angle_windows: torch.Tensor,
+    ecc_windows: torch.Tensor,
     window_eccentricity: np.ndarray,
-    scale: int = 0,
 ) -> tuple[dict, torch.Tensor]:
     r"""Normalize windows to have L1-norm of 1.
 
-    we calculate the L1-norm of single windows (that is, product of
+    We calculate the L1-norm of single windows (that is, product of
     eccentricity and angular windows) for all angles, one middling
     eccentricity (third of the way thorugh), then average across angles
     (because of alignment with pixel grid, L1-norm will vary somewhat
@@ -648,33 +647,31 @@ def normalize_windows(
     Parameters
     ----------
     angle_windows
-        dictionary containing the angular windows
+        tensor containing the angular windows
     ecc_windows
-        dictionary containing the eccentricity windows
+        tensor containing the eccentricity windows
     window_eccentricity
         array containing the eccentricity for each window that defines
         their location relative to each other (and so can be in either
         pixels or degrees). this is used to determine how to scale the
         L1-norm. It should probably be the central eccentricity, but it
         should not contain any zeros.
-    scale
-        which scale to calculate norm for and modify
 
     Returns
     -------
     ecc_windows
-        the normalized ecc_windows. only ``scale`` is modified
+        the normalized ecc_windows.
     scale_factor
-        the scale_factor used to normalize eccentricity windows at this
-        scale (as a 3d tensor, number of eccentricity windows by 1 by
+        the scale_factor used to normalize eccentricity windows
+        (as a 3d tensor, number of eccentricity windows by 1 by
         1). stored by ``PoolingWindows`` object so we can undo it for
         ``project()`` or plotting purposes
 
     """
     # pick some window with a middling eccentricity
-    n = ecc_windows[scale].shape[0] // 3
+    n = ecc_windows.shape[0] // 3
     # get the l1 norm of a single window
-    w = torch.einsum("ahw,hw->ahw", angle_windows[scale], ecc_windows[scale][n])
+    w = torch.einsum("ahw,hw->ahw", angle_windows, ecc_windows[n])
     l1 = torch.norm(w, 1, (-1, -2))
     l1 = l1.mean(0)
     # the l1 norm grows with the area of the windows; the radial
@@ -691,7 +688,7 @@ def normalize_windows(
     # scale factor then we actually made (because we calculate
     # details for windows that go out farther, just in case). if
     # that's so, drop the extra scale factor
-    if len(scale_factor) > len(ecc_windows[scale]):
-        scale_factor = scale_factor[: len(ecc_windows[scale])]
-    ecc_windows[scale] = ecc_windows[scale] * scale_factor
+    if len(scale_factor) > len(ecc_windows):
+        scale_factor = scale_factor[: len(ecc_windows)]
+    ecc_windows = ecc_windows * scale_factor
     return ecc_windows, scale_factor

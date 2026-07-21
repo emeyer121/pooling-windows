@@ -375,9 +375,10 @@ class PoolingWindows(nn.Module):
             # otherwise, use the central one.
             except AttributeError:
                 ecc = self.central_eccentricity_degrees
-            self.ecc_windows, norm_factor = pooling.normalize_windows(
-                self.angle_windows, self.ecc_windows, ecc, i
+            norm_ecc, norm_factor = pooling.normalize_windows(
+                angle_windows[i], ecc_windows[i], ecc, i
             )
+            self.ecc_windows[i] = norm_ecc
             self.norm_factor[i] = norm_factor
 
     def _window_sizes(self):
