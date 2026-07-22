@@ -11,6 +11,30 @@ import pooling
 from conftest import DEVICE
 
 
+def unpack_dict(pw):
+    pw_dict = pw.__dict__
+    new_dict = {}
+    for k, v in pw_dict.items():
+        if k.startswith(("_", "training")):
+            continue
+        else:
+            # check if dictionary
+            if isinstance(v, dict):
+                new_dict.update({f"{k}_{k_}": v_ for k_, v_ in v.items()})
+            # check if list of dictionaries and concat with new keys
+            elif isinstance(v, list) and v and isinstance(v[0], dict):
+                for num, d in enumerate(pw_dict[k]):
+                    new_dict.update({f"{k}_{num}_{k_}": v_ for k_, v_ in d.items()})
+            # check if list of numpy arrays and concat with new keys
+            elif isinstance(v, list) and v and isinstance(v[0], np.ndarray):
+                new_dict.update({f"{k}_{k_}": v_ for k_, v_ in enumerate(v)})
+            # if none of the above, just copy
+            else:
+                new_dict[k] = v
+
+    return new_dict
+
+
 class TestPooling:
     def test_creation(self):
         pooling.pooling.create_pooling_windows(0.87, (256, 256))
@@ -23,7 +47,7 @@ class TestPooling:
 
     def test_creation_gaussian(self):
         pooling.pooling.create_pooling_windows(
-            0.87, (100, 100), 0.2, 30, 1.2, "gaussian", std_dev=1
+            0.87, (100, 100), 0.2, 30, 1.2, "gaussian"
         )
 
     @pytest.mark.parametrize("n_windows", [4, 4.5])
@@ -38,7 +62,7 @@ class TestPooling:
 
     @pytest.mark.parametrize("res", [(256, 256), (1000, 1000), 100])
     def test_angle_windows(self, res):
-        pooling.pooling._polar_angle_windows(4, res)
+        pooling.pooling._polar_angle_windows(10, res)
 
     def test_angle_windows_notint(self):
         with pytest.raises(Exception, match="n_windows must be an integer"):
@@ -88,13 +112,11 @@ class TestPooling:
         assert np.isinf(pooling.pooling.calculate.scaling(4, 0))
 
     @pytest.mark.parametrize("num_scales", [1, 3])
-    @pytest.mark.parametrize("transition_region_width", [0.5, 1])
-    def test_PoolingWindows_cosine(self, rand_img, num_scales, transition_region_width):
+    def test_PoolingWindows_cosine(self, rand_img, num_scales):
         pw = pooling.PoolingWindows(
             0.5,
             rand_img.shape[2:],
             num_scales=num_scales,
-            transition_region_width=transition_region_width,
             window_type="cosine",
         )
         pw(rand_img)
@@ -106,30 +128,8 @@ class TestPooling:
             rand_img.shape[2:],
             num_scales=num_scales,
             window_type="gaussian",
-            std_dev=1,
         )
         pw(rand_img)
-        # we only support std_dev=1
-        with pytest.raises(
-            Exception, match="Only std_dev=1 allowed for Gaussian windows!"
-        ):
-            pooling.PoolingWindows(
-                0.5,
-                rand_img.shape[2:],
-                num_scales=num_scales,
-                window_type="gaussian",
-                std_dev=2,
-            )
-        with pytest.raises(
-            Exception, match="Only std_dev=1 allowed for Gaussian windows!"
-        ):
-            pooling.PoolingWindows(
-                0.5,
-                rand_img.shape[2:],
-                num_scales=num_scales,
-                window_type="gaussian",
-                std_dev=0.5,
-            )
 
     def test_PoolingWindows_totype(self, pool_win):
         assert pool_win.angle_windows[0].dtype == torch.float32
@@ -148,9 +148,9 @@ class TestPooling:
     @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
     def test_PoolingWindows_todevice(self, pool_win):
         pool_win.to("cpu")
-        assert pool_win.angle_windows[0].device == "cpu"
+        assert pool_win.angle_windows[0].device.type == "cpu"
         pool_win.to("cuda")
-        assert pool_win.angle_windows[0].device == "cuda"
+        assert pool_win.angle_windows[0].device.type == "cuda"
 
     @pytest.mark.parametrize("offset", [0.2, 0.5])
     def test_PoolingWindows_merge(self, rand_img, pool_win, offset):
@@ -223,6 +223,70 @@ class TestPooling:
                 0.8, rand_img.shape[-2:], num_scales=2, cache_dir=tmp_path
             )
 
+    def test_PoolingWindows_save(self, rand_img, tmp_path):
+        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:])
+        pw.save(tmp_path / "model.pt")
+        assert pathlib.Path(tmp_path / "model.pt").exists()
+        assert pathlib.Path(tmp_path / "model.pt").is_file()
+
+    def test_PoolingWindows_loadcache(self, rand_img, tmp_path):
+        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:], cache_dir=tmp_path)
+        assert pathlib.Path(pw.cache_dir) == tmp_path
+        pw.save(tmp_path / "model.pt")
+        new_path = tmp_path / "newdir"
+        new_path.mkdir()
+        pw_load = pooling.PoolingWindows.load(
+            tmp_path / "model.pt", cache_dir=tmp_path / "newdir/"
+        )
+        assert pathlib.Path(pw_load.cache_dir) == pathlib.Path(
+            str(tmp_path) + "/newdir/"
+        )
+
+    @pytest.mark.parametrize("scaling", [0.5, 1])
+    @pytest.mark.parametrize("ecc", [[0.5, 10], [1, 15]])
+    @pytest.mark.parametrize("num_scales", [1, 3])
+    @pytest.mark.parametrize("window_type", ["gaussian", "cosine"])
+    @pytest.mark.parametrize("file_type", [".pt", ".csv"])
+    def test_PoolingWindows_saveload(
+        self, scaling, rand_img, ecc, num_scales, window_type, tmp_path, file_type
+    ):
+        pw = pooling.PoolingWindows(
+            scaling,
+            rand_img.shape[-2:],
+            min_eccentricity=ecc[0],
+            max_eccentricity=ecc[1],
+            num_scales=num_scales,
+            window_type=window_type,
+        )
+        pw_dict = unpack_dict(pw)
+
+        pw.save(tmp_path / pathlib.Path(f"./model{file_type}"))
+        pw_new = pooling.PoolingWindows.load(
+            tmp_path / pathlib.Path(f"./model{file_type}")
+        )
+        pw_new_dict = unpack_dict(pw_new)
+
+        for k, v in pw_dict.items():
+            if isinstance(pw_dict[k], (torch.Tensor, np.ndarray)):
+                assert torch.allclose(
+                    torch.as_tensor(pw_dict[k]), torch.as_tensor(pw_new_dict[k])
+                )
+            else:
+                # otherwise check individual equivalence
+                assert pw_dict[k] == pw_new_dict[k]
+
+    @pytest.mark.skipif(DEVICE.type == "cpu", reason="Only makes sense to test on cuda")
+    def test_PoolingWindows_saveload_device(self, pool_win, tmp_path):
+        pool_win.to("cuda")
+        pool_win.save(tmp_path / "model.pt")
+        assert pool_win.angle_windows[0].device.type == "cuda"
+        pw = pooling.PoolingWindows.load(tmp_path / "model.pt")
+        assert pw.angle_windows[0].device.type == "cpu"
+
+    def test_PoolingWindows_nofile_load(self):
+        with pytest.raises(FileNotFoundError, match="No such file or directory:"):
+            pooling.PoolingWindows.load("fake_file.pt")
+
     def test_PoolingWindows_sep(self, rand_img, pool_win):
         # test the window and pool function separate of the forward function
         pooled_x1 = pool_win(rand_img)
@@ -243,8 +307,34 @@ class TestPooling:
             for i in range(num_scales):
                 pw(im[(i,)], idx=i, weights=torch.ones(num_scales, 1, 1, 1, 1))
 
-    def test_PoolingWindows_summarize(self, rand_img, pool_win):
+    def test_PoolingWindows_summarize_gaussian(self, pool_win):
         sizes = pool_win.summarize_window_sizes()
+        assert np.allclose(sizes["min_window_center_degrees"], 0.6169492446746707)
+        assert np.allclose(sizes["min_window_fwhm_degrees"], 0.30847462233733536)
+        assert np.allclose(sizes["min_window_area_degrees"], 0.037367906541873275)
+        assert np.allclose(sizes["max_window_center_degrees"], 14.435802268216328)
+        assert np.allclose(sizes["max_window_fwhm_degrees"], 7.217901134108164)
+        assert np.allclose(sizes["max_window_area_degrees"], 20.458874764448375)
+        assert np.allclose(sizes["min_window_scale_0_center_pixels"], 5.26463355455719)
+        assert np.allclose(sizes["min_window_scale_0_fwhm_pixels"], 2.632316777278595)
+        assert np.allclose(sizes["min_window_scale_0_area_pixels"], 2.721047914586897)
+        assert np.allclose(
+            sizes["max_window_scale_0_center_pixels"], 123.18551268877933
+        )
+        assert np.allclose(sizes["max_window_scale_0_fwhm_pixels"], 61.59275634438966)
+        assert np.allclose(sizes["max_window_scale_0_area_pixels"], 1489.7697961809874)
+        assert np.allclose(sizes["min_window_scale_1_center_pixels"], 2.632316777278595)
+        assert np.allclose(sizes["min_window_scale_1_fwhm_pixels"], 1.3161583886392976)
+        assert np.allclose(sizes["min_window_scale_1_area_pixels"], 0.6802619786467242)
+        assert np.allclose(sizes["max_window_scale_1_center_pixels"], 61.59275634438966)
+        assert np.allclose(sizes["max_window_scale_1_fwhm_pixels"], 30.79637817219483)
+        assert np.allclose(sizes["max_window_scale_1_area_pixels"], 372.44244904524686)
+
+    def test_PoolingWindows_summarize_cosine(self, rand_img):
+        pw = pooling.PoolingWindows(
+            0.5, rand_img.shape[2:], num_scales=2, window_type="cosine"
+        )
+        sizes = pw.summarize_window_sizes()
         assert np.allclose(sizes["min_window_center_degrees"], 0.8201941016011038)
         assert np.allclose(sizes["min_window_fwhm_degrees"], 0.4100970508005519)
         assert np.allclose(sizes["min_window_area_degrees"], 0.06604397097574137)
