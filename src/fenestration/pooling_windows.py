@@ -117,16 +117,6 @@ class PoolingWindows(nn.Module):
         a dict of 3d tensors containing the values used to normalize
         ecc_windows. Each key corresponds to a different scale. This is
         stored to undo that normalization for plotting and projection.
-    window_width_degrees : dict
-        Dictionary containing the widths of the windows in
-        degrees. There are six keys, corresponding to a 2x2 for the
-        widths in the radial and angular directions by the 'top',
-        'half', and 'full' widths (top is the width of the flat-top
-        region of each window, where the window's value is 1; full is
-        the width of the entire window; half is the width at
-        half-max). Each value is a list containing the widths for the
-        windows in different eccentricity bands. To visualize these, see
-        the ``plot_window_widths`` method.
     window_width_pixels : list
         List of dictionaries containing the widths of the windows in
         pixels; each entry in the list corresponds to the widths for a
@@ -138,44 +128,29 @@ class PoolingWindows(nn.Module):
         (within each eccentricity band)
     n_eccentricity_bands : int
         The number of eccentricity bands in our model
-    calculated_min_eccentricity_degrees : list
-        List of floats (one for each scale) that contain
-        ``calculate._min_eccentricity()[0]``, that is, the minimum
-        eccentricity (in degrees) where the area of the window at
-        half-max exceeds one pixel (based on the scaling, size of the
-        image in pixels and in degrees).
     calculated_min_eccentricity_pixels : list
         List of floats (one for each scale) that contain
         ``calculate._min_eccentricity()[1]``, that is, the minimum
         eccentricity (in pixels) where the area of the window at
         half-max exceeds one pixel (based on the scaling, size of the
         image in pixels and in degrees).
-    central_eccentricity_degrees : np.ndarray
-        A 1d array with shape ``(self.n_eccentricity_bands,)``, each
-        value gives the eccentricity of the center of each eccentricity
-        band of windows (in degrees).
     central_eccentricity_pixels : list
         List of 1d arrays (one for each scale), each with shape
         ``(self.n_eccentricity_bands,)``, each value gives the
         eccentricity of the center of each eccentricity band of windows
-        (in degrees).
-    window_approx_area_degrees : dict
-        Dictionary containing the approximate areas of the windows, in
-        degrees. There are three keys: 'top', 'half', and 'full',
-        corresponding to which width we used to calculate the area (top
-        is the width of the flat-top region of each window, where the
-        window's value is 1; full is the width of the entire window;
-        half is the width at half-max). To get this approximate area, we
-        multiply the radial and angular widths against each other and
-        then by pi/4 to get the area of the regular ellipse that has
-        those widths (our windows are elongated, so this is probably an
-        under-estimate). To visualize these, see the
-        ``plot_window_areas`` method
+        (in pixels).
     window_approx_area_pixels : list
         List of dictionaries containing the approximate areasof the
         windows in pixels; each entry in the list corresponds to the
-        areas for a different scale, as in ``windows``. See above for
-        explanation of the dictionaries. To visualize these, see the
+        areas for a different scale, as in ``windows``. There are three
+        keys: 'top', 'half', and 'full', corresponding to which width we
+        used to calculate the area (top is the width of the flat-top
+        region of each window, where the window's value is 1; full is
+        the width of the entire window; half is the width at half-max).
+        To get this approximate area, we multiply the radial and angular
+        widths against each other and then by pi/4 to get the area of the
+        regular ellipse that has those widths (our windows are elongated,
+        so this is probably an under-estimate). To visualize these, see the
         ``plot_window_areas`` method.
     deg_to_pix : list
         List of floats containing the degree-to-pixel conversion factor
@@ -282,7 +257,7 @@ class PoolingWindows(nn.Module):
         else:
             self.cache_dir = cache_dir
         self.cache_paths = []
-        self.calculated_min_eccentricity_degrees = []
+        self._calculated_min_eccentricity_degrees = []
         self.calculated_min_eccentricity_pixels = []
         self._window_sizes()
         for i in range(self.num_scales):
@@ -290,7 +265,7 @@ class PoolingWindows(nn.Module):
             min_ecc, min_ecc_pix = calculate._min_eccentricity(
                 scaling, scaled_img_res, max_eccentricity
             )
-            self.calculated_min_eccentricity_degrees.append(min_ecc)
+            self._calculated_min_eccentricity_degrees.append(min_ecc)
             self.calculated_min_eccentricity_pixels.append(min_ecc_pix)
             if self.min_eccentricity is not None and min_ecc > self.min_eccentricity:
                 warnings.warn(
@@ -335,9 +310,9 @@ class PoolingWindows(nn.Module):
             # eccentricity windows, so we add empty windows to make sure that's
             # the case. this is only an issue with coarse scales (or
             # equivalently, small resolutions) and smaller scales
-            if ecc_windows.shape[0] < self.central_eccentricity_degrees.shape[0]:
+            if ecc_windows.shape[0] < self._central_eccentricity_degrees.shape[0]:
                 n_extra_wdws = (
-                    self.central_eccentricity_degrees.shape[0] - ecc_windows.shape[0]
+                    self._central_eccentricity_degrees.shape[0] - ecc_windows.shape[0]
                 )
                 ecc_windows = torch.cat(
                     [ecc_windows, torch.zeros_like(ecc_windows[:n_extra_wdws])]
@@ -361,7 +336,7 @@ class PoolingWindows(nn.Module):
                 ecc = self.one_std_dev_eccentricity_degrees
             # otherwise, use the central one.
             except AttributeError:
-                ecc = self.central_eccentricity_degrees
+                ecc = self._central_eccentricity_degrees
             norm_ecc, norm_factor = pooling.normalize_windows(
                 angle_windows, ecc_windows, ecc
             )
@@ -373,8 +348,8 @@ class PoolingWindows(nn.Module):
 
         helper function that gets called during construction, should not
         be used by user. Sets the following attribute: n_polar_windows,
-        n_eccentricity_bands, window_width_degrees, central_eccentricity_degrees,
-        window_approx_area_degrees, window_width_pixels, central_eccentricity_pixels,
+        n_eccentricity_bands, _window_width_degrees, _central_eccentricity_degrees,
+        _window_approx_area_degrees, window_width_pixels, central_eccentricity_pixels,
         window_approx_area_pixels, deg_to_pix
 
         all of these are based on calling various helper functions (from
@@ -400,16 +375,16 @@ class PoolingWindows(nn.Module):
             self._transition_region_width,
             self._std_dev,
         )
-        self.window_width_degrees = dict(
+        self._window_width_degrees = dict(
             zip(
                 ["radial_top", "radial_full", "angular_top", "angular_full"],
                 window_widths,
             )
         )
-        self.n_eccentricity_bands = len(self.window_width_degrees["radial_top"])
+        self.n_eccentricity_bands = len(self._window_width_degrees["radial_top"])
         # transition width and std dev don't matter for central
         # eccentricity, just min and max
-        self.central_eccentricity_degrees = calculate._windows_eccentricity(
+        self._central_eccentricity_degrees = calculate._windows_eccentricity(
             "central",
             self.n_eccentricity_bands,
             ecc_window_width,
@@ -423,20 +398,20 @@ class PoolingWindows(nn.Module):
                 self.min_eccentricity,
                 std_dev=self._std_dev,
             )
-        self.window_width_degrees["radial_half"] = (
-            self.scaling * self.central_eccentricity_degrees
+        self._window_width_degrees["radial_half"] = (
+            self.scaling * self._central_eccentricity_degrees
         )
         # the 2 we divide by here is the
         # radial_to_circumferential_ratio; if we ever allow that to be
         # set by the user will need to update
-        self.window_width_degrees["angular_half"] = (
-            self.window_width_degrees["radial_half"] / 2
+        self._window_width_degrees["angular_half"] = (
+            self._window_width_degrees["radial_half"] / 2
         )
-        self.window_approx_area_degrees = {}
+        self._window_approx_area_degrees = {}
         for k in ["full", "top", "half"]:
-            self.window_approx_area_degrees[k] = (
-                self.window_width_degrees[f"radial_{k}"]
-                * self.window_width_degrees[f"angular_{k}"]
+            self._window_approx_area_degrees[k] = (
+                self._window_width_degrees[f"radial_{k}"]
+                * self._window_width_degrees[f"angular_{k}"]
                 * (np.pi / 4)
             )
         self.window_width_pixels = []
@@ -451,7 +426,7 @@ class PoolingWindows(nn.Module):
             self.window_width_pixels.append(
                 dict(
                     (k, v * deg_to_pix)
-                    for k, v in self.window_width_degrees.copy().items()
+                    for k, v in self._window_width_degrees.copy().items()
                 )
             )
             self.window_approx_area_pixels.append({})
@@ -462,7 +437,7 @@ class PoolingWindows(nn.Module):
                     * (np.pi / 4)
                 )
             self.central_eccentricity_pixels.append(
-                self.deg_to_pix[-1] * self.central_eccentricity_degrees
+                self.deg_to_pix[-1] * self._central_eccentricity_degrees
             )
 
     def to(self, *args: Any, **kwargs: Any) -> nn.Module:
@@ -1180,8 +1155,8 @@ class PoolingWindows(nn.Module):
 
         """
         if units == "degrees":
-            data = self.window_width_degrees
-            central_ecc = self.central_eccentricity_degrees
+            data = self._window_width_degrees
+            central_ecc = self._central_eccentricity_degrees
         elif units == "pixels":
             data = self.window_width_pixels[scale_num]
             central_ecc = self.central_eccentricity_pixels[scale_num]
@@ -1269,8 +1244,8 @@ class PoolingWindows(nn.Module):
 
         """
         if units == "degrees":
-            data = self.window_approx_area_degrees
-            central_ecc = self.central_eccentricity_degrees
+            data = self._window_approx_area_degrees
+            central_ecc = self._central_eccentricity_degrees
         elif units == "pixels":
             data = self.window_approx_area_pixels[scale_num]
             central_ecc = self.central_eccentricity_pixels[scale_num]
@@ -1332,14 +1307,14 @@ class PoolingWindows(nn.Module):
         fig, axes = plt.subplots(2, 1, figsize=(5, 10), gridspec_kw={"hspace": 0.4})
         for i, (f, name) in enumerate(zip(funcs, ["L1-norm", "Sum"])):
             d = f(windows).numpy()
-            # most of the time, self.central_eccentricity_degrees
+            # most of the time, self._central_eccentricity_degrees
             # and d will be same size, but sometimes they will not
-            # not. this happens because central_eccentricity_degrees
+            # not. this happens because _central_eccentricity_degrees
             # contains all windows that we constructed, but the
             # ecc_windows dictionary throws away any windows that
             # have all zero (or close to zero) values. this will be
             # those at the end, because they're off the image
-            ecc = self.central_eccentricity_degrees[: d.shape[0]]
+            ecc = self._central_eccentricity_degrees[: d.shape[0]]
             axes[i].semilogx(ecc, d)
             for j, dj in enumerate(d.transpose(1, 0)):
                 label = angle_n[j] if i == 0 else None
@@ -1404,16 +1379,16 @@ class PoolingWindows(nn.Module):
 
         """
         min_idx = np.abs(
-            self.central_eccentricity_degrees - self.min_eccentricity
+            self._central_eccentricity_degrees - self.min_eccentricity
         ).argmin()
         max_idx = np.abs(
-            self.central_eccentricity_degrees - self.max_eccentricity
+            self._central_eccentricity_degrees - self.max_eccentricity
         ).argmin()
         sizes = {}
         if units == "degrees":
-            central_ecc = self.central_eccentricity_degrees
-            widths = self.window_width_degrees
-            areas = self.window_approx_area_degrees
+            central_ecc = self._central_eccentricity_degrees
+            widths = self._window_width_degrees
+            areas = self._window_approx_area_degrees
             for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
                 sizes[f"{extrem}_window_center"] = central_ecc[idx]
                 sizes[f"{extrem}_window_fwhm"] = widths["radial_half"][idx]
