@@ -883,8 +883,8 @@ class PoolingWindows(nn.Module):
 
         >>> import fenestration as fen
         >>> pw = fen.PoolingWindows(0.5, (256, 256))
-        >>> pw.save("./saved_data/model_params.pt")
-        >>> pw_new = fen.PoolingWindows.load("./saved_data/model_params.pt")
+        >>> pw.save("./model_params.pt")
+        >>> pw_new = fen.PoolingWindows.load("./model_params.pt")
 
         """
         save_dict = {
@@ -936,8 +936,8 @@ class PoolingWindows(nn.Module):
 
         >>> import fenestration as fen
         >>> pw = fen.PoolingWindows(0.5, (256, 256))
-        >>> pw.save("pw_model.pt")
-        >>> pw_new = fen.PoolingWindows.load("pw_model.pt")
+        >>> pw.save("./model_params.pt")
+        >>> pw_new = fen.PoolingWindows.load("./model_params.pt")
         >>> pw_new
         PoolingWindows()
 
@@ -1393,6 +1393,12 @@ class PoolingWindows(nn.Module):
         >>> pw = fen.PoolingWindows(0.5, (256, 256))
         >>> summary = pw.summarize_window_sizes()
         >>> pprint(summary)
+        {'max_window_scale_0_area': np.float64(1489.7697961809874),
+        'max_window_scale_0_center': np.float64(123.18551268877933),
+        'max_window_scale_0_fwhm': np.float64(61.59275634438966),
+        'min_window_scale_0_area': np.float64(2.721047914586897),
+        'min_window_scale_0_center': np.float64(5.26463355455719),
+        'min_window_scale_0_fwhm': np.float64(2.632316777278595)}
 
         """
         min_idx = np.abs(
