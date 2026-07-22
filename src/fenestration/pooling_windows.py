@@ -1362,22 +1362,42 @@ class PoolingWindows(nn.Module):
             fig.legend(loc="center right", title="Angle slices")
         return fig
 
-    def summarize_window_sizes(self) -> dict:
+    def summarize_window_sizes(self, units: str = "pixels") -> dict:
         r"""Summarize window sizes.
 
         This function returns a dictionary summarizing the window sizes
         at the minimum and maximum eccentricity. Let ``min_window`` be
         the window whose center is closest to ``self.min_eccentricity``
         and ``max_window`` the one whose center is closest to
-        ``self.max_eccentricity``. We find its center, FWHM (in the
-        radial direction), and approximate area (at half-max) in
-        degrees. We do the same in pixels, for each scale.
+        ``self.max_eccentricity``. If ``units="degrees"``, we find its
+        center, FWHM (in the radial direction), and approximate area (at
+        half-max). If ``units="pixels"``, we do the same for each scale.
+
+        Parameters
+        ----------
+        units
+            Which units to return the window size summary in
 
         Returns
         -------
         sizes
             dictionary with the keys described above, summarizing window
             sizes. all values are scalar floats
+
+        Raises
+        ------
+        Exception
+            If ``units`` are not "pixels" or "degrees"
+
+        Examples
+        --------
+        In order to display the window size parameters nicely, ``pprint``
+        is recommended:
+
+        >>> from pprint import pprint
+        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
+        >>> summary = pw.summarize_window_sizes()
+        >>> pprint(summary)
 
         """
         min_idx = np.abs(
@@ -1387,21 +1407,26 @@ class PoolingWindows(nn.Module):
             self.central_eccentricity_degrees - self.max_eccentricity
         ).argmin()
         sizes = {}
-        central_ecc = self.central_eccentricity_degrees
-        widths = self.window_width_degrees
-        areas = self.window_approx_area_degrees
-        for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
-            sizes[f"{extrem}_window_center_degrees"] = central_ecc[idx]
-            sizes[f"{extrem}_window_fwhm_degrees"] = widths["radial_half"][idx]
-            sizes[f"{extrem}_window_area_degrees"] = areas["half"][idx]
-        central_ecc = self.central_eccentricity_pixels
-        widths = self.window_width_pixels
-        areas = self.window_approx_area_pixels
-        for i in range(len(central_ecc)):
+        if units == "degrees":
+            central_ecc = self.central_eccentricity_degrees
+            widths = self.window_width_degrees
+            areas = self.window_approx_area_degrees
             for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
-                sizes[f"{extrem}_window_scale_{i}_center_pixels"] = central_ecc[i][idx]
-                sizes[f"{extrem}_window_scale_{i}_fwhm_pixels"] = widths[i][
-                    "radial_half"
-                ][idx]
-                sizes[f"{extrem}_window_scale_{i}_area_pixels"] = areas[i]["half"][idx]
+                sizes[f"{extrem}_window_center"] = central_ecc[idx]
+                sizes[f"{extrem}_window_fwhm"] = widths["radial_half"][idx]
+                sizes[f"{extrem}_window_area"] = areas["half"][idx]
+        elif units == "pixels":
+            central_ecc = self.central_eccentricity_pixels
+            widths = self.window_width_pixels
+            areas = self.window_approx_area_pixels
+            for i in range(len(central_ecc)):
+                for extrem, idx in zip(["min", "max"], [min_idx, max_idx]):
+                    sizes[f"{extrem}_window_scale_{i}_center"] = central_ecc[i][idx]
+                    sizes[f"{extrem}_window_scale_{i}_fwhm"] = widths[i]["radial_half"][
+                        idx
+                    ]
+                    sizes[f"{extrem}_window_scale_{i}_area"] = areas[i]["half"][idx]
+        else:
+            raise Exception(f"units must be one of {'pixels', 'degrees'}, not {units}!")
+
         return sizes
