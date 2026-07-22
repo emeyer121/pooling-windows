@@ -216,18 +216,18 @@ class TestPooling:
             )
 
     def test_PoolingWindows_save(self, rand_img, tmp_path):
-        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:])
+        pw = fen.PoolingWindows(0.8, rand_img.shape[-2:])
         pw.save(tmp_path / "model.pt")
         assert pathlib.Path(tmp_path / "model.pt").exists()
         assert pathlib.Path(tmp_path / "model.pt").is_file()
 
     def test_PoolingWindows_loadcache(self, rand_img, tmp_path):
-        pw = pooling.PoolingWindows(0.8, rand_img.shape[-2:], cache_dir=tmp_path)
+        pw = fen.PoolingWindows(0.8, rand_img.shape[-2:], cache_dir=tmp_path)
         assert pathlib.Path(pw.cache_dir) == tmp_path
         pw.save(tmp_path / "model.pt")
         new_path = tmp_path / "newdir"
         new_path.mkdir()
-        pw_load = pooling.PoolingWindows.load(
+        pw_load = fen.PoolingWindows.load(
             tmp_path / "model.pt", cache_dir=tmp_path / "newdir/"
         )
         assert pathlib.Path(pw_load.cache_dir) == pathlib.Path(
@@ -242,7 +242,7 @@ class TestPooling:
     def test_PoolingWindows_saveload(
         self, scaling, rand_img, ecc, num_scales, window_type, tmp_path, file_type
     ):
-        pw = pooling.PoolingWindows(
+        pw = fen.PoolingWindows(
             scaling,
             rand_img.shape[-2:],
             min_eccentricity=ecc[0],
@@ -253,9 +253,7 @@ class TestPooling:
         pw_dict = unpack_dict(pw)
 
         pw.save(tmp_path / pathlib.Path(f"./model{file_type}"))
-        pw_new = pooling.PoolingWindows.load(
-            tmp_path / pathlib.Path(f"./model{file_type}")
-        )
+        pw_new = fen.PoolingWindows.load(tmp_path / pathlib.Path(f"./model{file_type}"))
         pw_new_dict = unpack_dict(pw_new)
 
         for k, v in pw_dict.items():
@@ -272,12 +270,12 @@ class TestPooling:
         pool_win.to("cuda")
         pool_win.save(tmp_path / "model.pt")
         assert pool_win.angle_windows[0].device.type == "cuda"
-        pw = pooling.PoolingWindows.load(tmp_path / "model.pt")
+        pw = fen.PoolingWindows.load(tmp_path / "model.pt")
         assert pw.angle_windows[0].device.type == "cpu"
 
     def test_PoolingWindows_nofile_load(self):
         with pytest.raises(FileNotFoundError, match="No such file or directory:"):
-            pooling.PoolingWindows.load("fake_file.pt")
+            fen.PoolingWindows.load("fake_file.pt")
 
     def test_PoolingWindows_sep(self, rand_img, pool_win):
         # test the window and pool function separate of the forward function
