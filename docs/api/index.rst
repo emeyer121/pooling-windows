@@ -8,28 +8,28 @@ Pooling Window object
 
 The main object you will interact with is PoolingWindows which will create and plot the generated windows.
 
-.. currentmodule:: pooling
+.. currentmodule:: fenestration
 .. autosummary::
     :toctree: generated
     :signatures: none
 
     PoolingWindows
 
-.. currentmodule:: pooling.pooling
+.. currentmodule:: fenestration.pooling
 .. autosummary::
     :toctree: generated
     :signatures: none
 
     create_pooling_windows
 
-.. currentmodule:: pooling.sampling
+.. currentmodule:: fenestration.sampling
 .. autosummary::
     :toctree: generated
     :signatures: none
 
     check_sampling
 
-.. currentmodule:: pooling.tensors
+.. currentmodule:: fenestration.tensors
 .. autosummary::
     :toctree: generated
     :signatures: none
