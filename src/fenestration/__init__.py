@@ -1,8 +1,15 @@
 """Pooling Windows is a python library for generating foveated pooling windows."""
 
-__all__ = ["PoolingWindows", "pooling", "sampling", "tensors"]
+__all__ = [
+    "PoolingWindows",
+    "create_pooling_windows",
+    "pooling",
+    "sampling",
+    "_tensors",
+]
 
-from . import pooling, sampling, tensors
+from . import _tensors, pooling, sampling
+from .pooling import create_pooling_windows
 from .pooling_windows import PoolingWindows
 
 

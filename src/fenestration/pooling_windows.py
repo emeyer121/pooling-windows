@@ -19,7 +19,7 @@ import torch
 from matplotlib.figure import Figure
 from torch import nn
 
-from . import calculate, plot, pooling, tensors
+from . import _tensors, calculate, plot, pooling
 
 __all__ = [
     "PoolingWindows",
@@ -1025,7 +1025,9 @@ class PoolingWindows(nn.Module):
                 except TypeError:
                     # in this case, it's an int
                     pass
-                ax.contour(tensors.to_numpy(w), contour_levels, colors=colors, **kwargs)
+                ax.contour(
+                    _tensors.to_numpy(w), contour_levels, colors=colors, **kwargs
+                )
         return ax
 
     def plot_window_values(
@@ -1100,7 +1102,7 @@ class PoolingWindows(nn.Module):
                 output = torch.einsum(
                     "hw,hw,ehw->e", [im, a, self.ecc_windows[windows_scale]]
                 )
-                colors = tensors.to_numpy(output / norm_windows)
+                colors = _tensors.to_numpy(output / norm_windows)
             else:
                 colors = np.random.rand(windows.shape[0])
             # and convert into grey RGB triples
@@ -1115,7 +1117,7 @@ class PoolingWindows(nn.Module):
                     # in this case, it's an int
                     pass
                 ax.contourf(
-                    tensors.to_numpy(w),
+                    _tensors.to_numpy(w),
                     [contour_level, 1],
                     colors=[colors[i]],
                     **kwargs,
