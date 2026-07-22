@@ -4,7 +4,7 @@ API
 ===
 
 Pooling Windows object
----------------------
+----------------------
 
 The main object you will interact with is `PoolingWindows` which will create
 and plot the generated windows. Additionally, `create_pooling_windows` will return
