@@ -32,7 +32,7 @@ warnings.filterwarnings(
 ```{admonition} Run this notebook yourself!
 :class: important
 
-Download the executed notebook: **{nb-download}`Generate_Windows.ipynb`**!
+Download the executed notebook: **{nb-download}`generate_windows.ipynb`**!
 
 ```
 
