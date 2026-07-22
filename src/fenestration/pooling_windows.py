@@ -19,7 +19,7 @@ import torch
 from matplotlib.figure import Figure
 from torch import nn
 
-from . import _plot, _tensors, calculate, pooling
+from . import _plot, _tensors, calculate, create_pooling_windows, pooling
 
 __all__ = [
     "PoolingWindows",
@@ -208,13 +208,13 @@ class PoolingWindows(nn.Module):
     -----
     If you are just interested in the eccentricity and angular filters
     associated with these pooling windows, this is also possible using
-    a combination of ``fen.pooling.create_pooling_windows`` and
+    a combination of ``fen.create_pooling_windows`` and
     ``fen.pooling.normalize_windows``. See Examples section of
     ``create_pooling_windows`` for details on this process.
 
     See Also
     --------
-    fen.pooling.create_pooling_windows : create angle and eccentricity windows
+    fen.create_pooling_windows : create angle and eccentricity windows
 
     References
     ----------
@@ -315,7 +315,7 @@ class PoolingWindows(nn.Module):
                     angle_windows = windows["angle"]
                     ecc_windows = windows["ecc"]
             if angle_windows is None or ecc_windows is None:
-                angle_windows, ecc_windows = pooling.create_pooling_windows(
+                angle_windows, ecc_windows = create_pooling_windows(
                     scaling,
                     scaled_img_res,
                     self.min_eccentricity,

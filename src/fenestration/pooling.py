@@ -505,7 +505,7 @@ def create_pooling_windows(
     To create gaussian windows (default), you can specify the following arguments:
 
     >>> import fenestration as fen
-    >>> angle_w, ecc_w = fen.pooling.create_pooling_windows(
+    >>> angle_w, ecc_w = fen.create_pooling_windows(
     ...     scaling=0.8,
     ...     img_res=(256, 256),
     ...     min_eccentricity=1,
@@ -519,7 +519,7 @@ def create_pooling_windows(
 
     Similarly for raised cosine windows:
 
-    >>> angle_w, ecc_w = fen.pooling.create_pooling_windows(
+    >>> angle_w, ecc_w = fen.create_pooling_windows(
     ...     scaling=0.8,
     ...     img_res=(256, 256),
     ...     min_eccentricity=1,
@@ -546,7 +546,7 @@ def create_pooling_windows(
 
        >>> import fenestration as fen
        >>> import matplotlib.pyplot as plt
-       >>> angle_w, ecc_w = fen.pooling.create_pooling_windows(
+       >>> angle_w, ecc_w = fen.create_pooling_windows(
        ...     0.8,
        ...     (256, 256),
        ...     window_type="cosine",
@@ -571,7 +571,7 @@ def create_pooling_windows(
 
        >>> import fenestration as fen
        >>> import torch
-       >>> angle_w, ecc_w = fen.pooling.create_pooling_windows(
+       >>> angle_w, ecc_w = fen.create_pooling_windows(
        ...     0.8,
        ...     (256, 256),
        ...     window_type="cosine",
