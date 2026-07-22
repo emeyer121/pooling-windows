@@ -45,7 +45,7 @@ def check_sampling(
     ``create_movie`` to see the quality of this interpolation
 
     The idea here is to take a function (for example,
-    ``pooling.pooling.gaussian``) and say that we have this function
+    ``fen.pooling.gaussian``) and say that we have this function
     defined at, e.g., every 10 pixels on the array ``linspace(-5, 5,
     101)``. We want to answer then, the question of how well we can
     interpolate to all the intermediate functions, that is, the
@@ -272,9 +272,7 @@ def create_movie(
     Returns
     -------
     anim
-        The animation object. In order to view, must convert to HTML
-        (call ``pooling.tensors.convert_anim_to_html(anim)``) or save (call
-        ``anim.save(movie.mp4)``, must have ``ffmpeg`` installed).
+        The animation object.
 
     """
     x = tensors.to_numpy(x)

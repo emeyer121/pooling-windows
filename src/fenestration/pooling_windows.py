@@ -19,7 +19,7 @@ import torch
 from matplotlib.figure import Figure
 from torch import nn
 
-from . import plot, pooling, tensors
+from . import calculate, plot, pooling, tensors
 
 __all__ = [
     "PoolingWindows",
@@ -208,13 +208,13 @@ class PoolingWindows(nn.Module):
     -----
     If you are just interested in the eccentricity and angular filters
     associated with these pooling windows, this is also possible using
-    a combination of ``pooling.pooling.create_pooling_windows`` and
-    ``pooling.pooling.normalize_windows``. See Examples section of
+    a combination of ``fen.pooling.create_pooling_windows`` and
+    ``fen.pooling.normalize_windows``. See Examples section of
     ``create_pooling_windows`` for details on this process.
 
     See Also
     --------
-    pooling.pooling.create_pooling_windows : create angle and eccentricity windows
+    fen.pooling.create_pooling_windows : create angle and eccentricity windows
 
     References
     ----------
@@ -287,7 +287,7 @@ class PoolingWindows(nn.Module):
         self._window_sizes()
         for i in range(self.num_scales):
             scaled_img_res = [np.ceil(j / 2**i) for j in img_res]
-            min_ecc, min_ecc_pix = pooling.calculate._min_eccentricity(
+            min_ecc, min_ecc_pix = calculate._min_eccentricity(
                 scaling, scaled_img_res, max_eccentricity
             )
             self.calculated_min_eccentricity_degrees.append(min_ecc)
@@ -378,24 +378,20 @@ class PoolingWindows(nn.Module):
         window_approx_area_pixels, deg_to_pix
 
         all of these are based on calling various helper functions (from
-        ``pooling.calculate``) and doing simple calculations
+        ``fen.calculate``) and doing simple calculations
         based on the attributes already set (largely min_eccentricity,
         max_eccentricity, scaling, and transition_region_width)
 
         """
-        ecc_window_width = pooling.calculate._eccentricity_window_spacing(
+        ecc_window_width = calculate._eccentricity_window_spacing(
             scaling=self.scaling, std_dev=self._std_dev
         )
-        n_polar_windows = int(
-            round(pooling.calculate._angular_n_windows(ecc_window_width / 2))
-        )
+        n_polar_windows = int(round(calculate._angular_n_windows(ecc_window_width / 2)))
         self.n_polar_windows = n_polar_windows
-        angular_window_width = pooling.calculate._angular_window_spacing(
-            self.n_polar_windows
-        )
+        angular_window_width = calculate._angular_window_spacing(self.n_polar_windows)
         # we multiply max_eccentricity by sqrt(2) here because we want
         # to go out to the corner of the image
-        window_widths = pooling.calculate._window_widths_actual(
+        window_widths = calculate._window_widths_actual(
             angular_window_width,
             ecc_window_width,
             self.min_eccentricity,
@@ -413,21 +409,19 @@ class PoolingWindows(nn.Module):
         self.n_eccentricity_bands = len(self.window_width_degrees["radial_top"])
         # transition width and std dev don't matter for central
         # eccentricity, just min and max
-        self.central_eccentricity_degrees = pooling.calculate._windows_eccentricity(
+        self.central_eccentricity_degrees = calculate._windows_eccentricity(
             "central",
             self.n_eccentricity_bands,
             ecc_window_width,
             self.min_eccentricity,
         )
         if self.window_type == "gaussian":
-            self.one_std_dev_eccentricity_degrees = (
-                pooling.calculate._windows_eccentricity(
-                    "1std",
-                    self.n_eccentricity_bands,
-                    ecc_window_width,
-                    self.min_eccentricity,
-                    std_dev=self._std_dev,
-                )
+            self.one_std_dev_eccentricity_degrees = calculate._windows_eccentricity(
+                "1std",
+                self.n_eccentricity_bands,
+                ecc_window_width,
+                self.min_eccentricity,
+                std_dev=self._std_dev,
             )
         self.window_width_degrees["radial_half"] = (
             self.scaling * self.central_eccentricity_degrees
@@ -450,7 +444,7 @@ class PoolingWindows(nn.Module):
         self.central_eccentricity_pixels = []
         self.deg_to_pix = []
         for i in range(self.num_scales):
-            deg_to_pix = pooling.calculate.deg_to_pix(
+            deg_to_pix = calculate.deg_to_pix(
                 [j / 2**i for j in self.img_res], self.max_eccentricity
             )
             self.deg_to_pix.append(deg_to_pix)
@@ -553,7 +547,7 @@ class PoolingWindows(nn.Module):
 
         Parameters
         ----------
-        other_PoolingWindows : pooling.PoolingWindows
+        other_PoolingWindows : fen.PoolingWindows
             A second instantiated PoolingWindows object
         scale_offset : float, optional
             The amount to offset all the keys of the second
@@ -887,10 +881,10 @@ class PoolingWindows(nn.Module):
         To use, just input a file path in order to save the parameters needed for
         initializing the pooling window model.
 
-        >>> import pooling
-        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
+        >>> import fenestration as fen
+        >>> pw = fen.PoolingWindows(0.5, (256, 256))
         >>> pw.save("./saved_data/model_params.pt")
-        >>> pw_new = pooling.poolingWindows.load("./saved_data/model_params.pt")
+        >>> pw_new = fen.PoolingWindows.load("./saved_data/model_params.pt")
 
         """
         save_dict = {
@@ -940,10 +934,10 @@ class PoolingWindows(nn.Module):
         To use, just input a path to the file saved using ``save`` in order to load the
         parameters needed for initializing the pooling window model.
 
-        >>> import pooling
-        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
+        >>> import fenestration as fen
+        >>> pw = fen.PoolingWindows(0.5, (256, 256))
         >>> pw.save("pw_model.pt")
-        >>> pw_new = pooling.PoolingWindows.load("pw_model.pt")
+        >>> pw_new = fen.PoolingWindows.load("pw_model.pt")
         >>> pw_new
         PoolingWindows()
 
@@ -1395,7 +1389,8 @@ class PoolingWindows(nn.Module):
         is recommended:
 
         >>> from pprint import pprint
-        >>> pw = pooling.PoolingWindows(0.5, (256, 256))
+        >>> import fenestration as fen
+        >>> pw = fen.PoolingWindows(0.5, (256, 256))
         >>> summary = pw.summarize_window_sizes()
         >>> pprint(summary)
 
