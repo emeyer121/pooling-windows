@@ -113,12 +113,12 @@ angle_w, ecc_w = pooling.pooling.create_pooling_windows(
   std_dev=1,
   device="cpu"
 )
-ecc_windows, scale_factor = pooling.pooling.normalize_windows(
-  angle_windows=angle_w,
-  ecc_windows=ecc_w,
-  window_eccentricity=1,
-  scale=0
-)
+#ecc_windows, scale_factor = pooling.pooling.normalize_windows(
+#  angle_windows=angle_w,
+#  ecc_windows=ecc_w,
+#  window_eccentricity=1,
+#  scale=0
+#)
 ```
 
 ## Displaying Window Values
