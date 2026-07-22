@@ -19,7 +19,7 @@ import torch
 from matplotlib.figure import Figure
 from torch import nn
 
-from . import _tensors, calculate, plot, pooling
+from . import _plot, _tensors, calculate, pooling
 
 __all__ = [
     "PoolingWindows",
@@ -1005,7 +1005,7 @@ class PoolingWindows(nn.Module):
 
         """
         if ax is None:
-            fig = plot._setup_fig(self.img_res)
+            fig = _plot._setup_fig(self.img_res)
             ax = fig.axes[0]
         if contour_levels is None:
             contour_levels = [self.window_intersecting_amplitude]
@@ -1076,7 +1076,7 @@ class PoolingWindows(nn.Module):
 
         """
         if ax is None:
-            fig = plot._setup_fig(self.img_res)
+            fig = _plot._setup_fig(self.img_res)
             ax = fig.axes[0]
         contour_level = self.window_intersecting_amplitude
         # attempt to not have all the windows in memory at once...
