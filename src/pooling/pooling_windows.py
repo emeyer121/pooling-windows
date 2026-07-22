@@ -376,7 +376,7 @@ class PoolingWindows(nn.Module):
             except AttributeError:
                 ecc = self.central_eccentricity_degrees
             norm_ecc, norm_factor = pooling.normalize_windows(
-                angle_windows[i], ecc_windows[i], ecc
+                angle_windows, ecc_windows, ecc
             )
             self.ecc_windows[i] = norm_ecc
             self.norm_factor[i] = norm_factor
