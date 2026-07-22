@@ -544,8 +544,15 @@ def create_pooling_windows(
        :include-source:
        :context: close-figs
 
+       >>> import fenestration as fen
        >>> import matplotlib.pyplot as plt
-       >>> angle_w, ecc_w = fen.pooling.create_pooling_windows(0.87, (256, 256))
+       >>> angle_w, ecc_w = fen.pooling.create_pooling_windows(
+       ...     0.8,
+       ...     (256, 256),
+       ...     window_type="cosine",
+       ...     transition_region_width=0.5,
+       ...     std_dev=None,
+       ... )
        >>> fig, ax = plt.subplots(1, 2, figsize=(8, 4))
        >>> ax[0].imshow(ecc_w[0], cmap="Grays_r", interpolation="none")
        <matplotlib.image.AxesImage ...>
@@ -562,14 +569,21 @@ def create_pooling_windows(
        :include-source:
        :context: close-figs
 
+       >>> import fenestration as fen
        >>> import torch
-       >>> angle_w, ecc_w = fen.pooling.create_pooling_windows(0.87, (256, 256))
+       >>> angle_w, ecc_w = fen.pooling.create_pooling_windows(
+       ...     0.8,
+       ...     (256, 256),
+       ...     window_type="cosine",
+       ...     transition_region_width=0.5,
+       ...     std_dev=None,
+       ... )
        >>> # we ignore the last ring of eccentricity windows here because
        >>> # they're all relatively small, which makes the following plot
        >>> # look weird. for how to properly handle them, see the
        >>> # PoolingWindows class
        >>> windows = torch.einsum("ahw,ehw->eahw", [angle_w, ecc_w[:-1]]).flatten(0, 1)
-       >>> fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+       >>> fig, ax = plt.subplots(figsize=(5, 5))
        >>> for w in windows:
        ...     ax.contour(w, [0.5], colors="r")
        <matplotlib.contour.QuadContourSet ...>
