@@ -7,89 +7,81 @@ import numpy as np
 import pytest
 import torch
 
-import pooling
+import fenestration as fen
 from conftest import DEVICE
 
 
 class TestPooling:
     def test_creation(self):
-        pooling.pooling.create_pooling_windows(0.87, (256, 256))
+        fen.pooling.create_pooling_windows(0.87, (256, 256))
 
     @pytest.mark.parametrize("region_width", [0.5, 0.7])
     def test_creation_args(self, region_width):
-        pooling.pooling.create_pooling_windows(
+        fen.pooling.create_pooling_windows(
             0.87, (100, 100), 0.2, 30, 1.2, transition_region_width=region_width
         )
 
     def test_creation_gaussian(self):
-        pooling.pooling.create_pooling_windows(
-            0.87, (100, 100), 0.2, 30, 1.2, "gaussian"
-        )
+        fen.pooling.create_pooling_windows(0.87, (100, 100), 0.2, 30, 1.2, "gaussian")
 
     @pytest.mark.parametrize("n_windows", [4, 4.5])
     def test_ecc_nwindows(self, n_windows):
-        pooling.pooling._log_eccentricity_windows((256, 256), n_windows=n_windows)
+        fen.pooling._log_eccentricity_windows((256, 256), n_windows=n_windows)
 
     @pytest.mark.parametrize("window_spacing", [0.5, 1])
     def test_ecc_window_spacing(self, window_spacing):
-        pooling.pooling._log_eccentricity_windows(
-            (256, 256), window_spacing=window_spacing
-        )
+        fen.pooling._log_eccentricity_windows((256, 256), window_spacing=window_spacing)
 
     @pytest.mark.parametrize("res", [(256, 256), (1000, 1000), 100])
     def test_angle_windows(self, res):
-        pooling.pooling._polar_angle_windows(10, res)
+        fen.pooling._polar_angle_windows(10, res)
 
     def test_angle_windows_notint(self):
         with pytest.raises(Exception, match="n_windows must be an integer"):
-            pooling.pooling._polar_angle_windows(1.5, (256, 256))
+            fen.pooling._polar_angle_windows(1.5, (256, 256))
 
     def test_angle_windows_onewin(self):
         with pytest.raises(Exception, match="We cannot handle one window correctly!"):
-            pooling.pooling._polar_angle_windows(1, (256, 256))
+            fen.pooling._polar_angle_windows(1, (256, 256))
 
     def test_calculations(self):
         # these really shouldn't change, but just in case...
-        assert pooling.pooling.calculate._angular_window_spacing(2) == np.pi
-        assert pooling.pooling.calculate._angular_n_windows(2) == np.pi
+        assert fen.pooling.calculate._angular_window_spacing(2) == np.pi
+        assert fen.pooling.calculate._angular_n_windows(2) == np.pi
         with pytest.raises(
             Exception, match="Exactly one of n_windows or scaling must be set!"
         ):
-            pooling.pooling.calculate._eccentricity_window_spacing()
+            fen.pooling.calculate._eccentricity_window_spacing()
         assert np.allclose(
-            pooling.pooling.calculate._eccentricity_window_spacing(n_windows=4),
+            fen.pooling.calculate._eccentricity_window_spacing(n_windows=4),
             0.8502993454155389,
         )
         assert np.allclose(
-            pooling.pooling.calculate._eccentricity_window_spacing(scaling=0.87),
+            fen.pooling.calculate._eccentricity_window_spacing(scaling=0.87),
             0.8446653390527211,
         )
         assert np.allclose(
-            pooling.pooling.calculate._eccentricity_window_spacing(5, 10, scaling=0.87),
+            fen.pooling.calculate._eccentricity_window_spacing(5, 10, scaling=0.87),
             0.8446653390527211,
         )
         assert np.allclose(
-            pooling.pooling.calculate._eccentricity_window_spacing(5, 10, n_windows=4),
+            fen.pooling.calculate._eccentricity_window_spacing(5, 10, n_windows=4),
             0.1732867951399864,
         )
         assert np.allclose(
-            pooling.pooling.calculate._eccentricity_n_windows(0.8502993454155389), 4
+            fen.pooling.calculate._eccentricity_n_windows(0.8502993454155389), 4
         )
         assert np.allclose(
-            pooling.pooling.calculate._eccentricity_n_windows(
-                0.1732867951399864, 5, 10
-            ),
+            fen.pooling.calculate._eccentricity_n_windows(0.1732867951399864, 5, 10),
             4,
         )
-        assert np.allclose(pooling.pooling.calculate.scaling(4), 0.8761474337786708)
-        assert np.allclose(
-            pooling.pooling.calculate.scaling(4, 5, 10), 0.17350368946058647
-        )
-        assert np.isinf(pooling.pooling.calculate.scaling(4, 0))
+        assert np.allclose(fen.pooling.calculate.scaling(4), 0.8761474337786708)
+        assert np.allclose(fen.pooling.calculate.scaling(4, 5, 10), 0.17350368946058647)
+        assert np.isinf(fen.pooling.calculate.scaling(4, 0))
 
     @pytest.mark.parametrize("num_scales", [1, 3])
     def test_PoolingWindows_cosine(self, rand_img, num_scales):
-        pw = pooling.PoolingWindows(
+        pw = fen.PoolingWindows(
             0.5,
             rand_img.shape[2:],
             num_scales=num_scales,
@@ -99,7 +91,7 @@ class TestPooling:
 
     @pytest.mark.parametrize("num_scales", [1, 3])
     def test_PoolingWindows(self, rand_img, num_scales):
-        pw = pooling.PoolingWindows(
+        pw = fen.PoolingWindows(
             0.5,
             rand_img.shape[2:],
             num_scales=num_scales,
@@ -130,7 +122,7 @@ class TestPooling:
 
     @pytest.mark.parametrize("offset", [0.2, 0.5])
     def test_PoolingWindows_merge(self, rand_img, pool_win, offset):
-        other_pool_win = pooling.PoolingWindows(0.7, rand_img.shape[2:])
+        other_pool_win = fen.PoolingWindows(0.7, rand_img.shape[2:])
         pool_win.merge(other_pool_win, scale_offset=offset)
         assert np.allclose(
             pool_win.angle_windows[offset], other_pool_win.angle_windows[0]
@@ -153,10 +145,10 @@ class TestPooling:
         pool_win.pool(windowed_x)
 
     def test_PoolingWindows_project(self, rand_img):
-        pw = pooling.PoolingWindows(0.5, rand_img.shape[2:])
+        pw = fen.PoolingWindows(0.5, rand_img.shape[2:])
         pooled = pw(rand_img)
         pw.project(pooled)
-        pw = pooling.PoolingWindows(0.5, rand_img.shape[2:], num_scales=3)
+        pw = fen.PoolingWindows(0.5, rand_img.shape[2:], num_scales=3)
         pooled = pw(rand_img)
         pw.project(pooled)
 
@@ -166,7 +158,7 @@ class TestPooling:
     def test_PoolingWindows_nonsquare(self, rand_img, sh):
         # test PoolingWindows with weirdly-shaped iamges
         tmp = rand_img[..., : sh[0], : sh[1]]
-        pw = pooling.PoolingWindows(0.9, tmp.shape[-2:])
+        pw = fen.PoolingWindows(0.9, tmp.shape[-2:])
         pw(tmp)
 
     def test_PoolingWindows_caching(self, rand_img, tmp_path):
@@ -174,7 +166,7 @@ class TestPooling:
         new_path = tmp_path / "test_dir"
         new_path.mkdir()
         start_time = time.perf_counter()
-        pw = pooling.PoolingWindows(
+        pw = fen.PoolingWindows(
             0.8, rand_img.shape[-2:], num_scales=2, cache_dir=new_path
         )
         tot_time_new = time.perf_counter() - start_time
@@ -183,7 +175,7 @@ class TestPooling:
             assert pathlib.Path(i).exists()
             assert pathlib.Path(i).is_relative_to(new_path)
         start_time = time.perf_counter()
-        pw = pooling.PoolingWindows(
+        pw = fen.PoolingWindows(
             0.8, rand_img.shape[-2:], num_scales=2, cache_dir=new_path
         )
         tot_time_cache = time.perf_counter() - start_time
@@ -195,7 +187,7 @@ class TestPooling:
     def test_PoolingWindows_cache_dne(self, rand_img, tmp_path):
         tmp_path = op.join(tmp_path, "new_dir")
         with pytest.raises(FileNotFoundError, match="directory does not exist!"):
-            pooling.PoolingWindows(
+            fen.PoolingWindows(
                 0.8, rand_img.shape[-2:], num_scales=2, cache_dir=tmp_path
             )
 
@@ -208,7 +200,7 @@ class TestPooling:
     @pytest.mark.parametrize("num_scales", [1, 3])
     @pytest.mark.parametrize("input_fmt", ["dict", "tensor"])
     def test_reweighting(self, num_scales, input_fmt):
-        pw = pooling.PoolingWindows(0.5, (256, 256), num_scales=num_scales)
+        pw = fen.PoolingWindows(0.5, (256, 256), num_scales=num_scales)
         im = {
             (i,): torch.rand((1, 1, 256 // 2**i, 256 // 2**i), dtype=torch.float32)
             for i in range(num_scales)
@@ -243,7 +235,7 @@ class TestPooling:
         assert np.allclose(sizes["max_window_scale_1_area_pixels"], 372.44244904524686)
 
     def test_PoolingWindows_summarize_cosine(self, rand_img):
-        pw = pooling.PoolingWindows(
+        pw = fen.PoolingWindows(
             0.5, rand_img.shape[2:], num_scales=2, window_type="cosine"
         )
         sizes = pw.summarize_window_sizes()
