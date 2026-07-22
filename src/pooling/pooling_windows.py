@@ -117,9 +117,6 @@ class PoolingWindows(nn.Module):
         a dict of 3d tensors containing the values used to normalize
         ecc_windows. Each key corresponds to a different scale. This is
         stored to undo that normalization for plotting and projection.
-    state_dict_reduced : dict
-        A dictionary containing those attributes necessary to initialize
-        the model.
     window_width_degrees : dict
         Dictionary containing the widths of the windows in
         degrees. There are six keys, corresponding to a 2x2 for the
@@ -327,16 +324,6 @@ class PoolingWindows(nn.Module):
         self.calculated_min_eccentricity_degrees = []
         self.calculated_min_eccentricity_pixels = []
         self._window_sizes()
-        self.state_dict_reduced = {
-            "scaling": scaling,
-            "img_res": img_res,
-            "min_eccentricity": self.min_eccentricity,
-            "max_eccentricity": self.max_eccentricity,
-            "transition_region_width": self._transition_region_width,
-            "cache_dir": self.cache_dir,
-            "window_type": window_type,
-            "std_dev": self._std_dev,
-        }
         for i in range(self.num_scales):
             scaled_img_res = [np.ceil(j / 2**i) for j in img_res]
             min_ecc, min_ecc_pix = pooling.calculate._min_eccentricity(
