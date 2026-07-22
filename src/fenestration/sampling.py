@@ -115,9 +115,9 @@ def check_sampling(
             pix_sampling = np.argmin(abs((x - val_sampling)[0] - x))
     try:
         X = x.unsqueeze(1) - x[::pix_sampling]
-        sampled = _tensors.to_numpy(func(X, **func_kwargs))
+        sampled = _tensors._to_numpy(func(X, **func_kwargs))
         full_X = x.unsqueeze(1) - x
-        full = _tensors.to_numpy(func(full_X, **func_kwargs))
+        full = _tensors._to_numpy(func(full_X, **func_kwargs))
     except AttributeError:
         # numpy arrays don't have unsqueeze, so we use this `[:, None]`
         # syntax to get the same outcome
@@ -218,7 +218,7 @@ def interpolation_plot(
         # this will get us the closest value, if there's no exactly
         # correct one.
         pix = np.argmin(abs(x - val))
-    x = _tensors.to_numpy(x)
+    x = _tensors._to_numpy(x)
     ylim = [interpolated.min(), interpolated.max()]
     ylim = [ylim[0] - np.diff(ylim) / 10, ylim[1] + np.diff(ylim) / 10]
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -275,7 +275,7 @@ def create_movie(
         The animation object.
 
     """
-    x = _tensors.to_numpy(x)
+    x = _tensors._to_numpy(x)
     fig = interpolation_plot(interpolated, residuals, x=x, full=full)
     if full is not None:
         full_line = fig.axes[0].lines[1]
