@@ -1,4 +1,4 @@
-# pooling-windows
+# fenestration
 
 PyTorch implementation of pooling windows like those used in Freeman and
 Simoncelli, 2011[^1].
@@ -31,7 +31,7 @@ of some sampling and aliasing issues), you will also need to install
 [jupyter](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html). Additionally, some of the examples use
 [plenoptic](https://github.com/plenoptic-org/plenoptic) -- if you
 wish to use it, you must install that package as well (follow the instructions
-in its README).
+in its `README`).
 
 ## Usage
 
@@ -174,21 +174,17 @@ found on the `master` branch).
 
 ## Code structure
 
-  - `tests/test_pooling.py`: some tests (run on every push using Github actions)
-    to make sure pooling windows don't change drastically. They're not a
-    complete suite of tests for these windows.
-  - `pooling/`: python module containing the code for the pooling windows.
+  - `tests/`: some tests (run on every push using Github actions)
+    to make sure necessary functionality does not change with updates.
+  - `src/fenestration/`: python module containing the code for the pooling windows.
     - `pooling_windows.py`: contains the `PoolingWindows` class, which is how
-      users should interact with this code.
-    - `pooling.py`: variety of calculations used for constructing and
+      users should primarily interact with this code.
+    - `pooling.py`: variety of functions that allow for constructing and
       investigating the windows, used by `PoolingWindows`.
-    - `tensors.py`: miscellaneous utility functions.
+    - `calculate.py`: variety of calculations, used by `PoolingWindows`
     - `__init__.py`: boilerplate file for making `pooling` a module.
     - `sampling.py`: checks sampling and aliasing issues, used by the
-      `Sampling_and_aliasing.ipynb` notebook, but not by `PoolingWindows`.
-  - `Sampling_and_aliasing.ipynb`: example of how to check for sampling /
-    aliasing issues. I would recommend you do something similar to this if you
-    construct your own windows or modify these in a significant way.
+      `Sampling and Aliasing` tutorial, but not by `PoolingWindows`.
 
 ## References
 

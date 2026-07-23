@@ -29,7 +29,9 @@ tests = [
 docs = [
     "sphinx",
     "pydata-sphinx-theme",
-    "myst-parser"
+    "myst-nb",
+    "jupytext",
+    "plenoptic>=2.0.1",
 ]
 
 [tool.setuptools.packages.find]
