@@ -135,11 +135,14 @@ pw = pooling.PoolingWindows(0.8, (256,256))
 pw.plot_window_values(img, subset=False)
 ```
 
-If you would like a summary of the size and values associated with the pooling windows, you can call `summarize_window_sizes`.
+If you would like a summary of the size and values associated with the pooling windows, you can call `summarize_window_sizes` for either pixels or degrees.
 
 ```{code-cell} ipython3
-summary, _ = pw.summarize_window_sizes()
-summary
+from pprint import pprint
+summary = pw.summarize_window_sizes(units="pixels")
+pprint(summary)
+summary = pw.summarize_window_sizes(units="degrees")
+pprint(summary)
 ```
 
 ## Checking Windows
