@@ -47,7 +47,7 @@ import matplotlib as mpl
 import numpy as np
 import torch
 
-import pooling
+import fenestration as fen
 
 mpl.rcParams['xtick.bottom'] = False
 mpl.rcParams['xtick.labelbottom'] = False
@@ -64,14 +64,14 @@ mpl.rcParams['ytick.labelleft'] = False
 Let's begin by creating a `PoolingWindows` object for image size `(256,256)` and visualize the window contours that are created. We must also input a `scaling` value that determines the size of the window (see [](choosing-scaling-values)).
 
 ```{code-cell} ipython3
-pw = pooling.PoolingWindows(0.5, (256,256))
+pw = fen.PoolingWindows(0.5, (256,256))
 pw.plot_windows(subset=False)
 ```
 
 We can also change a number of other parameters that define the windows: `min_eccentricity` and `max_eccentricity` that define the extent of the windows within the image in degrees of visual angle, `num_scales` which controls the number of window scales generated, `cache_dir` for specifying a directory to cache the windows, and `window_type` which can be defined as `gaussian` or `cosine`.
 
 ```{code-cell} ipython3
-pw = pooling.PoolingWindows(
+pw = fen.PoolingWindows(
   scaling=0.5,
   img_res=(256,256),
   min_eccentricity=1,
@@ -81,12 +81,12 @@ pw = pooling.PoolingWindows(
 pw.plot_windows()
 ```
 
-If you want to just generate the eccentricity rings and angular wedges separately, you can also call `pooling.create_pooling_windows`. Here we will use `scaling=2` and and image size of `(256,256)`. We will also take advantage of [plenoptic's](https://plenoptic.org/) plotting function `po.imshow`.
+If you want to just generate the eccentricity rings and angular wedges separately, you can also call `fen.create_pooling_windows`. Here we will use `scaling=2` and and image size of `(256,256)`. We will also take advantage of [plenoptic's](https://plenoptic.org/) plotting function `po.imshow`.
 
 ```{code-cell} ipython3
 import plenoptic as po
 
-angle_w, ecc_w = pooling.pooling.create_pooling_windows(2, (256, 256))
+angle_w, ecc_w = fen.create_pooling_windows(2, (256, 256))
 # only show first 8 eccentricity rings
 fig = po.plot.imshow(ecc_w[:8].unsqueeze(0))
 fig = po.plot.imshow(angle_w.unsqueeze(0))
@@ -99,12 +99,12 @@ It is also simple to reconstruct the windows from this angle and eccentricity da
 windows = torch.einsum('ahw,ehw->eahw', [angle_w, ecc_w]).flatten(0, 1)
 ```
 
-However, in order to reproduce the results in `pooling.PoolingWindows`, you would also need to normalize the windows so that they have an L1-norm of 1. This ensures that each eccentricity contributes equally, which can be useful when generating model metamers.
+However, in order to reproduce the results in `fen.PoolingWindows`, you would also need to normalize the windows so that they have an L1-norm of 1. This ensures that each eccentricity contributes equally, which can be useful when generating model metamers.
 
 ```{code-cell} ipython3
-angle_w, ecc_w = pooling.pooling.create_pooling_windows(
+angle_w, ecc_w = fen.create_pooling_windows(
   scaling=0.8,
-  resolution=(256, 256),
+  img_res=(256, 256),
   min_eccentricity=1,
   max_eccentricity=10,
   radial_to_circumferential_ratio=2,
@@ -113,7 +113,7 @@ angle_w, ecc_w = pooling.pooling.create_pooling_windows(
   std_dev=1,
   device="cpu"
 )
-#ecc_windows, scale_factor = pooling.pooling.normalize_windows(
+#ecc_windows, scale_factor = fen.pooling.normalize_windows(
 #  angle_windows=angle_w,
 #  ecc_windows=ecc_w,
 #  window_eccentricity=1,
@@ -131,7 +131,7 @@ plt.imshow(torch.squeeze(img), cmap='gray')
 ```
 
 ```{code-cell} ipython3
-pw = pooling.PoolingWindows(0.8, (256,256))
+pw = fen.PoolingWindows(0.8, (256,256))
 pw.plot_window_values(img, subset=False)
 ```
 
@@ -171,8 +171,8 @@ pw.plot_window_checks();
 However, the `scaling` values used in previous examples were arbitrary. Let's say you are displaying images for an experiment and want to build pooling windows ranging from 1-10 degrees of eccentricity, tiling the space with 5 angular windows. You can then find the precise scaling value to generate the corresponding `PoolingWindows` object.
 
 ```{code-cell} ipython3
-scaling = pooling.calculate.scaling(n_windows=5, min_ecc=1, max_ecc=10, std_dev=1)
-pw = pooling.PoolingWindows(scaling, (256,256), min_eccentricity=1, max_eccentricity=10)
+scaling = fen.calculate.scaling(n_windows=5, min_ecc=1, max_ecc=10, std_dev=1)
+pw = fen.PoolingWindows(scaling, (256,256), min_eccentricity=1, max_eccentricity=10)
 ax = pw.plot_windows()
 ax.set_title(f"Scaling = {scaling:.4f}");
 ```
